@@ -1,5 +1,5 @@
 ---
-layout: presentation-post-index
+layout: post
 menutitle: Publications
 menuorder: 2
 excerpt: "Recent Publications"
