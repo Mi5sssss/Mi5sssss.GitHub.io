@@ -7,21 +7,21 @@ logo: # filename of a logo image that has been placed into your images directory
 # Enter the following platform usernames if you would like for them to appear on your site.
 owner:
   name: Rui Xie
-  avatar: bio-photo.jpg
-  bio: "A brief description of yourself."
-  email: #emailaddress
+  avatar: IMG_1453.JPG
+  bio: "Photograph/Hiking"
+  email: xier2018@mail.sustech.edu.cn #emailaddress
   # Do not include the @ symbol in your Twitter username
   twitter: #username
   linkedin: #username
-  github: #username
+  github: Mi5sssss #username
   orcid: # ID Number (ex. 0000-0000-0000-0000)
   researchgate: #username
   mendeley: #username
-  google:
+  google: 
     plus: #username
     analytics:
     verify:
-    scholar: #id
+    scholar: kFFMzkQAAAAJ #id
   facebook: #username
   instagram: #username
   bing-verify:
