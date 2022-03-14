@@ -1,7 +1,7 @@
 ---
 layout: page
 menutitle: Publications
-menuorder: 2
+menuorder: 1
 excerpt: "Recent Publications"
 ---
 ## Conference
