@@ -95,3 +95,9 @@ exclude:
     "LICENSE",
     "README.md",
   ]
+
+# Gitalk settings
+comment_gitalk_clientId: a576c74f3fd856e620fc
+comment_gitalk_clientSecret: 0d9e5f16fd3e35cbabc5ad2ef51df39f17fa83e8
+comment_gitalk_repo: Mi5sssss.GitHub.io
+github_username: Mi5sssss
