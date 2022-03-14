@@ -8,13 +8,13 @@ I am current a senior student from [Southern University of Science and Technolog
 
 I would like to start my PhD journey in Fall 2022 and my CV is [here](doc\xie_cv.pdf).
 
-## Current Interests and Projects:
+## 📚Current Interests and Projects
 
 - Neural Architecture Search on Emerging Devices
 - Large Sparse Matrix Computation and Optimization
 - Computer Architecture
 
-## News
+## 📰News
 
 * 03/2022 My old page [rickxie.xyz](https://rickxie.xyz) coudl be still access by the end of 2022, new page would be [rickxie.cn](https://rickxie.cn) from now.
 * 03/2022 An work was accepted by [DAC 2022](https://www.dac.com/) (Embedded Systems and Software) (San Francisco).
@@ -22,7 +22,7 @@ I would like to start my PhD journey in Fall 2022 and my CV is [here](doc\xie_cv
 * 09/2021 A paper was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/).
 * 06/2021 A Chinese patent submitted.
 
-## Contact
+## 📞Contact
 
 Email: [xier2018@mail.sustech.edu.cn](mailto:xier2018@mail.sustech.edu.cn) or [xr@ieee.org](mailto:xr@ieee.org)
 
