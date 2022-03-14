@@ -6,7 +6,7 @@ menuorder: 1
 ---
 I am current a senior student from [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), expected obtain the Bachelor of Engineering in June 2022. I show great interests in Computer Architecture Design and Emerging Technology. My undergraduate supervisor is [Dr. Quan Chen](https://faculty.sustech.edu.cn/chenq3/en).
 
-I would like to start my PhD journey in Fall 2022.
+I would like to start my PhD journey in Fall 2022 and my CV is [here]().
 
 ## Current Interests and Projects:
 
