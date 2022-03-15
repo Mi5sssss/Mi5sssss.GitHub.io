@@ -1,11 +1,13 @@
 ---
 layout: post
 title: A wireless technology-based field hearing aid system for a specific range
-date: 2021-7-06
-categories: Idea
+excerpt: "What is a static website generator, and why should I care?"
+modified: 7/06/2021, 9:00:24
 tags: [Innovation,Idea]
-description: 一种基于无线技术的特定范围现场助听系统
+comments: true
+category: blog
 ---
+
 
 # 一种基于无线技术的特定范围现场助听系统
 
