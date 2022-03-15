@@ -1,10 +1,10 @@
 ---
 layout: post
 title: Street snap in Shenzhen
-date: 2021-7-03
-categories: photograph
-tags: [摄影,人像]
-description: 人像摄影
+modified: 7/03/2021, 9:00:24
+tags: [photograph, portrait]
+comments: true
+category: blog
 ---
 
 
