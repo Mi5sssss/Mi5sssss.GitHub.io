@@ -8,6 +8,7 @@ category: blog
 ---
 
 
+
 # An Application of nano-crossbar in  reconfigurable programmable architecture  
 
 Rui Xie, Undergraduate *Student, Southern University of Science and Technology*  
