@@ -1,11 +1,12 @@
 ---
 layout: post
 title: Young Couple in Campus Photograph
-date: 2021-6-28
-categories: photograph
-tags: [摄影,人像]
-description: 人像摄影
+modified: 6/28/2021, 9:00:24
+tags: [photograph, portrait]
+comments: true
+category: blog
 ---
+
 Rain today, and almost all the photos were taken indoor. 
 
 >Models：Hangyu Zhao and His Girlfriend
