@@ -1,12 +1,11 @@
 ---
 layout: post
 title: An Application of nano-crossbar in  reconfigurable programmable architecture
-date: 2021-7-05
-categories: Research
+modified: 7/05/2021, 9:00:24
 tags: [Research, Course]
-description: 
+comments: true
+category: blog
 ---
-
 
 
 # An Application of nano-crossbar in  reconfigurable programmable architecture  
