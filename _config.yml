@@ -8,7 +8,7 @@ logo: # filename of a logo image that has been placed into your images directory
 owner:
   name: Rui (Rick) Xie
   avatar: IMG_1453.JPG
-  bio: "Photograph/Hiking"
+  bio: "📷/⛰/🏀"
   email: xier2018@mail.sustech.edu.cn #emailaddress
   # Do not include the @ symbol in your Twitter username
   twitter: #username
@@ -17,7 +17,7 @@ owner:
   orcid: # ID Number (ex. 0000-0000-0000-0000)
   researchgate: #username
   mendeley: #username
-  google: 
+  google:
     plus: #username
     analytics:
     verify:
