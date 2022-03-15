@@ -20,7 +20,7 @@ I would like to start my PhD journey in Fall 2022 and my CV is [here](doc\xie_cv
 
 ## 📰News
 
-* **03/2022** My old page [rickxie.xyz](https://rickxie.xyz) coudl be still accessd by the end of 2022, new page would be [rickxie.cn](https://rickxie.cn) from now.
+* **03/2022** My old page [rickxie.xyz](https://rickxie.xyz) could be still accessd by the end of 2022, new page would be [rickxie.cn](https://rickxie.cn) from now.
 * **03/2022** An work was accepted by [DAC 2022](https://www.dac.com/) (Embedded Systems and Software) (San Francisco).
 * **11/2021** An oral report in IEEE ICTA 2021 (Zhuhai) (Online).
 * **09/2021** A paper was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/).
