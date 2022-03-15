@@ -27,3 +27,8 @@ I would like to start my PhD journey in Fall 2022 and my CV is [here](doc\xie_cv
 Email: [xier2018@mail.sustech.edu.cn](mailto:xier2018@mail.sustech.edu.cn) or [xr@ieee.org](mailto:xr@ieee.org)
 
 (Last Updated Mar. 2022)
+
+<div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div>
+<!-- for rickxie.cn -->
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=300&t=n&d=3p-vIrt5cRJ99hVpVm3E0PmXHIg3YvSe4uSxEE5vp7Q'></script>
+ 
