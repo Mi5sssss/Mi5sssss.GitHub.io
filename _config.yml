@@ -48,8 +48,8 @@ owner:
 # lowlight-color: "#000"
 
 # Rensselaer Color
-highlight-color: "#54585a"
-lowlight-color: "#d6001c"
+highlight-color: "#d6001c"
+lowlight-color: "#000"
 
   # NOTE: If you would like your site to be licensed under a creative commons license, uncomment the 'yes' next to the type of license you wish to use.
 creative-commons:
