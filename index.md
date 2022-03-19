@@ -12,7 +12,7 @@ I would like to start my PhD journey in Fall 2022 and my CV is [here](doc\xie_cv
 
 ## 📚Current Interests and Projects
 
-- Neural Architecture Search on Emerging Devices
+<!-- - Neural Architecture Search on Emerging Devices -->
 - Matrix Computation and Optimization
 - Computer Architecture
 
