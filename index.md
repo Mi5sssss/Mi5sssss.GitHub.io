@@ -13,6 +13,7 @@ I would like to start my PhD journey in Fall 2022 and my CV is [here](doc\xie_cv
 ## 📚Current Interests and Projects
 
 <!-- - Neural Architecture Search on Emerging Devices -->
+
 - Matrix Computation and Optimization
 - Computer Architecture
 
@@ -21,8 +22,8 @@ I would like to start my PhD journey in Fall 2022 and my CV is [here](doc\xie_cv
 * **03/2022** My old page [rickxie.xyz](https://rickxie.xyz) could be still accessd by the end of 2022, new page would be [rickxie.cn](https://rickxie.cn) from now.
 * **03/2022** A work was accepted by [DAC 2022](https://www.dac.com/) (Embedded Systems and Software) (San Francisco).
 * **11/2021** An oral report in IEEE ICTA 2021 (Zhuhai) (Online).
-* **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/).
-* **06/2021** A Chinese patent submitted.
+* **10/2021** A Chinese patent published.
+* **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/)
 
 ## 📞Contact
 
@@ -35,4 +36,5 @@ Email: [xier2018@mail.sustech.edu.cn](mailto:xier2018@mail.sustech.edu.cn) or [x
 ---
 
 <!-- for rickxie.cn -->
+
 <script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=300&t=n&d=3p-vIrt5cRJ99hVpVm3E0PmXHIg3YvSe4uSxEE5vp7Q'></script>
