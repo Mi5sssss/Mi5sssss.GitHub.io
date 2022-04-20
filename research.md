@@ -5,6 +5,8 @@ menutitle: Research
 menuorder: 1
 ---
 
+My research focus on computer architecture and system design.
+
 <!-- The acceleration of large Memristor Crossbar Arrays (MCAs) is important for the SPICE of crossbar structure. We have built a preconditioner for the existing architecture through Modified Nodal Analysis Equations.
 
 ![xie_intro_2021_Page_09](https://cdn.jsdelivr.net/gh/Mi5sssss/blog_image@main/RRAM-Simulation/xie_intro_2021_Page_09.2d0dj2bb0dog.jpg)
