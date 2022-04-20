@@ -5,7 +5,9 @@ menutitle: Research
 menuorder: 1
 ---
 
-My research focus on computer architecture and system design.
+## My research focus on 📚
+- Computer architecture and system design
+- Matrix Computation and Optimization
 
 <!-- The acceleration of large Memristor Crossbar Arrays (MCAs) is important for the SPICE of crossbar structure. We have built a preconditioner for the existing architecture through Modified Nodal Analysis Equations.
 
