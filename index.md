@@ -20,9 +20,9 @@ I am current a senior student from [Southern University of Science and Technolog
 ## 📰News
 
 * **03/2022** My old page [rickxie.xyz](https://rickxie.xyz) could be still accessd by the end of 2022, new page would be [rickxie.cn](https://rickxie.cn) from now.
-* **03/2022** A work was accepted by [DAC 2022](https://www.dac.com/) (Embedded Systems and Software) (San Francisco).
+<!-- * **03/2022** A work was accepted by [DAC 2022](https://www.dac.com/) (Embedded Systems and Software) (San Francisco). -->
 * **11/2021** An oral report in IEEE ICTA 2021 (Zhuhai) (Online).
-* **10/2021** A Chinese patent published.
+<!-- * **10/2021** A Chinese patent published. -->
 * **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/)
 
 ## 📞Contact
