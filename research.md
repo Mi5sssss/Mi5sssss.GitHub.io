@@ -1,11 +1,12 @@
 ---
 layout: page
 excerpt: "My research"
+title: Reseearch
 menutitle: Research
 menuorder: 1
 ---
-
 ## My research focus on 📚
+
 - Computer architecture and system design
 - Matrix Computation and Optimization
 
