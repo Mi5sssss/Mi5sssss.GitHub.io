@@ -1,7 +1,7 @@
 ---
 layout: post
 title: English email notice
-modified: 5/08/2022, 15:25:24
+modified: 8/5/2022, 15:25:24
 tags: [email, notice]
 comments: true
 category: blog
