@@ -1,7 +1,7 @@
 ---
 layout: page
 excerpt: "My research"
-title: Reseearch
+title: Research
 menutitle: Research
 menuorder: 1
 ---
