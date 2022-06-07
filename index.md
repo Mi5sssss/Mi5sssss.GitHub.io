@@ -14,8 +14,6 @@ I am current a senior student from [Southern University of Science and Technolog
 
 ## 📚Current Interests and Projects
 
-<!-- - Neural Architecture Search on Emerging Devices -->
-
 - Matrix Computation and Optimization
 - Computer Architecture
 
