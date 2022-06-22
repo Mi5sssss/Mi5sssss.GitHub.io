@@ -36,7 +36,7 @@ Here is [My CV](doc\xie_cv_display.pdf).
 Email: [xierui0210@gmail.com](mailto:xierui0210@gmail.com).
 
 
-(Last Updated May 2022)
+(Last Updated June 2022)
 
 <div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div>
 
