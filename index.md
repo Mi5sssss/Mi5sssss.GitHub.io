@@ -8,7 +8,7 @@ I am current a senior student from [Southern University of Science and Technolog
 
 <!-- My undergraduate supervisor is [Quan Chen](https://faculty.sustech.edu.cn/chenq3/en). -->
 
-<!-- My CV is [here](doc\xie_cv.pdf). -->
+Here is [My CV](doc\xie_cv.pdf).
 
 ---
 
@@ -18,6 +18,8 @@ I am current a senior student from [Southern University of Science and Technolog
 - Computer Architecture
 
 ## 📰News
+
+* **06/2022** I am very lucky to obtain the College Graduate Excellence Award from SME, SUSTech.
 
 * **03/2022** My old page [rickxie.xyz](https://rickxie.xyz) could be still accessd by the end of 2022, new page would be [rickxie.cn](https://rickxie.cn) from now.
 
