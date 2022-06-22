@@ -8,7 +8,7 @@ I am current a senior student from [Southern University of Science and Technolog
 
 <!-- My undergraduate supervisor is [Quan Chen](https://faculty.sustech.edu.cn/chenq3/en). -->
 
-Here is [My CV](doc\xie_cv.pdf).
+Here is [My CV](doc\xie_cv_display.pdf).
 
 ---
 
