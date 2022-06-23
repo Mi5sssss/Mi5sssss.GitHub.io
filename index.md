@@ -19,7 +19,7 @@ Here is [My CV](doc\xie_cv_display.pdf).
 
 ## 📰News
 
-* **06/2022** Got the Outstanding Undergraduate Thesis Award.
+* **06/2022** Got the Undergraduate Thesis Award.
 
 * **06/2022** I am very lucky to obtain the College Graduate Excellence Award from SME, SUSTech.
 
