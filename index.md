@@ -19,9 +19,11 @@ Here is [My CV](doc\xie_cv_display.pdf).
 
 ## 📰News
 
-* **06/2022** I was awarded the Excellent Graduate in the SUSTech.
+* **06/2022** I will be the alumni mentor of Zhicheng College at SUSTech for the period from May 2022 to May 2023.
+* 
+* **06/2022** I was conferred the Excellent Graduate in the SUSTech.
   
-* **06/2022** Got the Undergraduate Thesis Award.
+* **06/2022** I have got the Undergraduate Thesis Award.
 
 * **06/2022** I am very lucky to obtain the College Graduate Excellence Award from SME, SUSTech.
 
