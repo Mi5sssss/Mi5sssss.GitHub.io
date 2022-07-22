@@ -13,6 +13,13 @@
 
 {% include _navigation.html %}
 
+<!--to add tags-->
+{% if page.tags %}
+{% for tag in page.tags %}
+<a href="{{ site.baseurl }}/tags/#{{ tag | slugify }}" class="post-tag">{{ tag }}</a>
+{% endfor %}
+{%- endif -%}
+<!--to add tags-->
 
 
 <div id="main" role="main">
