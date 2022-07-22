@@ -49,10 +49,8 @@
   {% if site.owner.disqus-shortname and page.comments == true %}
     <section id="disqus_thread"></section><!-- /#disqus_thread -->
   {% endif %}
-  </article>
-</div><!-- /#main -->
 
-<!--to add related posts-->
+  <!--to add related posts-->
 {% assign firstTag = page.tags | first %}
 {% assign relatedCount = 0 %}
 
@@ -73,6 +71,11 @@
   {% endfor %}
 </div>
 <!--to add related posts-->
+
+  </article>
+</div><!-- /#main -->
+
+
 
 <!-- <div class="comment">
   //Link Gitalk 的支持文件 
