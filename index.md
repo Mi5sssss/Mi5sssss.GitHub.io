@@ -4,7 +4,7 @@ excerpt: "About Me..."
 menutitle: Home
 menuorder: 1
 ---
-From Aug. 2022, I will be a Ph.D. student in the [Electrical, Computer, and Systems Engineering Department](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/) with a research interests in Computer Architecture and Computer System Design.
+From Aug. 2022, I will be a Ph.D. student in the [Department of Electrical, Computer, and Systems Engineering](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/) with a research interests in Computer Architecture and Computer System Design.
 
 I previously completed a Bachelor of Engineering with honor at [School of Microelectronics](https://sme.sustech.edu.cn/en/), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
 
