@@ -6,7 +6,7 @@ menuorder: 1
 ---
 I am a Ph.D. student in the [Electrical, Computer, and Systems Engineering Department](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/) with a research interests in Computer Architecture and Computer System Design.
 
-I earned a Bachelor of Engineering with honor at [School of Microelectronics](), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
+I previously completed a Bachelor of Engineering with honor at [School of Microelectronics](), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
 
 <!-- My undergraduate supervisor is [Quan Chen](https://faculty.sustech.edu.cn/chenq3/en). -->
 
