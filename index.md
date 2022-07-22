@@ -8,8 +8,6 @@ I am a Ph.D. student in the [Electrical, Computer, and Systems Engineering Depar
 
 I previously completed a Bachelor of Engineering with honor at [School of Microelectronics](), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
 
-<!-- My undergraduate supervisor is [Quan Chen](https://faculty.sustech.edu.cn/chenq3/en). -->
-
 Here is [My CV](doc\xie_cv_display.pdf).
 
 ---
@@ -26,13 +24,7 @@ Here is [My CV](doc\xie_cv_display.pdf).
 * **06/2022** I have got the Undergraduate Thesis Award.
 * **06/2022** I am very lucky to obtain the College Graduate Excellence Award from SME, SUSTech.
 * **03/2022** My old page [rickxie.xyz](https://rickxie.xyz) could be still accessd by the end of 2022, new page would be [rickxie.cn](https://rickxie.cn) from now.
-
-<!-- * **03/2022** A work was accepted by [DAC 2022](https://www.dac.com/) (Embedded Systems and Software) (San Francisco). -->
-
 * **11/2021** An oral report in IEEE ICTA 2021 (Zhuhai) (Online).
-
-<!-- * **10/2021** A Chinese patent published. -->
-
 * **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/)
 
 ## 📞Contact
