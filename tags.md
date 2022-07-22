@@ -1,6 +1,6 @@
 ---
 layout: page
-title: tags
+title: Tags
 permalink: /tags/
 menutitle: Tags
 menuorder: 1
