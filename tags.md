@@ -3,6 +3,7 @@ layout: page
 title: tags
 permalink: /tags/
 menutitle: Tags
+menuorder: 1
 ---
 <div class="tags-expo">
   <div class="tags-expo-list">
