@@ -2,6 +2,7 @@
 layout: page
 title: tags
 permalink: /tags/
+menutitle: Tags
 ---
 <div class="tags-expo">
   <div class="tags-expo-list">
