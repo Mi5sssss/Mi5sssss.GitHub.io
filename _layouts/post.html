@@ -21,14 +21,6 @@
     {% include _author-bio.html %}
   </div>
 
-  <!--to add tags-->
-  {% if page.tags %}
-  {% for tag in page.tags %}
-  <a href="{{ site.baseurl }}/tags/#{{ tag | slugify }}" class="post-tag">{{ tag }}</a>
-  {% endfor %}
-  {%- endif -%}
-  <!--to add tags-->
-  
   <article class="post">
     <div class="headline-wrap">
       {% if page.link %}
@@ -37,6 +29,15 @@
         <h1><a href="{{ site.github.url }}{{ page.url }}" rel="bookmark" title="{{ page.title }}">{{ page.title }}</a></h1>
       {% endif %}
     </div><!--/ .headline-wrap -->
+
+      <!--to add tags-->
+      {% if page.tags %}
+      {% for tag in page.tags %}
+      <a href="{{ site.baseurl }}/tags/#{{ tag | slugify }}" class="post-tag">{{ tag }}</a>
+      {% endfor %}
+      {%- endif -%}
+      <!--to add tags-->
+  
     <div class="article-wrap">
       {{ content }}
       <hr />
