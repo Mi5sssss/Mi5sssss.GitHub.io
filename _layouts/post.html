@@ -32,11 +32,13 @@
 
       <!--to add tags-->
       {% if page.tags %}
+      <h4>
       [
       {% for tag in page.tags %}
       <a href="{{ site.baseurl }}/tags/#{{ tag | slugify }}" class="post-tag">{{ tag }}</a>
       {% endfor %}
       ]
+      </h4>
       {%- endif -%}
       <!--to add tags-->
   
