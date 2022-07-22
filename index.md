@@ -4,7 +4,9 @@ excerpt: "About Me..."
 menutitle: Home
 menuorder: 1
 ---
-I am current a senior student from [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), expected obtain the Bachelor of Engineering in June 2022. I show great interests in Computer Architecture Design and Personal Computer System Design.
+I am a Ph.D. student in the [Electrical, Computer, and Systems Engineering Department](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/) with a research interests in Computer Architecture and Computer System Design.
+
+I earned a Bachelor of Engineering with honor at [School of Microelectronics](), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
 
 <!-- My undergraduate supervisor is [Quan Chen](https://faculty.sustech.edu.cn/chenq3/en). -->
 
@@ -20,13 +22,9 @@ Here is [My CV](doc\xie_cv_display.pdf).
 ## 📰News
 
 * **06/2022** I will be the alumni mentor of Zhicheng College at SUSTech for the period from May 2022 to May 2023.
-
 * **06/2022** I was conferred the Excellent Graduate in the SUSTech.
-  
 * **06/2022** I have got the Undergraduate Thesis Award.
-
 * **06/2022** I am very lucky to obtain the College Graduate Excellence Award from SME, SUSTech.
-
 * **03/2022** My old page [rickxie.xyz](https://rickxie.xyz) could be still accessd by the end of 2022, new page would be [rickxie.cn](https://rickxie.cn) from now.
 
 <!-- * **03/2022** A work was accepted by [DAC 2022](https://www.dac.com/) (Embedded Systems and Software) (San Francisco). -->
@@ -41,8 +39,7 @@ Here is [My CV](doc\xie_cv_display.pdf).
 
 Email: [xierui0210@gmail.com](mailto:xierui0210@gmail.com).
 
-
-(Last Updated June 2022)
+(Last Updated July 2022)
 
 <div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div>
 
