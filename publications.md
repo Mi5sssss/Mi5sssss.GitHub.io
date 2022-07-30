@@ -5,7 +5,6 @@ menutitle: Publications
 menuorder: 2
 excerpt: "Recent Publications"
 ---
-## Publications
 
 [2] Yuan Ren, Wenyong Zhou, Ziyi Guan, **Rui Xie**, Quan Chen, Hao Yu, Ngai Wong, XMAS: An Efficient Customizable Flow for Crossbarred-Memristor Architecture Search, 59th Design Automation Conference Engineering Track ([Link](https://59dac.conference-program.com/presentation/?id=ETPOST157&sess=sess187))
 
