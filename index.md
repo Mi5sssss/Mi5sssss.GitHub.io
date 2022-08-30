@@ -29,7 +29,7 @@ Here is [My CV](doc\xie_cv_display.pdf).
 
 ## 📞Contact
 
-Email: [xierui0210@gmail.com](mailto:xierui0210@gmail.com).
+Email: [xier2@rpi.edu](xier2@rpi.edu)
 
 (Last Updated July 2022)
 
