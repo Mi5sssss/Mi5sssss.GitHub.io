@@ -4,7 +4,7 @@ excerpt: "About Me..."
 menutitle: Home
 menuorder: 1
 ---
-From Aug. 2022, I will be a Ph.D. student in the [Department of Electrical, Computer, and Systems Engineering](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/) with  research interests in Computer Architecture and Computer System Design.
+I am a Ph.D. student in the [Department of Electrical, Computer, and Systems Engineering](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/).
 
 I previously completed a Bachelor of Engineering with Honors at [School of Microelectronics](https://sme.sustech.edu.cn/en/), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
 
@@ -14,7 +14,7 @@ Here is [My CV](doc\xie_cv_display.pdf).
 
 ## 📚Current Interests and Projects
 
-- Matrix Computation and Optimization
+- Storage System Design
 - Computer Architecture
 
 ## 📰News
@@ -29,9 +29,10 @@ Here is [My CV](doc\xie_cv_display.pdf).
 
 ## 📞Contact
 
-Email: [xier2@rpi.edu](xier2@rpi.edu)
+Email: [xier2@rpi.edu](mailto:xier2@rpi.edu)
+Phone: +1 (518) 918-5886
 
-(Last Updated July 2022)
+(Last Updated Sep. 2022)
 
 <div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div>
 
