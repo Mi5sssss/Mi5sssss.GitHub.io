@@ -29,6 +29,8 @@ Here is [My CV](doc\xie_cv_display.pdf).
 
 ## 📞Contact
 
+Office: CII 9123, Rensselaer Polytechnic Institute, Troy, NY
+
 Email: [xier2@rpi.edu](mailto:xier2@rpi.edu)
 
 Phone: +1 (518) 918-5886
