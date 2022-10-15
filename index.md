@@ -31,7 +31,7 @@ Here is [My CV](doc\xie_cv_display.pdf).
 * **11/2021** An oral report in IEEE ICTA 2021 (Zhuhai) (Online).
 * **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/)
 
-## [🖊Publications]
+## 📕Publications
 * Ziyi Guan, Wenyong Zhou, Yuan Ren, **Rui Xie**, Hao Yu, Ngai Wong, "A Hardware-Aware Neural Architecture Search Pareto Front Exploration for In-Memory Computing," in Proc. 2022 IEEE 16th Int. Conf. Solid-State and Integrated Circuit Technology (ICSICT), Oct 2022 (Invited Paper)
 
 * Yuan Ren, Wenyong Zhou, Ziyi Guan, **Rui Xie**, Quan Chen, Hao Yu, Ngai Wong, XMAS: An Efficient Customizable Flow for Crossbarred-Memristor Architecture Search, 59th Design Automation Conference Engineering Track ([Link](https://59dac.conference-program.com/presentation/?id=ETPOST157&sess=sess187))
