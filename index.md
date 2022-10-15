@@ -45,7 +45,7 @@ I previously completed a Bachelor of Engineering with Honors at [School of Micro
 * **Rui Xie**, Mingyang Song, Junzhuo Zhou, Jie Mei, Quan Chen, *A Fast Method for Steady-State Memristor Crossbar Array Circuit Simulation*, 2021 IEEE International Conference on Integrated Circuits Technologies and Applications ([Link](https://ieeexplore.ieee.org/document/9661817))
 * Quan Chen, Dayi Fan, **Rui Xie**, Mingyang Song, Construction and optimization of neural networks for memristor arrays based
 on circuit simulation. CN 202110673101.5
-[(More)](publications.md)
+* [(More)](publications.md)
 
 
 (Last Updated Oct. 2022)
