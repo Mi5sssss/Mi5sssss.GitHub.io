@@ -10,7 +10,11 @@ I previously completed a Bachelor of Engineering with Honors at [School of Micro
 
 Here is [My CV](doc\xie_cv_display.pdf).
 
----
+## 🏫 Educations
+
+* **08/2022 - Present** PhD Student in Computer Engineering, Rensselaer Polytechnic Institute
+* 
+* **08/2018 - 06/2022** BEeng in Microelectronics Science and Engineering, School of Microelectronics, Southern University of Science and Technology
 
 ## 📚Current Interests and Projects
 
