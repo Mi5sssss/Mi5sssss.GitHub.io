@@ -27,14 +27,6 @@ Here is [My CV](doc\xie_cv_display.pdf).
 * **11/2021** An oral report in IEEE ICTA 2021 (Zhuhai) (Online).
 * **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/)
 
-## 📞Contact
-
-Office: CII 9123, Rensselaer Polytechnic Institute, Troy, NY
-
-Email: [xier2@rpi.edu](mailto:xier2@rpi.edu)
-
-Phone: +1 (518) 918-5886
-
 (Last Updated Sep. 2022)
 
 <div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div>
