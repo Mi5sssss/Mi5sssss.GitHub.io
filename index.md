@@ -5,9 +5,7 @@ menutitle: Home
 menuorder: 1
 ---
 I am a Ph.D. student in the [Department of Electrical, Computer, and Systems Engineering](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/). I am extremely fortunate to be advised by [Prof. Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
-I previously completed a Bachelor of Engineering with Honors at [School of Microelectronics](https://sme.sustech.edu.cn/en/), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
-
-Here is [My CV](doc\xie_cv_display.pdf).
+I previously completed a Bachelor of Engineering with Honors at [School of Microelectronics](https://sme.sustech.edu.cn/en/), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html). Here is [My CV](doc\xie_cv_display.pdf).
 
 ## 🏫 Educations
 
