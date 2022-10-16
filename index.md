@@ -57,5 +57,3 @@ on circuit simulation. CN 202110673101.5
 <!-- for rickxie.cn -->
 
 <script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=300&t=n&d=3p-vIrt5cRJ99hVpVm3E0PmXHIg3YvSe4uSxEE5vp7Q'></script>
-
-<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2930.792018830771!2d-73.68086338382696!3d42.729292619694704!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89de0fa0754f2517%3A0xc812ad6a8b0415a0!2sLow%20Center%20for%20Industrial%20Innovation!5e0!3m2!1sen!2sus!4v1665962398670!5m2!1sen!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
