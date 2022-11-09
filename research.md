@@ -26,4 +26,4 @@ We want to make Look up tables for the real memristor which would help to facili
 
 My ultimate goal and current plan. -->
 
-<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQHrdJo90EzGcW27KNJPGjEpHG477cJ1nTjFJQlqne-mj9pXRo8S_89TlVRU5On6w/embed?start=false&loop=false&delayms=3000" frameborder="0" width="1280" height="749" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQHrdJo90EzGcW27KNJPGjEpHG477cJ1nTjFJQlqne-mj9pXRo8S_89TlVRU5On6w/embed?start=false&loop=false&delayms=3000" frameborder="0" width="640" height="389" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
