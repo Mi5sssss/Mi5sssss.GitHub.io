@@ -25,3 +25,5 @@ We want to make Look up tables for the real memristor which would help to facili
 ![xie_intro_2021_Page_17](https://cdn.jsdelivr.net/gh/Mi5sssss/blog_image@main/RRAM-Simulation/xie_intro_2021_Page_17.3ulognnu4o00.jpg)
 
 My ultimate goal and current plan. -->
+
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQHrdJo90EzGcW27KNJPGjEpHG477cJ1nTjFJQlqne-mj9pXRo8S_89TlVRU5On6w/embed?start=false&loop=false&delayms=3000" frameborder="0" width="1280" height="749" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
