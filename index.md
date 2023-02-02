@@ -4,7 +4,7 @@ excerpt: "About Me..."
 menutitle: Home
 menuorder: 1
 ---
-I am a Ph.D. student in the [Department of Electrical, Computer, and Systems Engineering](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/). I am extremely fortunate to be advised by [Prof. Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
+I am a PhD student in the [Department of Electrical, Computer, and Systems Engineering](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/). I am extremely fortunate to be advised by [Prof. Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
 I previously completed a Bachelor of Engineering with Honors at [School of Microelectronics](https://sme.sustech.edu.cn/en/), [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html). Here is [My CV](doc\xie_cv_display.pdf).
 
 ## 🏫Educations
@@ -25,8 +25,12 @@ I previously completed a Bachelor of Engineering with Honors at [School of Micro
 
 ## 📚Current Interests and Projects
 
-- Storage System Design
-- Computer Architecture
+- **Storage and Cache System Design**
+  - B-tree Based Cache System with Data Compression in DRAM:
+    1. DRAM/SSD-based caching systems play an important role in modern IT infrastructure
+    2. DRAM accounts for a significant (and increasing) portion of system TCO
+    3. NAND flash memory has limited (and decreasing) P/E cycling endurance
+
 
 ## 📰News
 
@@ -48,7 +52,7 @@ on circuit simulation. CN 202110673101.5
 * [(More)](publications.md)
 
 
-(Last Updated Oct. 2022)
+(Last Updated Jan. 2023)
 
 <div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div>
 
