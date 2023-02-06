@@ -33,5 +33,5 @@ My ultimate goal and current plan. -->
 
 ### Clean Room Experiment
 
-[Course Report (In Chinese)](https://drive.google.com/file/d/1NkhxHRhjTs9eslLFBBhyF2AvXFJe9f3O/view?usp=share_link)
+[Course Report (In Chinese)](https://drive.google.com/file/d/1NkhxHRhjTs9eslLFBBhyF2AvXFJe9f3O/view?usp=sharing)
 
