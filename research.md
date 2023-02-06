@@ -30,3 +30,8 @@ My ultimate goal and current plan. -->
 ### Matrix Computation and Optimization
 
 <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQHrdJo90EzGcW27KNJPGjEpHG477cJ1nTjFJQlqne-mj9pXRo8S_89TlVRU5On6w/embed?start=false&loop=false&delayms=3000" frameborder="0" width="640" height="389" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
+### Clean Room Experiment
+
+[Course Report (In Chinese)](https://drive.google.com/file/d/1NkhxHRhjTs9eslLFBBhyF2AvXFJe9f3O/view?usp=share_link)
+
