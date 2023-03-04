@@ -54,10 +54,10 @@ on circuit simulation. CN 202110673101.5
 
 (Last Updated Jan. 2023)
 
-<div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div>
+<!-- <div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div> -->
 
----
+<!-- --- -->
 
 <!-- for rickxie.cn -->
 
-<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=300&t=n&d=3p-vIrt5cRJ99hVpVm3E0PmXHIg3YvSe4uSxEE5vp7Q'></script>
+<!-- <script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=300&t=n&d=3p-vIrt5cRJ99hVpVm3E0PmXHIg3YvSe4uSxEE5vp7Q'></script> -->
