@@ -61,3 +61,7 @@ on circuit simulation. CN 202110673101.5
 <!-- for rickxie.cn -->
 
 <!-- <script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=300&t=n&d=3p-vIrt5cRJ99hVpVm3E0PmXHIg3YvSe4uSxEE5vp7Q'></script> -->
+
+
+
+<a class="twitter-timeline" data-width="800" data-height="600" data-theme="light" href="https://twitter.com/RickXie10?ref_src=twsrc%5Etfw">Tweets by RickXie10</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
