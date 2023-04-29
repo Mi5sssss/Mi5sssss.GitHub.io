@@ -39,7 +39,7 @@ owner:
   flickr: #username
   codepen: #username
   disqus-shortname: xier
-  zhihu: rick-xie-19
+  zhihu: # rick-xie-19
 
 # The following adjust the accents for your site. If you would like to further edit colors, fonts, font sizes, etc.
 # you may do so in _sass/variables.scss
