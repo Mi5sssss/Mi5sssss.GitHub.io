@@ -11,11 +11,11 @@ owner:
   bio: "Rick @ RPI"
   email: #xier2@rpi.edu #emailaddress
   # Do not include the @ symbol in your Twitter username
-  twitter: # RickXie10 #username
-  linkedin: # rui-xie-b31337219 #username
-  github: # Mi5sssss #username
+  twitter: RickXie10 #username
+  linkedin: rui-xie-b31337219 #username
+  github: Mi5sssss #username
   orcid: # ID Number (ex. 0000-0000-0000-0000)
-  researchgate: Rui-Xie-12 #username
+  researchgate: # Rui-Xie-12 #username
   mendeley: #username
   google:
     plus: #username
@@ -39,7 +39,7 @@ owner:
   flickr: #username
   codepen: #username
   disqus-shortname: xier
-  zhihu: # rick-xie-19
+  zhihu: rick-xie-19
 
 # The following adjust the accents for your site. If you would like to further edit colors, fonts, font sizes, etc.
 # you may do so in _sass/variables.scss
