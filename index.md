@@ -64,4 +64,4 @@ on circuit simulation. CN 202110673101.5
 
 
 
-<a class="twitter-timeline" data-width="800" data-height="600" data-theme="light" href="https://twitter.com/RickXie10?ref_src=twsrc%5Etfw">Tweets by RickXie10</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<!-- <a class="twitter-timeline" data-width="800" data-height="600" data-theme="light" href="https://twitter.com/RickXie10?ref_src=twsrc%5Etfw">Tweets by RickXie10</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script> -->
