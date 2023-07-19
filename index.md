@@ -60,7 +60,7 @@ on circuit simulation. CN 202110673101.5
 
 <!-- for rickxie.cn -->
 
-<!-- <script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=300&t=n&d=3p-vIrt5cRJ99hVpVm3E0PmXHIg3YvSe4uSxEE5vp7Q'></script> -->
+<script type='text/javascript' id='clustrmaps' src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=300&t=n&d=3p-vIrt5cRJ99hVpVm3E0PmXHIg3YvSe4uSxEE5vp7Q'></script>
 
 
 
