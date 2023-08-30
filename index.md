@@ -30,6 +30,7 @@ I previously completed a Bachelor of Engineering with Honors at [School of Micro
     1. DRAM/SSD-based caching systems play an important role in modern IT infrastructure
     2. DRAM accounts for a significant (and increasing) portion of system TCO
     3. NAND flash memory has limited (and decreasing) P/E cycling endurance -->
+- **Enhancing memory architectures by optimizing DRAM and SSDs performance, cost, and energy, with integrated computational functions**
 
 
 ## 📰News
