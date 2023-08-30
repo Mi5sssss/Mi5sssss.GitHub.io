@@ -25,7 +25,6 @@ I previously completed a Bachelor of Engineering with Honors at [School of Micro
 
 ## 📚Current Interests and Projects
 
-- **Storage and Cache System Design**
 - **Enhancing memory architectures by optimizing DRAM and SSDs performance, cost, and energy, with integrated computational functions**
 
 
