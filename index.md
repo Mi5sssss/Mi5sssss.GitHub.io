@@ -26,10 +26,10 @@ I previously completed a Bachelor of Engineering with Honors at [School of Micro
 ## 📚Current Interests and Projects
 
 - **Storage and Cache System Design**
-  - B-tree Based Cache System with Data Compression in DRAM:
+  <!-- - B-tree Based Cache System with Data Compression in DRAM:
     1. DRAM/SSD-based caching systems play an important role in modern IT infrastructure
     2. DRAM accounts for a significant (and increasing) portion of system TCO
-    3. NAND flash memory has limited (and decreasing) P/E cycling endurance
+    3. NAND flash memory has limited (and decreasing) P/E cycling endurance -->
 
 
 ## 📰News
