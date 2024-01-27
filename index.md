@@ -7,7 +7,7 @@ menuorder: 1
 **Welcome to my page!** I am a PhD student in the [Department of Electrical, Computer, and Systems Engineering](https://www.ecse.rpi.edu/), [School of Engineering](https://eng.rpi.edu/), at [Rensselaer Polytechnic Institute](https://www.rpi.edu/). I am fortunate to be advised by [Prof. Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
 I previously completed a Bachelor of Engineering with Honors in [Southern University of Science and Technology](https://www.sustech.edu.cn/en/), where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html). Here is [My CV](doc\xie_cv.pdf).
 
-I am focusing on enhancing memory architectures by optimizing DRAM and SSDs performance, cost, and energy, with integrated computational functions.
+I am focusing on enhancing **memory architectures** by optimizing DRAM and SSDs performance, cost, and energy, with integrated computational functions.
 
 ## 🏫Educations
 
