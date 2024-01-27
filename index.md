@@ -39,11 +39,8 @@ on circuit simulation. CN 202110673101.5
 * Excellent Graduate in Southern University of Science and Technology, Jun. 2022
 * Graduation with Honor: College Graduate Excellence Award, Jun. 2022
 * First Class of the Merit Student Scholarship, Sep. 2021
-<!-- * Outstanding Cadre Award of Zhicheng College, May. 2021 -->
 * First Prize of College Student Innovation and Entrepreneurship Training Program, Mar. 2021
-<!-- * Second Class of the Merit Student Scholarship, Sep. 2020
-* Third Prize of China College IC Competition in Southern China, Jul. 2020
-* Third Class of the Merit Student Scholarship, Sep. 2019 -->
+
 
 (Last Updated Jan. 2024)
 
