@@ -17,7 +17,7 @@ I am focusing on enhancing **memory architectures** by optimizing DRAM and SSDs 
 
 ## 📰News
 
-* **6/2023** Our work accepcted by in ISMM 2023.
+* **06/2023** Our work accepcted by in ISMM 2023.
 * **11/2021** An oral report at IEEE ICTA 2021 (Zhuhai) (Online).
 * **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/)
 
