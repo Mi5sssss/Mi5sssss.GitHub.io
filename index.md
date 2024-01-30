@@ -15,11 +15,11 @@ I am focusing on enhancing **memory architectures** by optimizing DRAM and SSDs 
 * **08/2018 - 06/2022** BEng in Microelectronics Science and Engineering, School of Microelectronics, Southern University of Science and Technology
 
 
-## 📰News
+<!-- ## 📰News
 
 * **06/2023** Our work accepcted by in ISMM 2023.
 * **11/2021** An oral report at IEEE ICTA 2021 (Zhuhai) (Online).
-* **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/)
+* **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/) -->
 
 ## 📕Publications
 
