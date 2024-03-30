@@ -42,7 +42,7 @@ on circuit simulation. CN 202110673101.5
 * First Prize of College Student Innovation and Entrepreneurship Training Program, Mar. 2021
 
 
-(Last Updated Jan. 2024)
+<!-- (Last Updated Jan. 2024) -->
 
 <!-- <div align=center>You are the No. <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-Ay4w35cD6aCbb3Z4-22.gif' border='0' alt='free counter'></a> vistor of my homepage.<script type='text/javascript' src='https://www.counter12.com/ad.js?id=Ay4w35cD6aCbb3Z4'></script></div> -->
 
