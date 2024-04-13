@@ -9,7 +9,11 @@ I previously completed a Bachelor of Engineering with Honors in Southern Univers
 
 I am focusing on enhancing **memory architectures** by optimizing DRAM and SSDs performance, cost, and energy, with integrated computational functions.
 
-xier2 [at] rpi (dot) edu
+---
+Welcome to contact with me!
+
+Email: xier2 [at] rpi (dot) edu
+---
 
 ## 🏫Educations
 
