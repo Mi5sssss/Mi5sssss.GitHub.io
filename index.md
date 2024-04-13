@@ -14,8 +14,8 @@ Email: xier2 [at] rpi (dot) edu
 
 ## 🏫Educations
 
-* **08/2022 - Present** PhD Candidate in Computer Engineering, Rensselaer Polytechnic Institute
-* **08/2018 - 06/2022** BEng in Microelectronics Science and Engineering, School of Microelectronics, Southern University of Science and Technology
+* **08/2022 - Present** PhD student in Computer Engineering, Rensselaer Polytechnic Institute
+* **08/2018 - 06/2022** BEng in Microelectronics Science and Engineering, Southern University of Science and Technology
 
 
 <!-- ## 📰News
