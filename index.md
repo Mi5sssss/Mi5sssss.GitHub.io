@@ -9,6 +9,8 @@ I previously completed a Bachelor of Engineering with Honors in Southern Univers
 
 I am focusing on enhancing **memory architectures** by optimizing DRAM and SSDs performance, cost, and energy, with integrated computational functions.
 
+xier2 [at] rpi (dot) edu
+
 ## 🏫Educations
 
 * **08/2022 - Present** PhD Candidate in Computer Engineering, Rensselaer Polytechnic Institute
