@@ -7,15 +7,22 @@ menuorder: 1
 **Welcome to my page!** I am a PhD student in the ECSE Department at Rensselaer Polytechnic Institute. I am fortunate to be advised by [Prof. Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
 I previously completed a Bachelor of Engineering with Honors in Southern University of Science and Technology, where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
 
-I am focusing on enhancing **memory architectures** by optimizing DRAM and SSDs performance, cost, and energy, with integrated computational functions.
+My research focuses on optimizing memory architectures, primarily DRAM and SSDs, to enhance hardware performance and software efficiency. I explore solutions in data processing and AI, aiming to contribute to more efficient and sustainable computing systems.
 
 Welcome to contact with me!
 Email: xier2 [at] rpi (dot) edu
 
 ## 🏫Educations
 
-* **08/2022 - Present** PhD student in Computer Engineering, Rensselaer Polytechnic Institute
-* **08/2018 - 06/2022** BEng in Microelectronics Science and Engineering, Southern University of Science and Technology
+* 08/2022 - Present PhD student in Computer Engineering, Rensselaer Polytechnic Institute
+* 08/2018 - 06/2022 BEng in Microelectronics Science and Engineering, Southern University of Science and Technology
+
+## 💼Experience
+- 12/2021 - 06/2022 EDA engineer intern, BTD Technology
+  - Optimized parsers for faster interpretation and reduced memory usage
+  - Developed interface for EDA tools
+- 06/2020 - 08/2020 Remote research intern, University of Hong Kong
+- 06/2019 - 08/2019 Visiting student, University of Oxford
 
 
 <!-- ## 📰News
@@ -26,12 +33,16 @@ Email: xier2 [at] rpi (dot) edu
 
 ## 📕Publications
 
-* Linsen Ma, **Rui Xie**, Tong Zhang, "ZipKV: In-Memory Key-Value Store with Built-In Data Compression", ISMM 2023 ([paper](https://dl.acm.org/doi/abs/10.1145/3591195.3595273))
-* Ziyi Guan, Wenyong Zhou, Yuan Ren, **Rui Xie**, Hao Yu, Ngai Wong, "A Hardware-Aware Neural Architecture Search Pareto Front Exploration for In-Memory Computing," in Proc. 2022 IEEE 16th Int. Conf. Solid-State and Integrated Circuit Technology (ICSICT), Oct 2022 ([paper](https://ieeexplore.ieee.org/document/9963263))
-* Yuan Ren, Wenyong Zhou, Ziyi Guan, **Rui Xie**, Quan Chen, Hao Yu, Ngai Wong, XMAS: An Efficient Customizable Flow for Crossbarred-Memristor Architecture Search, 59th Design Automation Conference Engineering Track ([poster](https://59dac.conference-program.com/presentation/?id=ETPOST157&sess=sess187))
-* **Rui Xie**, Mingyang Song, Junzhuo Zhou, Jie Mei, Quan Chen, *A Fast Method for Steady-State Memristor Crossbar Array Circuit Simulation*, 2021 IEEE International Conference on Integrated Circuits Technologies and Applications ([paper](https://ieeexplore.ieee.org/document/9661817))
+### Conference
+* 2023  Linsen Ma, **Rui Xie**, Tong Zhang, "ZipKV: In-Memory Key-Value Store with Built-In Data Compression", ISMM 2023 ([paper](https://dl.acm.org/doi/abs/10.1145/3591195.3595273))
+* 2022  Ziyi Guan, Wenyong Zhou, Yuan Ren, **Rui Xie**, Hao Yu, Ngai Wong, "A Hardware-Aware Neural Architecture Search Pareto Front Exploration for In-Memory Computing," in Proc. 2022 IEEE 16th Int. Conf. Solid-State and Integrated Circuit Technology (ICSICT), Oct 2022 ([paper](https://ieeexplore.ieee.org/document/9963263))
+* 2022  Yuan Ren, Wenyong Zhou, Ziyi Guan, **Rui Xie**, Quan Chen, Hao Yu, Ngai Wong, XMAS: An Efficient Customizable Flow for Crossbarred-Memristor Architecture Search, 59th Design Automation Conference Engineering Track ([poster](https://59dac.conference-program.com/presentation/?id=ETPOST157&sess=sess187))
+* 2021  **Rui Xie**, Mingyang Song, Junzhuo Zhou, Jie Mei, Quan Chen, *A Fast Method for Steady-State Memristor Crossbar Array Circuit Simulation*, 2021 IEEE International Conference on Integrated Circuits Technologies and Applications ([paper](https://ieeexplore.ieee.org/document/9661817))
+
+### Patent
 * Quan Chen, Dayi Fan, **Rui Xie**, Mingyang Song, Construction and optimization of neural networks for memristor arrays based
 on circuit simulation. CN 202110673101.5
+
 * [(More)](publications.md)
 
 <!-- ## 📒 Reviewer Experience
