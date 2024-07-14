@@ -9,7 +9,7 @@ I previously completed a Bachelor of Engineering with Honors in Southern Univers
 
 My research focuses on optimizing memory architectures, primarily DRAM and SSDs, to enhance hardware performance and software efficiency. I explore solutions in data processing and AI, aiming to contribute to more efficient and sustainable computing systems.
 
-Welcome to contact with me!
+Welcome to talk to me!
 Email: xier2 [at] rpi (dot) edu
 
 ## 🏫Educations
