@@ -33,11 +33,12 @@ Email: xier2 [at] rpi (dot) edu
 
 ## 📕Publications
 
-* Linsen Ma, **Rui Xie**, Tong Zhang, "ZipKV: In-Memory Key-Value Store with Built-In Data Compression", ISMM 2023 ([paper](https://dl.acm.org/doi/abs/10.1145/3591195.3595273))
-* Ziyi Guan, Wenyong Zhou, Yuan Ren, **Rui Xie**, Hao Yu, Ngai Wong, "A Hardware-Aware Neural Architecture Search Pareto Front Exploration for In-Memory Computing," in Proc. 2022 IEEE 16th Int. Conf. Solid-State and Integrated Circuit Technology (ICSICT), Oct 2022 ([paper](https://ieeexplore.ieee.org/document/9963263))
-* Yuan Ren, Wenyong Zhou, Ziyi Guan, **Rui Xie**, Quan Chen, Hao Yu, Ngai Wong, XMAS: An Efficient Customizable Flow for Crossbarred-Memristor Architecture Search, 59th Design Automation Conference Engineering Track ([poster](https://59dac.conference-program.com/presentation/?id=ETPOST157&sess=sess187))
-* **Rui Xie**, Mingyang Song, Junzhuo Zhou, Jie Mei, Quan Chen, *A Fast Method for Steady-State Memristor Crossbar Array Circuit Simulation*, 2021 IEEE International Conference on Integrated Circuits Technologies and Applications ([paper](https://ieeexplore.ieee.org/document/9661817))
-* Quan Chen, Dayi Fan, **Rui Xie**, Mingyang Song, Construction and optimization of neural networks for memristor arrays based
+- **Rui Xie**, Asad Ul Haq, Linsen Ma, Krystal Sun, Sanchari Sen, Swagath Venkataramani, Liu Liu, Tong Zhang, "SmartQuant: CXL-based AI Model Store in Support of Runtime Configurable Weight Quantization", arXiv preprint ([paper](https://arxiv.org/abs/2407.15866))
+- Linsen Ma, **Rui Xie**, Tong Zhang, "ZipKV: In-Memory Key-Value Store with Built-In Data Compression", ISMM 2023 ([paper](https://dl.acm.org/doi/abs/10.1145/3591195.3595273))
+- Ziyi Guan, Wenyong Zhou, Yuan Ren, **Rui Xie**, Hao Yu, Ngai Wong, "A Hardware-Aware Neural Architecture Search Pareto Front Exploration for In-Memory Computing," in Proc. 2022 IEEE 16th Int. Conf. Solid-State and Integrated Circuit Technology (ICSICT), Oct 2022 ([paper](https://ieeexplore.ieee.org/document/9963263))
+- Yuan Ren, Wenyong Zhou, Ziyi Guan, **Rui Xie**, Quan Chen, Hao Yu, Ngai Wong, XMAS: An Efficient Customizable Flow for Crossbarred-Memristor Architecture Search, 59th Design Automation Conference Engineering Track ([poster](https://59dac.conference-program.com/presentation/?id=ETPOST157&sess=sess187))
+- **Rui Xie**, Mingyang Song, Junzhuo Zhou, Jie Mei, Quan Chen, *A Fast Method for Steady-State Memristor Crossbar Array Circuit Simulation*, 2021 IEEE International Conference on Integrated Circuits Technologies and Applications ([paper](https://ieeexplore.ieee.org/document/9661817))
+- Quan Chen, Dayi Fan, **Rui Xie**, Mingyang Song, Construction and optimization of neural networks for memristor arrays based
 on circuit simulation. CN 202110673101.5 ([patent](https://patents.google.com/patent/CN113570048B))
 * [(More)](publications.md)
 
