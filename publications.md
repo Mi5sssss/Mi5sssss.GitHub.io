@@ -5,6 +5,8 @@ menutitle: Publications
 menuorder: 2
 excerpt: "Recent Publications"
 ---
+[6] **Rui Xie**, Linsen Ma, Alex Zhong, Feng Chen, Tong Zhang, "ZipCache: A Hybrid-DRAM/SSD Cache with Built-in Transparent Compression", 10th International Symposium on Memory Systems (To appear)
+
 [5] **Rui Xie**, Asad Ul Haq, Linsen Ma, Krystal Sun, Sanchari Sen, Swagath Venkataramani, Liu Liu, Tong Zhang, "SmartQuant: CXL-based AI Model Store in Support of Runtime Configurable Weight Quantization", arXiv preprint ([paper](https://arxiv.org/abs/2407.15866))
 
 [4] Linsen Ma, **Rui Xie**, Tong Zhang, "ZipKV: In-Memory Key-Value Store with Built-In Data Compression", 2023 International Symposium on Memory Management ([Link](https://dl.acm.org/doi/abs/10.1145/3591195.3595273))
