@@ -33,6 +33,7 @@ Email: xier2 [at] rpi (dot) edu
 
 ## 📕Publications
 
+- **Rui Xie**, Asad Ul Haq, Linsen Ma, Yunhua Fang, Zirak Burzin Engineer, Liu Liu, Tong Zhang, "Reimagining Memory Access for LLM Inference: Compression-Aware Memory Controller Design", arXiv preprint ([paper](https://arxiv.org/abs/2503.18869))
 - **Rui Xie**, Linsen Ma, Alex Zhong, Feng Chen, Tong Zhang, "ZipCache: A Hybrid-DRAM/SSD Cache with Built-in Transparent Compression", 10th International Symposium on Memory Systems ([paper](doc/ZipCache_v1-2.pdf)) ([slides](doc/2024-10-01-zipcache.pdf))
 - **Rui Xie**, Asad Ul Haq, Linsen Ma, Krystal Sun, Sanchari Sen, Swagath Venkataramani, Liu Liu, Tong Zhang, "SmartQuant: CXL-based AI Model Store in Support of Runtime Configurable Weight Quantization", arXiv preprint ([paper](https://arxiv.org/abs/2407.15866))
 - Linsen Ma, **Rui Xie**, Tong Zhang, "ZipKV: In-Memory Key-Value Store with Built-In Data Compression", 2023 International Symposium on Memory Management ([paper](https://dl.acm.org/doi/abs/10.1145/3591195.3595273))

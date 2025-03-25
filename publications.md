@@ -5,6 +5,9 @@ menutitle: Publications
 menuorder: 2
 excerpt: "Recent Publications"
 ---
+
+[7] **Rui Xie**, Asad Ul Haq, Linsen Ma, Yunhua Fang, Zirak Burzin Engineer, Liu Liu, Tong Zhang, "Reimagining Memory Access for LLM Inference: Compression-Aware Memory Controller Design", arXiv preprint ([paper](https://arxiv.org/abs/2503.18869))
+
 [6] **Rui Xie**, Linsen Ma, Alex Zhong, Feng Chen, Tong Zhang, "ZipCache: A Hybrid-DRAM/SSD Cache with Built-in Transparent Compression", 10th International Symposium on Memory Systems ([paper](doc/ZipCache_v1-2.pdf)) ([slides](doc/2024-10-01-zipcache.pdf))
 
 [5] **Rui Xie**, Asad Ul Haq, Linsen Ma, Krystal Sun, Sanchari Sen, Swagath Venkataramani, Liu Liu, Tong Zhang, "SmartQuant: CXL-based AI Model Store in Support of Runtime Configurable Weight Quantization", arXiv preprint ([paper](https://arxiv.org/abs/2407.15866))
