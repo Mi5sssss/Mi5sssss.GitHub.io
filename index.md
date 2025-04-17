@@ -17,14 +17,14 @@ Feel free to reach out -- I am always happy to chat!
    📍 Troy, NY | 🗓️ Aug 2022 – Present
 
 **B.Eng in Microelectronics Science and Engineering** — *Southern University of Science and Technology*  
-   📍 Shenzhen, China | 🗓️ Aug 2018 – Jun 2022
+   📍 Shenzhen, CN | 🗓️ Aug 2018 – Jun 2022
 
 ## 💼Experience
 **EDA Engineer Intern** — *BTD Technology*  
-   📍 Shenzhen, China | 🗓️ Dec 2021 – Jun 2022  
-   
+   📍 Shenzhen, CN | 🗓️ Dec 2021 – Jun 2022  
+
 **Research Intern** — *University of Hong Kong*  
-   📍 Hong Kong | 🗓️ Jun 2020 – Aug 2020  
+   📍 Hong Kong, CN | 🗓️ Jun 2020 – Aug 2020  
 
 **Visiting Student** — *University of Oxford*  
    📍 Oxford, UK | 🗓️ Jun 2019 – Aug 2019  
