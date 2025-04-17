@@ -4,16 +4,15 @@ excerpt: "About Me..."
 menutitle: Home
 menuorder: 1
 ---
-**Welcome to my page!** I am a PhD student in the ECSE Department at Rensselaer Polytechnic Institute. I am fortunate to be advised by [Prof. Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
-I previously completed a Bachelor of Engineering with Honors in Southern University of Science and Technology, where I worked with [Prof. Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
+**Welcome to my page!** I am a PhD student in the ECSE Department at Rensselaer Polytechnic Institute. I am fortunate to be advised by [Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
+I previously completed a Bachelor of Engineering with Honors in Southern University of Science and Technology, where I conducted research under [Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
 
 My research focuses on optimizing memory architectures, primarily DRAM and SSDs, to enhance hardware performance and software efficiency. I explore solutions in data processing and AI, aiming to contribute to more efficient and sustainable computing systems.
 
-Welcome to talk to me!
-Email: xier2 [at] rpi (dot) edu
+Feel free to reach out -- I am always happy to chat!
+📧 Email: xier2 [at] rpi (dot) edu
 
 ## 🏫 Education
-
 1. **Ph.D. Student in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
    📍 Troy, NY | 🗓️ Aug 2022 – Present
 
@@ -65,10 +64,11 @@ Email: xier2 [at] rpi (dot) edu
 <!-- ## 📒 Reviewer Experience
 * ISCAS -->
 
-## 🏆Honors and Awards
+## 🏆 Honors and Awards
 
-- 2022  Excellent Graduate Award, Southern University of Science and Technology
-- 2021  First Class Student Scholarship (Top 5%), Southern University of Science and Technology
+1. **Excellent Graduate Award**, Southern University of Science and Technology — *2022*
+2. **First Class Student Scholarship** *(Top 5%)*, Southern University of Science and Technology — *2021*
+3. **First Prize of College Student Innovation and Entrepreneurship Training Program**, Southern University of Science and Technology - *2021*
 
 <!-- * Excellent Graduate in Southern University of Science and Technology, Jun. 2022
 * Graduation with Honor: College Graduate Excellence Award, Jun. 2022
