@@ -59,7 +59,7 @@ Feel free to reach out -- I am always happy to chat!
 
 8. Quan Chen, Dayi Fan, **Rui Xie**, Mingyang Song, "Construction and optimization of neural networks for memristor arrays based on circuit simulation". CN 202110673101.5 ([patent](https://patents.google.com/patent/CN113570048B))
 
-* [(More)](publications.md)
+[(More)](publications.md)
 
 
 ## 🏆 Honors and Awards
