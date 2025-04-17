@@ -65,8 +65,11 @@ Feel free to reach out -- I am always happy to chat!
 ## 🏆 Honors and Awards
 
 1. **DAC Young Fellow Award**, 61th Design Automation Conference, - *2024*
+   
 2. **Excellent Graduate Award**, Southern University of Science and Technology — *2022*
+   
 3. **First Class Student Scholarship** *(Top 5%)*, Southern University of Science and Technology — *2021*
+   
 4. **First Prize of College Student Innovation and Entrepreneurship Training Program**, Southern University of Science and Technology - *2021*
 
 ## 📒 Peer Reviewer Experience
