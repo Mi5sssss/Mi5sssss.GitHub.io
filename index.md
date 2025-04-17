@@ -13,24 +13,24 @@ Feel free to reach out -- I am always happy to chat!
 📧 Email: xier2 [at] rpi (dot) edu
 
 ## 🏫 Education
-1. **Ph.D. Student in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
+**Ph.D. Student in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
    📍 Troy, NY | 🗓️ Aug 2022 – Present
 
-2. **B.Eng in Microelectronics Science and Engineering** — *Southern University of Science and Technology*  
+**B.Eng in Microelectronics Science and Engineering** — *Southern University of Science and Technology*  
    📍 Shenzhen, China | 🗓️ Aug 2018 – Jun 2022
 
 ## 💼Experience
-1. **EDA Engineer Intern** — *BTD Technology*  
+**EDA Engineer Intern** — *BTD Technology*  
    📍 Shenzhen, China | 🗓️ Dec 2021 – Jun 2022  
    - Optimized HDL file parsers using C++ and Flex/Bison, improving interpretation speed and reducing memory footprint 
    - Developed an integrated Qt-based user interface for circuit-level simulation tool BTDSim
 
-2. **Research Intern** — *University of Hong Kong*  
+**Research Intern** — *University of Hong Kong*  
    📍 Hong Kong | 🗓️ Jun 2020 – Aug 2020  
    - Developed an organized super-network for MNIST classification task with constraints of RRAM Array topology and energy consumption
    - Developed a converge method of memristor device on ArC ONE (a high performance array control instruments) and Keysights B1500A
 
-3. **Visiting Student** — *University of Oxford*  
+**Visiting Student** — *University of Oxford*  
    📍 Oxford, UK | 🗓️ Jun 2019 – Aug 2019  
    - Related courses: Big Data Analysis, Data and Society
 
@@ -61,14 +61,16 @@ Feel free to reach out -- I am always happy to chat!
 
 * [(More)](publications.md)
 
-<!-- ## 📒 Reviewer Experience
-* ISCAS -->
 
 ## 🏆 Honors and Awards
 
-1. **Excellent Graduate Award**, Southern University of Science and Technology — *2022*
-2. **First Class Student Scholarship** *(Top 5%)*, Southern University of Science and Technology — *2021*
-3. **First Prize of College Student Innovation and Entrepreneurship Training Program**, Southern University of Science and Technology - *2021*
+1. **DAC Young Fellow Award**, 61th Design Automation Conference, - *2024*
+2. **Excellent Graduate Award**, Southern University of Science and Technology — *2022*
+3. **First Class Student Scholarship** *(Top 5%)*, Southern University of Science and Technology — *2021*
+4. **First Prize of College Student Innovation and Entrepreneurship Training Program**, Southern University of Science and Technology - *2021*
+
+## 📒 Peer Reviewer Experience
+1. **IEEE International Symposium on Circuits and Systems** - 2022, 2023, 2024
 
 <!-- * Excellent Graduate in Southern University of Science and Technology, Jun. 2022
 * Graduation with Honor: College Graduate Excellence Award, Jun. 2022
