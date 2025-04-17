@@ -22,17 +22,12 @@ Feel free to reach out -- I am always happy to chat!
 ## 💼Experience
 **EDA Engineer Intern** — *BTD Technology*  
    📍 Shenzhen, China | 🗓️ Dec 2021 – Jun 2022  
-  * Optimized HDL file parsers using C++ and Flex/Bison, improving interpretation speed and reducing memory footprint 
-  * Developed an integrated Qt-based user interface for circuit-level simulation tool BTDSim
-
+   
 **Research Intern** — *University of Hong Kong*  
    📍 Hong Kong | 🗓️ Jun 2020 – Aug 2020  
-   * Developed an organized super-network for MNIST classification task with constraints of RRAM Array topology and energy consumption
-  * Developed a converge method of memristor device on ArC ONE (a high performance array control instruments) and Keysights B1500A
 
 **Visiting Student** — *University of Oxford*  
    📍 Oxford, UK | 🗓️ Jun 2019 – Aug 2019  
-  * Related courses: Big Data Analysis, Data and Society
 
 
 <!-- ## 📰News
