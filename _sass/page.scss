@@ -739,3 +739,57 @@ $button-size: 1.5rem;
 #goog-wm-sb {
 	@extend .btn;
 }
+
+.content-with-toc {
+	display: flex;
+	flex-direction: row;
+  }
+  
+  .article-author-side {
+	flex: 0 0 20%; /* Adjust width as needed */
+	padding-right: 20px; /* Add some spacing */
+  }
+  
+  .post {
+	flex: 1;
+	padding-right: 20px; /* Add spacing if needed */
+  }
+  
+  .toc-sidebar {
+	flex: 0 0 20%; /* Adjust width to match author side or your preference */
+	padding-left: 20px;
+	position: sticky; /* Make it stick on scroll */
+	top: 20px; /* Adjust top spacing */
+	height: calc(100vh - 40px); /* Adjust height */
+	overflow-y: auto; /* Enable scrolling if content is long */
+  }
+  
+  #toc {
+	padding: 10px;
+	border: 1px solid #eee; /* Optional border */
+	border-radius: 5px; /* Optional rounded corners */
+	background-color: #f9f9f9; /* Optional background */
+  }
+  
+  #toc strong {
+	display: block;
+	margin-bottom: 5px;
+  }
+  
+  #toc-list {
+	list-style: none;
+	padding-left: 0;
+  }
+  
+  #toc-list li {
+	margin-bottom: 5px;
+  }
+  
+  #toc-list a {
+	text-decoration: none;
+	color: #333;
+  }
+  
+  #toc-list a.active {
+	font-weight: bold; /* Highlight the active section */
+  }
