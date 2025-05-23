@@ -130,3 +130,38 @@
 </div>
 </article>
 </div>```
+
+<div class="article-wrap">
+  <div id="toc">
+    <strong>Contents</strong>
+    <ul id="toc-list">
+    </ul>
+  </div>
+
+  {{ content }}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const postContent = document.querySelector('.article-wrap');
+      const tocList = document.getElementById('toc-list');
+      const headings = postContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+      headings.forEach(heading => {
+        const id = heading.textContent.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+        heading.setAttribute('id', id);
+        const listItem = document.createElement('li');
+        const link = document.createElement('a');
+        link.textContent = heading.textContent;
+        link.href = '#' + id;
+        listItem.appendChild(link);
+        tocList.appendChild(listItem);
+      });
+    });
+  </script>
+
+  <hr />
+  <footer role="contentinfo">
+    {% if page.share != false %}{% include _social-share.html %}{% endif %}
+    <p class="byline"><strong>{{ page.title }}</strong> was published on <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>{% if page.modified %} and last modified on <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time>{% endif %}.</p>
+  </footer>
+</div>
