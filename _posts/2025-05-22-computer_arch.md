@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: post-index
 title: Comprehensive Computer Architecture Knowledge Book
 excerpt: "A summary of computer architecture basic knowledge"
 modified: 5/22/2025, 17:38:00

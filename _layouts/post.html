@@ -1,3 +1,21 @@
+<!doctype html>
+<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if (IE 7)&!(IEMobile)]><html class="no-js lt-ie9 lt-ie8" lang="en"><![endif]-->
+<!--[if (IE 8)&!(IEMobile)]><html class="no-js lt-ie9" lang="en"><![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"><!--<![endif]-->
+<head>
+{% include _head.html %}
+</head>
+
+<body class="post">
+
+{% include _browser-upgrade.html %}
+
+{% include _navigation.html %}
+
+
+
+
 <div id="main" role="main">
   <div class="article-author-side">
     {% include _author-bio.html %}
@@ -10,7 +28,10 @@
       {% else %}
         <h1><a href="{{ site.github.url }}{{ page.url }}" rel="bookmark" title="{{ page.title }}">{{ page.title }}</a></h1>
       {% endif %}
-    </div>{% if page.tags %}
+    </div><!--/ .headline-wrap -->
+
+      <!--to add tags-->
+      {% if page.tags %}
       <h4>
       Tags: [
       {% for tag in page.tags %}
@@ -19,23 +40,22 @@
       ]
       </h4>
       {%- endif -%}
-      <div class="article-wrap">
-      <div id="toc">
-        <strong>Contents</strong>
-        <ul id="toc-list">
-        </ul>
-      </div>
-
+      <!--to add tags-->
+  
+    <div class="article-wrap">
       {{ content }}
       <hr />
       <footer role="contentinfo">
         {% if page.share != false %}{% include _social-share.html %}{% endif %}
         <p class="byline"><strong>{{ page.title }}</strong> was published on <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>{% if page.modified %} and last modified on <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time>{% endif %}.</p>
       </footer>
-    </div>{% if site.owner.disqus-shortname and page.comments == true %}
-    <section id="disqus_thread"></section>{% endif %}
+    </div><!-- /.article-wrap -->
+  {% if site.owner.disqus-shortname and page.comments == true %}
+    <section id="disqus_thread"></section><!-- /#disqus_thread -->
+  {% endif %}
 
-  {% assign firstTag = page.tags | first %}
+  <!--to add related posts-->
+{% assign firstTag = page.tags | first %}
 {% assign relatedCount = 0 %}
 
 <div class="related-posts">
@@ -48,59 +68,61 @@
     {% assign relatedCount = relatedCount | plus: 1 %}
     <a href="{{ site.baseurl }}{{related.permalink}}">{{ related.title }}</a><br>
     {% endunless %}
-
+      
     {% if relatedCount == 3 %}
       {% break %}
     {% endif %}
   {% endfor %}
 </div>
-</article>
-</div>```
+<!--to add related posts-->
 
-Then, you would add the JavaScript to dynamically generate the table of contents after the `{{ content }}` and before the `<hr />`:
+  </article>
+</div><!-- /#main -->
 
-```html+liquid
-    <div class="article-wrap">
-      <div id="toc">
-        <strong>Contents</strong>
-        <ul id="toc-list">
-        </ul>
-      </div>
 
-      {{ content }}
 
-      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          const postContent = document.querySelector('.article-wrap');
-          const tocList = document.getElementById('toc-list');
-          const headings = postContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
+<!-- <div class="comment">
+  //Link Gitalk 的支持文件 
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk@latest/dist/gitalk.min.js"></script> 
+  <div id="gitalk-container"></div>     <script type="text/javascript">
+    var gitalk = new Gitalk({
+  
+    // gitalk的主要参数
+      clientID: 'a576c74f3fd856e620fc',
+      clientSecret: '0d9e5f16fd3e35cbabc5ad2ef51df39f17fa83e8',
+      repo: 'Mi5sssss.GitHub.io',
+      owner: 'Mi5sssss',
+      admin: ['Mi5sssss'],
+      id:decodeURI(window.location.pathname),
+  
+    });
+    gitalk.render('gitalk-container');
+  </script> 
+</div> -->
+  <!-- Gitalk end -->
 
-          headings.forEach(heading => {
-            const id = heading.textContent.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-            heading.setAttribute('id', id);
-            const listItem = document.createElement('li');
-            const link = document.createElement('a');
-            link.textContent = heading.textContent;
-            link.href = '#' + id;
-            listItem.appendChild(link);
-            tocList.appendChild(listItem);
-          });
-        });
-      </script>
 
-      <hr />
-      <footer role="contentinfo">
-        {% if page.share != false %}{% include _social-share.html %}{% endif %}
-        <p class="byline"><strong>{{ page.title }}</strong> was published on <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>{% if page.modified %} and last modified on <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time>{% endif %}.</p>
-      </footer>
-    </div>```
+<div class="footer-wrap">
+  {% if site.related_posts.size > 0 %}
+  <div class="related-articles">
+  <h4>You might also enjoy <small class="pull-right">(<a href="{{ site.github.url }}/posts/">View all posts</a>)</small></h4>
+    <ul>
+    {% for post in site.related_posts limit:3 %}
+      <li><a href="{{ site.github.url }}{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a></li>
+    {% endfor %}
+    </ul>
+    <hr />
+  </div><!-- /.related-articles -->
+  {% endif %}
+  <footer>
+    {% include _footer.html %}
+  </footer>
+</div><!-- /.footer-wrap -->
 
-So, the file you need to modify is the one that starts with:
 
-```html
-<!doctype html>
-<html class="no-js" lang="en"><head>
-{% include _head.html %}
-</head>
 
-<body class="post">
+{% include _scripts.html %}
+
+</body>
+</html>
