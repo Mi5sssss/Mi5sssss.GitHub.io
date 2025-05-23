@@ -67,17 +67,28 @@
     {% endunless %}
 
     {% if relatedCount == 3 %}
-      {% break %}
-    {% endif %}
-  {% endfor %}
-</div>
-</article>
-</div>```
+      {% break %}<div id="main" role="main">
+  <div class="article-author-side">
+    {% include _author-bio.html %}
+  </div>
 
-Then, you would add the JavaScript to dynamically generate the table of contents after the `{{ content }}` and before the `<hr />`:
-
-```html+liquid
-    <div class="article-wrap">
+  <article class="post">
+    <div class="headline-wrap">
+      {% if page.link %}
+        <h1><a href="{{ page.link }}">{{ page.title }}</a></h1>
+      {% else %}
+        <h1><a href="{{ site.github.url }}{{ page.url }}" rel="bookmark" title="{{ page.title }}">{{ page.title }}</a></h1>
+      {% endif %}
+    </div>{% if page.tags %}
+      <h4>
+      Tags: [
+      {% for tag in page.tags %}
+      <a href="{{ site.baseurl }}/tags/#{{ tag | slugify }}" class="post-tag">{{ tag }}</a>
+      {% endfor %}
+      ]
+      </h4>
+      {%- endif -%}
+      <div class="article-wrap">
       <div id="toc">
         <strong>Contents</strong>
         <ul id="toc-list">
@@ -85,39 +96,37 @@ Then, you would add the JavaScript to dynamically generate the table of contents
       </div>
 
       {{ content }}
-
-      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          const postContent = document.querySelector('.article-wrap');
-          const tocList = document.getElementById('toc-list');
-          const headings = postContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
-          headings.forEach(heading => {
-            const id = heading.textContent.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-            heading.setAttribute('id', id);
-            const listItem = document.createElement('li');
-            const link = document.createElement('a');
-            link.textContent = heading.textContent;
-            link.href = '#' + id;
-            listItem.appendChild(link);
-            tocList.appendChild(listItem);
-          });
-        });
-      </script>
-
       <hr />
       <footer role="contentinfo">
         {% if page.share != false %}{% include _social-share.html %}{% endif %}
         <p class="byline"><strong>{{ page.title }}</strong> was published on <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>{% if page.modified %} and last modified on <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time>{% endif %}.</p>
       </footer>
-    </div>```
+    </div>{% if site.owner.disqus-shortname and page.comments == true %}
+    <section id="disqus_thread"></section>{% endif %}
 
-So, the file you need to modify is the one that starts with:
+  {% assign firstTag = page.tags | first %}
+{% assign relatedCount = 0 %}
 
-```html
-<!doctype html>
-<html class="no-js" lang="en"><head>
-{% include _head.html %}
-</head>
+<div class="related-posts">
+  <h3>related posts:</h3>
+  {% assign firstTag = page.tags | first %}
+  {% assign relatedCount = 0 %}
+  {% for related in site.tags[firstTag] %}
 
-<body class="post">
+  {% unless page.permalink == related.permalink %}
+    {% assign relatedCount = relatedCount | plus: 1 %}
+    <a href="{{ site.baseurl }}{{related.permalink}}">{{ related.title }}</a><br>
+    {% endunless %}
+
+    {% if relatedCount == 3 %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+</div>
+</article>
+</div>```
+    {% endif %}
+  {% endfor %}
+</div>
+</article>
+</div>```
