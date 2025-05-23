@@ -1,6 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en"><head>
-  {% include _head.html %}
+<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if (IE 7)&!(IEMobile)]><html class="no-js lt-ie9 lt-ie8" lang="en"><![endif]-->
+<!--[if (IE 8)&!(IEMobile)]><html class="no-js lt-ie9" lang="en"><![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"><!--<![endif]-->
+<head>
+{% include _head.html %}
 </head>
 
 <body class="post">
@@ -9,22 +13,23 @@
 
 {% include _navigation.html %}
 
+
+
 <div id="main" role="main">
   <div class="article-author-side">
     {% include _author-bio.html %}
   </div>
 
-  <div class="content-with-toc">
-    <article class="post">
-      <div class="headline-wrap">
-        {% if page.link %}
-          <h1><a href="{{ page.link }}">{{ page.title }}</a></h1>
-        {% else %}
-          <h1><a href="{{ site.github.url }}{{ page.url }}" rel="bookmark" title="{{ page.title }}">{{ page.title }}</a></h1>
-        {% endif %}
-      </div>{% if page.tags %}
+  <article class="post">
+    <div class="headline-wrap">
+      {% if page.link %}
+        <h1><a href="{{ page.link }}">{{ page.title }}</a></h1>
+      {% else %}
+        <h1><a href="{{ site.github.url }}{{ page.url }}" rel="bookmark" title="{{ page.title }}">{{ page.title }}</a></h1>
+      {% endif %}
+    </div>{% if page.tags %}
       <h4>
-      [
+      Tags: [
       {% for tag in page.tags %}
       <a href="{{ site.baseurl }}/tags/#{{ tag | slugify }}" class="post-tag">{{ tag }}</a>
       {% endfor %}
@@ -32,104 +37,131 @@
       </h4>
       {%- endif -%}
       <div class="article-wrap">
-        {{ content }}
-        <hr />
-        <footer role="contentinfo">
-          {% if page.share != false %}{% include _social-share.html %}{% endif %}
-          <p class="byline"><strong>{{ page.title }}</strong> was published on <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>{% if page.modified %} and last modified on <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time>{% endif %}.</p>
-        </footer>
-      </div>{% if site.owner.disqus-shortname and page.comments == true %}
-      <section id="disqus_thread"></section>{% endif %}
-
-      {% assign firstTag = page.tags | first %}
-      {% assign relatedCount = 0 %}
-
-      <div class="related-posts">
-        <h3>related posts:</h3>
-        {% assign firstTag = page.tags | first %}
-        {% assign relatedCount = 0 %}
-        {% for related in site.tags[firstTag] %}
-        {% unless page.permalink == related.permalink %}
-        {% assign relatedCount = relatedCount | plus: 1 %}
-        <a href="{{ site.baseurl }}{{related.permalink}}">{{ related.title }}</a><br>
-        {% endunless %}
-
-        {% if relatedCount == 3 %}
-        {% break %}
-        {% endif %}
-        {% endfor %}
+      <div id="toc">
+        <strong>Contents</strong>
+        <ul id="toc-list">
+        </ul>
       </div>
-      </article>
-  </div><div class="toc-sidebar">
-    <div id="toc">
-      <strong>Contents</strong>
-      <ul id="toc-list">
-      </ul>
-    </div>
-  </div></div><div class="footer-wrap">
-  {% if site.related_posts.size > 0 %}
-  <div class="related-articles">
-  <h4>You might also enjoy <small class="pull-right">(<a href="{{ site.github.url }}/posts/">View all posts</a>)</small></h4>
-    <ul>
-    {% for post in site.related_posts limit:3 %}
-      <li><a href="{{ site.github.url }}{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a></li>
-    {% endfor %}
+
+      {{ content }}
+      <hr />
+      <footer role="contentinfo">
+        {% if page.share != false %}{% include _social-share.html %}{% endif %}
+        <p class="byline"><strong>{{ page.title }}</strong> was published on <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>{% if page.modified %} and last modified on <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time>{% endif %}.</p>
+      </footer>
+    </div>{% if site.owner.disqus-shortname and page.comments == true %}
+    <section id="disqus_thread"></section>{% endif %}
+
+  {% assign firstTag = page.tags | first %}
+{% assign relatedCount = 0 %}
+
+<div class="related-posts">
+  <h3>related posts:</h3>
+  {% assign firstTag = page.tags | first %}
+  {% assign relatedCount = 0 %}
+  {% for related in site.tags[firstTag] %}
+
+  {% unless page.permalink == related.permalink %}
+    {% assign relatedCount = relatedCount | plus: 1 %}
+    <a href="{{ site.baseurl }}{{related.permalink}}">{{ related.title }}</a><br>
+    {% endunless %}
+
+    {% if relatedCount == 3 %}
+      {% break %}<div id="main" role="main">
+  <div class="article-author-side">
+    {% include _author-bio.html %}
+  </div>
+
+  <article class="post">
+    <div class="headline-wrap">
+      {% if page.link %}
+        <h1><a href="{{ page.link }}">{{ page.title }}</a></h1>
+      {% else %}
+        <h1><a href="{{ site.github.url }}{{ page.url }}" rel="bookmark" title="{{ page.title }}">{{ page.title }}</a></h1>
+      {% endif %}
+    </div>{% if page.tags %}
+      <h4>
+      Tags: [
+      {% for tag in page.tags %}
+      <a href="{{ site.baseurl }}/tags/#{{ tag | slugify }}" class="post-tag">{{ tag }}</a>
+      {% endfor %}
+      ]
+      </h4>
+      {%- endif -%}
+      <div class="article-wrap">
+      <div id="toc">
+        <strong>Contents</strong>
+        <ul id="toc-list">
+        </ul>
+      </div>
+
+      {{ content }}
+      <hr />
+      <footer role="contentinfo">
+        {% if page.share != false %}{% include _social-share.html %}{% endif %}
+        <p class="byline"><strong>{{ page.title }}</strong> was published on <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>{% if page.modified %} and last modified on <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time>{% endif %}.</p>
+      </footer>
+    </div>{% if site.owner.disqus-shortname and page.comments == true %}
+    <section id="disqus_thread"></section>{% endif %}
+
+  {% assign firstTag = page.tags | first %}
+{% assign relatedCount = 0 %}
+
+<div class="related-posts">
+  <h3>related posts:</h3>
+  {% assign firstTag = page.tags | first %}
+  {% assign relatedCount = 0 %}
+  {% for related in site.tags[firstTag] %}
+
+  {% unless page.permalink == related.permalink %}
+    {% assign relatedCount = relatedCount | plus: 1 %}
+    <a href="{{ site.baseurl }}{{related.permalink}}">{{ related.title }}</a><br>
+    {% endunless %}
+
+    {% if relatedCount == 3 %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+</div>
+</article>
+</div>```
+    {% endif %}
+  {% endfor %}
+</div>
+</article>
+</div>```
+
+<div class="article-wrap">
+  <div id="toc">
+    <strong>Contents</strong>
+    <ul id="toc-list">
     </ul>
-    <hr />
-  </div>{% endif %}
-  <footer>
-    {% include _footer.html %}
-  </footer>
-</div>{% include _scripts.html %}
+  </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const postContent = document.querySelector('.article-wrap');
-    const tocList = document.getElementById('toc-list');
-    const tocSidebar = document.querySelector('.toc-sidebar'); // Get the sidebar
+  {{ content }}
 
-    if (!postContent || !tocList || !tocSidebar) {
-      return; // Exit if elements are not found
-    }
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const postContent = document.querySelector('.article-wrap');
+      const tocList = document.getElementById('toc-list');
+      const headings = postContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
-    const headings = postContent.querySelectorAll('h1, h2, h3'); // Adjust heading levels as needed
-    const tocEntries = [];
-
-    // Generate Table of Contents and collect entries
-    headings.forEach(heading => {
-      const id = heading.textContent.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-      heading.setAttribute('id', id);
-      const listItem = document.createElement('li');
-      const link = document.createElement('a');
-      link.textContent = heading.textContent;
-      link.href = '#' + id;
-      listItem.appendChild(link);
-      tocList.appendChild(listItem);
-      tocEntries.push({ element: heading, link: link });
-    });
-
-    // Function to highlight the active section
-    function highlightActiveToc() {
-      const scrollPosition = window.scrollY + window.innerHeight / 3; // Adjust offset as needed
-
-      tocEntries.forEach(entry => {
-        const headingTop = entry.element.offsetTop;
-        const headingBottom = headingTop + entry.element.offsetHeight;
-        entry.link.classList.remove('active');
-
-        if (scrollPosition >= headingTop && scrollPosition < headingBottom) {
-          entry.link.classList.add('active');
-        }
+      headings.forEach(heading => {
+        const id = heading.textContent.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+        heading.setAttribute('id', id);
+        const listItem = document.createElement('li');
+        const link = document.createElement('a');
+        link.textContent = heading.textContent;
+        link.href = '#' + id;
+        listItem.appendChild(link);
+        tocList.appendChild(listItem);
       });
-    }
+    });
+  </script>
 
-    // Listen for scroll events
-    window.addEventListener('scroll', highlightActiveToc);
-
-    // Initial highlight on load
-    highlightActiveToc();
-  });
-</script>
-
-</body>
-</html>
+  <hr />
+  <footer role="contentinfo">
+    {% if page.share != false %}{% include _social-share.html %}{% endif %}
+    <p class="byline"><strong>{{ page.title }}</strong> was published on <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>{% if page.modified %} and last modified on <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time>{% endif %}.</p>
+  </footer>
+</div>
