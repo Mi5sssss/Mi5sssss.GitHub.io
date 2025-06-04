@@ -20,6 +20,9 @@ Feel free to reach out -- I am always happy to chat!
    📍 Shenzhen, CN | 🗓️ 2018 – 2022
 
 ## 💼Experience
+**Platform & ASIC Research Intern** — *Nokia Bell Labs*  
+   📍 Murray Hill, NJ | 🗓️ 2025  
+
 **EDA Engineer Intern** — *BTD Technology*  
    📍 Shenzhen, CN | 🗓️ 2021 – 2022  
 
