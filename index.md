@@ -4,8 +4,9 @@ excerpt: "About Me..."
 menutitle: Home
 menuorder: 1
 ---
-**Welcome to my page!** I am a PhD student in the ECSE Department at Rensselaer Polytechnic Institute. I am fortunate to be advised by [Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
-I previously completed a Bachelor of Engineering with Honors in Southern University of Science and Technology, where I conducted research under [Quan Chen](https://sme.sustech.edu.cn/en/index/teacher/neiye/id/40.html).
+**Welcome!** I am a PhD candidate in the ECSE Department at Rensselaer Polytechnic Institute, advised by [Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
+I earned my BEng in Southern University of Science and Technology.
+
 
 My research focuses on optimizing memory architectures, primarily DRAM and SSDs, to enhance hardware performance and software efficiency. I explore solutions in data processing and AI, aiming to contribute to more efficient and sustainable computing systems.
 
