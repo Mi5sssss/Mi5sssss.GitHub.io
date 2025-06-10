@@ -5,7 +5,7 @@ menutitle: Home
 menuorder: 1
 ---
 **Welcome!** I am a PhD candidate in the ECSE Department at Rensselaer Polytechnic Institute, advised by [Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
-I earned my BEng in Southern University of Science and Technology.
+I earned my BS in Southern University of Science and Technology.
 
 
 My research focuses on optimizing memory architectures, primarily DRAM and SSDs, to enhance hardware performance and software efficiency. I explore solutions in data processing and AI, aiming to contribute to more efficient and sustainable computing systems.
@@ -14,10 +14,10 @@ Feel free to reach out -- I am always happy to chat!
 📧 Email: xier2 [at] rpi (dot) edu
 
 ## 🏫 Education
-**Ph.D. Candidate in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
+**PhD Candidate in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
    📍 Troy, NY | 🗓️ 2022 – Present
 
-**B.Eng in Microelectronics Science and Engineering** — *Southern University of Science and Technology*  
+**BS in Microelectronics Science and Engineering** — *Southern University of Science and Technology*  
    📍 Shenzhen, CN | 🗓️ 2018 – 2022
 
 ## 💼Experience
