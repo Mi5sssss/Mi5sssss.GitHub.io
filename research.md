@@ -9,6 +9,8 @@ menuorder: 3
 
 - Computer architecture and system design
 
+![My research roadmap](doc/roadmap.png)
+
 <!-- The acceleration of large Memristor Crossbar Arrays (MCAs) is important for the SPICE of crossbar structure. We have built a preconditioner for the existing architecture through Modified Nodal Analysis Equations.
 
 ![xie_intro_2021_Page_09](https://cdn.jsdelivr.net/gh/Mi5sssss/blog_image@main/RRAM-Simulation/xie_intro_2021_Page_09.2d0dj2bb0dog.jpg)
