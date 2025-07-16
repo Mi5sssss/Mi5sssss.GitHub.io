@@ -5,6 +5,7 @@ menutitle: Publications
 menuorder: 2
 excerpt: "Recent Publications"
 ---
+[8] **Rui Xie**, Asad Ul Haq, Yunhua Fang, Linsen Ma, Sanchari Sen, Swagath Venkataramani, Liu Liu, Tong Zhang, "Breaking the HBM Bit Cost Barrier: Domain-Specific ECC for AI Inference Infrastructure", arXiv preprint arXiv:2507.02654 ([paper](https://arxiv.org/abs/2507.02654))
 
 [7] **Rui Xie**, Asad Ul Haq, Linsen Ma, Yunhua Fang, Zirak Burzin Engineer, Liu Liu, Tong Zhang, "Reimagining Memory Access for LLM Inference: Compression-Aware Memory Controller Design", arXiv preprint ([paper](https://arxiv.org/abs/2503.18869))
 
