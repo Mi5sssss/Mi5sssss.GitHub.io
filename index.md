@@ -10,6 +10,8 @@ I earned my BS in Southern University of Science and Technology.
 
 My research focuses on optimizing memory architectures, primarily DRAM and SSDs, to enhance hardware performance and software efficiency. I explore solutions in data processing and AI, aiming to contribute to more efficient and sustainable computing systems.
 
+![My research roadmap](doc/roadmap.png)
+
 Feel free to reach out -- I am always happy to chat!
 📧 Email: xier2 [at] rpi (dot) edu
 
