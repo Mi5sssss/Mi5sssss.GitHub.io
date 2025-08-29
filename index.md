@@ -7,7 +7,6 @@ menuorder: 1
 **Welcome!** I am a PhD candidate in the ECSE Department at Rensselaer Polytechnic Institute, advised by [Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
 I earned my BS in Southern University of Science and Technology.
 
-
 My research focuses on optimizing memory architectures, primarily DRAM and SSDs, to enhance hardware performance and software efficiency. I explore solutions in data processing and AI, aiming to contribute to more efficient and sustainable computing systems.
 
 ![My research roadmap](doc/roadmap.png)
