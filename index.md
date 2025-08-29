@@ -67,8 +67,9 @@ Feel free to reach out -- I am always happy to chat!
 
 ## 🏆 Honors and Awards
 
-1. **Outstanding Innovation Award 2nd Place Winner**, Nokia Bell Labs, - 2025
-2. **DAC Young Fellow Award**, 61th Design Automation Conference, - *2024*
+1. **Outstanding Innovation Award 2nd Place Winner**, Nokia Bell Labs - *2025*
+   
+2. **DAC Young Fellow Award**, 61th Design Automation Conference - *2024*
    
 3. **Excellent Graduate Award**, Southern University of Science and Technology — *2022*
    
