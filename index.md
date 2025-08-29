@@ -11,7 +11,7 @@ My research focuses on optimizing memory architectures, primarily DRAM and SSDs,
 
 ![My research roadmap](doc/roadmap.png)
 
-Feel free to reach out -- I am always happy to chat!
+Feel free to reach out. I am always happy to chat!
 📧 Email: xier2 [at] rpi (dot) edu
 
 ## 🏫 Education
