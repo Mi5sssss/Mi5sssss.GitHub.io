@@ -29,16 +29,19 @@ excerpt: "Recent Publications"
   </noscript>
   </div>
 
-<script src="{{ site.github.url }}/assets/js/publications.js"></script>
+<script src="/assets/js/publications.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     // Load a larger list on the dedicated Publications page
-    loadScholarPublications({
-      userId: 'kFFMzkQAAAAJ',
-      targetId: 'publications-list',
-      maxItems: 50
-    });
+    if (typeof loadScholarPublications === 'function') {
+      loadScholarPublications({
+        userId: 'kFFMzkQAAAAJ',
+        targetId: 'publications-list',
+        maxItems: 50
+      });
+    } else {
+      var t = document.getElementById('publications-list');
+      if (t) t.innerHTML = '<p>Unable to load publications. <a href="https://scholar.google.com/citations?user=kFFMzkQAAAAJ&hl=en&sortby=pubdate" target="_blank" rel="noopener">View on Google Scholar</a>.</p>';
+    }
   });
 </script>
-
-

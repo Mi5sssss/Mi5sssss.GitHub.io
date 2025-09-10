@@ -65,15 +65,20 @@ Feel free to reach out. I am always happy to chat!
 
 ## 📕 Publications
 
-<script src="{{ site.github.url }}/assets/js/publications.js"></script>
+<script src="/assets/js/publications.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     // Load latest publications from Google Scholar at runtime
-    loadScholarPublications({
-      userId: 'kFFMzkQAAAAJ',
-      targetId: 'publications-list',
-      maxItems: 10
-    });
+    if (typeof loadScholarPublications === 'function') {
+      loadScholarPublications({
+        userId: 'kFFMzkQAAAAJ',
+        targetId: 'publications-list',
+        maxItems: 10
+      });
+    } else {
+      var t = document.getElementById('publications-list');
+      if (t) t.innerHTML = '<p>Unable to load publications. <a href="https://scholar.google.com/citations?user=kFFMzkQAAAAJ&hl=en&sortby=pubdate" target="_blank" rel="noopener">View on Google Scholar</a>.</p>';
+    }
   });
   </script>
 [(More)](publications.md)

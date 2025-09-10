@@ -64,7 +64,7 @@
   async function fetchScholarText(userId) {
     const scholarUrl = 'https://scholar.google.com/citations?hl=en&user=' + encodeURIComponent(userId) + '&view_op=list_works&sortby=pubdate';
     // Use Jina AI Reader to bypass CORS and get plaintext
-    const relay = 'https://r.jina.ai/http://scholar.google.com/citations?hl=en&user=' + encodeURIComponent(userId) + '&view_op=list_works&sortby=pubdate';
+    const relay = 'https://r.jina.ai/https://scholar.google.com/citations?hl=en&user=' + encodeURIComponent(userId) + '&view_op=list_works&sortby=pubdate';
     const resp = await fetch(relay, { mode: 'cors' });
     if (!resp.ok) throw new Error('Fetch failed: ' + resp.status);
     return resp.text();
@@ -118,4 +118,3 @@
   // Expose globally
   window.loadScholarPublications = loadScholarPublications;
 })();
-
