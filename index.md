@@ -41,7 +41,7 @@ Feel free to reach out. I am always happy to chat!
 * **11/2021** An oral report at IEEE ICTA 2021 (Zhuhai) (Online).
 * **09/2021** A work was accepted by [IEEE ICTA 2021](http://www.ieee-icta.net/) -->
 
-<!-- ## 📕Publications
+## 📕Publications
 
 1. **Rui Xie**, Asad Ul Haq, Yunhua Fang, Linsen Ma, Sanchari Sen, Swagath Venkataramani, Liu Liu, Tong Zhang, "Breaking the HBM Bit Cost Barrier: Domain-Specific ECC for AI Inference Infrastructure", arXiv preprint arXiv:2507.02654 ([paper](https://arxiv.org/abs/2507.02654))
    
@@ -61,9 +61,9 @@ Feel free to reach out. I am always happy to chat!
 
 9.  Quan Chen, Dayi Fan, **Rui Xie**, Mingyang Song, "Construction and optimization of neural networks for memristor arrays based on circuit simulation". CN 202110673101.5 ([patent](https://patents.google.com/patent/CN113570048B))
 
-[(More)](publications.md) -->
+[(More)](publications.md)
 
-## 📕 Publications
+<!-- ## 📕 Publications
 
 <script src="/assets/js/publications.js"></script>
 <script>
@@ -81,7 +81,7 @@ Feel free to reach out. I am always happy to chat!
     }
   });
   </script>
-[(More)](publications.md)
+[(More)](publications.md) -->
 
 ## 🏆 Honors and Awards
 
