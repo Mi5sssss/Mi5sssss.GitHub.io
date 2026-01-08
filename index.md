@@ -16,20 +16,20 @@ Feel free to reach out. I am always happy to chat!
 
 ## 🏫 Education
 **PhD Candidate in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
-   📍 Troy, NY | 🗓️ 2022 – Present
+   📍 Troy, NY, USA | 🗓️ 2022 – Present
 
 **BE in Microelectronics Science and Engineering** — *Southern University of Science and Technology*  
-   📍 Shenzhen, CN | 🗓️ 2018 – 2022
+   📍 Shenzhen, China | 🗓️ 2018 – 2022
 
 ## 💼Experience
 **Platform & ASIC Research Intern** — *Nokia Bell Labs*  
-   📍 Murray Hill, NJ | 🗓️ 2025  
+   📍 Murray Hill, NJ, USA | 🗓️ 2025  
 
 **EDA Engineer Intern** — *BTD Technology*  
-   📍 Shenzhen, CN | 🗓️ 2021 – 2022  
+   📍 Shenzhen, China | 🗓️ 2021 – 2022  
 
 **Research Intern** — *University of Hong Kong*  
-   📍 Hong Kong, CN | 🗓️ 2020
+   📍 Hong Kong SAR, China | 🗓️ 2020
 
 **Visiting Student** — *University of Oxford*  
    📍 Oxford, UK | 🗓️ 2019
@@ -62,6 +62,7 @@ Feel free to reach out. I am always happy to chat!
 9.  Quan Chen, Dayi Fan, **Rui Xie**, Mingyang Song, "Construction and optimization of neural networks for memristor arrays based on circuit simulation". CN 202110673101.5 ([patent](https://patents.google.com/patent/CN113570048B))
 
 [(More)](publications.md)
+
 
 <!-- ## 📕 Publications
 
