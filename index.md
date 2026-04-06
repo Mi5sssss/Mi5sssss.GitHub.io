@@ -14,6 +14,12 @@ My research focuses on optimizing memory architectures, primarily DRAM and SSDs,
 Feel free to reach out. I am always happy to chat!
 📧 Email: xier2 [at] rpi (dot) edu
 
+## Featured Interactive
+
+I built an interactive explorer for tiered LLM memory placement and effective decode rooflines.
+
+[Open the LLM Memory Roofline Explorer](llm-memory-roofline/)
+
 ## 🏫 Education
 **PhD Candidate in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
    📍 Troy, NY, USA | 🗓️ 2022 – Present
