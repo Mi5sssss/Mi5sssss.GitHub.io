@@ -198,22 +198,117 @@
     }).join("");
   }
 
+  function svgBarChartHtml(config) {
+    var items = config.items || [];
+    if (!items.length) {
+      return '<p class="lmr-note">' + escapeHtml(config.emptyText || "No data.") + "</p>";
+    }
+
+    var width = 520;
+    var height = 300;
+    var margin = { top: 20, right: 18, bottom: 88, left: 62 };
+    var innerWidth = width - margin.left - margin.right;
+    var innerHeight = height - margin.top - margin.bottom;
+    var maxValue = items.reduce(function (max, item) { return Math.max(max, item.value, item.baseValue || 0); }, 0);
+    maxValue = maxValue > 0 ? maxValue : 1;
+    var step = innerWidth / items.length;
+    var barWidth = Math.min(58, step * 0.58);
+    var ticks = 4;
+    var tickLabels = [];
+    var gridLines = [];
+    var bars = [];
+    var baseBars = [];
+    var labels = [];
+
+    for (var i = 0; i <= ticks; i += 1) {
+      var tickValue = maxValue * (i / ticks);
+      var y = margin.top + innerHeight - (tickValue / maxValue) * innerHeight;
+      gridLines.push('<line x1="' + margin.left + '" y1="' + y.toFixed(1) + '" x2="' + (margin.left + innerWidth) + '" y2="' + y.toFixed(1) + '" class="lmr-svg-grid-line"></line>');
+      tickLabels.push(
+        '<text x="' + (margin.left - 10) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" class="lmr-svg-axis-label">' +
+        escapeHtml(config.tickFormat ? config.tickFormat(tickValue) : String(tickValue)) +
+        "</text>"
+      );
+    }
+
+    items.forEach(function (item, index) {
+      var centerX = margin.left + step * index + step / 2;
+      var x = centerX - barWidth / 2;
+      var valueHeight = (item.value / maxValue) * innerHeight;
+      var valueY = margin.top + innerHeight - valueHeight;
+
+      if (typeof item.baseValue === "number" && item.baseValue > 0) {
+        var baseHeight = (item.baseValue / maxValue) * innerHeight;
+        var baseY = margin.top + innerHeight - baseHeight;
+        baseBars.push(
+          '<rect x="' + x.toFixed(1) + '" y="' + baseY.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + baseHeight.toFixed(1) + '" rx="8" class="lmr-svg-bar-base"></rect>'
+        );
+      }
+
+      bars.push(
+        '<rect x="' + x.toFixed(1) + '" y="' + valueY.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + valueHeight.toFixed(1) + '" rx="8" fill="' + escapeHtml(item.color || config.color || "#2563eb") + '"></rect>'
+      );
+
+      labels.push(
+        '<text x="' + centerX.toFixed(1) + '" y="' + (margin.top + innerHeight + 18) + '" text-anchor="middle" class="lmr-svg-axis-label">' +
+        escapeHtml(item.label) +
+        '</text>' +
+        '<text x="' + centerX.toFixed(1) + '" y="' + (margin.top + innerHeight + 36) + '" text-anchor="middle" class="lmr-svg-value-label">' +
+        escapeHtml(item.valueLabel) +
+        "</text>"
+      );
+    });
+
+    return '' +
+      '<div class="lmr-svg-chart-wrap">' +
+        '<svg class="lmr-svg-chart" viewBox="0 0 ' + width + " " + height + '" role="img" aria-label="' + escapeHtml(config.title || "Bar chart") + '">' +
+          '<line x1="' + margin.left + '" y1="' + (margin.top + innerHeight) + '" x2="' + (margin.left + innerWidth) + '" y2="' + (margin.top + innerHeight) + '" class="lmr-svg-axis-line"></line>' +
+          gridLines.join("") +
+          tickLabels.join("") +
+          baseBars.join("") +
+          bars.join("") +
+          labels.join("") +
+        "</svg>" +
+      "</div>";
+  }
+
   function capacityChartHtml(derived) {
-    return derived.tiers.map(function (tier) {
-      var used = derived.tierUsage[tier.key] || 0;
-      var percent = tier.capacityGiB > 0 ? Math.min(100, (used / tier.capacityGiB) * 100) : 0;
-      return '<div class="lmr-bar-row"><div class="lmr-bar-head"><span>' + escapeHtml(tier.label) + '</span><span>' + formatGiB(used) + ' / ' + formatGiB(tier.capacityGiB) + '</span></div><div class="lmr-bar-track"><div class="lmr-bar-fill"></div><div class="lmr-bar-overlay" style="width:' + percent.toFixed(2) + '%"></div></div></div>';
-    }).join("");
+    return svgBarChartHtml({
+      title: "Capacity by Tier",
+      color: "#2563eb",
+      tickFormat: function (value) { return formatNum(value); },
+      items: derived.tiers.map(function (tier) {
+        var used = derived.tierUsage[tier.key] || 0;
+        return {
+          label: tier.label,
+          value: used,
+          baseValue: tier.capacityGiB,
+          valueLabel: formatNum(used) + " / " + formatNum(tier.capacityGiB) + " GiB"
+        };
+      })
+    });
   }
 
   function trafficChartHtml(derived) {
-    var trafficEntries = derived.tiers.map(function (tier) { return { label: tier.label, traffic: derived.trafficByTier[tier.key] || 0 }; }).filter(function (item) { return item.traffic > 0; });
-    if (!trafficEntries.length) return '<p class="lmr-note">No hot per-token traffic is assigned to slower tiers in this configuration.</p>';
-    var maxTraffic = trafficEntries.reduce(function (max, item) { return Math.max(max, item.traffic); }, 0);
-    return trafficEntries.map(function (item) {
-      var percent = maxTraffic > 0 ? (item.traffic / maxTraffic) * 100 : 0;
-      return '<div class="lmr-bar-row"><div class="lmr-bar-head"><span>' + escapeHtml(item.label) + '</span><span>' + item.traffic.toFixed(2) + ' GiB/token</span></div><div class="lmr-bar-track"><div class="lmr-bar-overlay traffic" style="width:' + percent.toFixed(2) + '%"></div></div></div>';
-    }).join("");
+    var trafficEntries = derived.tiers.map(function (tier) {
+      return { label: tier.label, traffic: derived.trafficByTier[tier.key] || 0 };
+    }).filter(function (item) {
+      return item.traffic > 0;
+    });
+
+    return svgBarChartHtml({
+      title: "Per-Token Traffic by Tier",
+      color: "#d6001c",
+      tickFormat: function (value) { return value.toFixed(1); },
+      emptyText: "No hot per-token traffic is assigned to slower tiers in this configuration.",
+      items: trafficEntries.map(function (item) {
+        return {
+          label: item.label,
+          value: item.traffic,
+          valueLabel: item.traffic.toFixed(2) + " GiB/token"
+        };
+      })
+    });
   }
 
   function placementHtml(derived) {
@@ -252,7 +347,7 @@
     var model = MODELS[state.modelKey];
     var accelerator = ACCELERATORS[state.acceleratorKey];
     var activeTabContent = state.activeTab === "placement" ? placementHtml(derived) : state.activeTab === "roofline" ? rooflineHtml(derived) : rulesHtml();
-    root.innerHTML = '<section class="lmr-shell"><div class="lmr-topbar"><a class="lmr-home-link" href="../">Back to Homepage</a></div><div class="lmr-intro"><h1>LLM Memory Hierarchy and Roofline Explorer</h1><p>This page is fully standalone. It does not use the site template layout, navigation, sidebar, or footer. All sliders, toggles, and calculations run directly in the browser.</p></div><div class="lmr-layout"><aside class="lmr-panel"><h2>Controls</h2><div class="lmr-control-group"><label for="modelKey">Model</label><select class="lmr-select" id="modelKey">' + optionList(MODELS, state.modelKey, "name") + '</select><p>' + escapeHtml(model.notes) + '</p></div><div class="lmr-control-group"><label for="acceleratorKey">Accelerator</label><select class="lmr-select" id="acceleratorKey">' + optionList(ACCELERATORS, state.acceleratorKey, "name") + '</select></div><div class="lmr-control-group"><div class="lmr-range-row"><span>Accelerator Count</span><strong>' + state.gpuCount + '</strong></div><input class="lmr-range" id="gpuCount" type="range" min="1" max="16" step="1" value="' + state.gpuCount + '"></div><div class="lmr-control-group lmr-box"><div class="lmr-toggle"><span class="lmr-label">Pool Peer HBM Over ' + escapeHtml(accelerator.peerName) + '</span><input id="poolPeerHbm" type="checkbox"' + (state.poolPeerHbm ? " checked" : "") + (state.gpuCount === 1 ? " disabled" : "") + '></div><p>When enabled, the model may shard across multiple accelerators. Peer memory increases capacity, but remote accesses are limited by the interconnect, not by local HBM bandwidth.</p></div><div class="lmr-grid-2"><div class="lmr-control-group"><label for="weightBits">Weight Precision</label><select class="lmr-select" id="weightBits">' + scalarOptionList(["16", "8", "4"], state.weightBits, { "16": "bf16 / fp16", "8": "fp8 / int8", "4": "int4" }) + '</select></div><div class="lmr-control-group"><label for="kvBits">KV Precision</label><select class="lmr-select" id="kvBits">' + scalarOptionList(["16", "8"], state.kvBits, { "16": "bf16 / fp16", "8": "fp8 / int8" }) + '</select></div></div><div class="lmr-control-group"><label for="workloadKey">Workload Preset</label><select class="lmr-select" id="workloadKey">' + optionList(WORKLOADS, state.workloadKey, "label") + '</select></div><div class="lmr-control-group"><div class="lmr-range-row"><span>Base Prompt Tokens</span><strong>' + state.basePrompt.toLocaleString() + '</strong></div><input class="lmr-range" id="basePrompt" type="range" min="1000" max="128000" step="1000" value="' + state.basePrompt + '"><p>Effective live tokens = base prompt + workload overhead = ' + derived.liveTokens.toLocaleString() + ' tokens</p></div><div class="lmr-control-group"><div class="lmr-range-row"><span>Concurrent Sessions</span><strong>' + state.sessions + '</strong></div><input class="lmr-range" id="sessions" type="range" min="1" max="16" step="1" value="' + state.sessions + '"><p>Effective session count respects minimum workload branch count = ' + derived.effectiveSessions + '</p></div><div class="lmr-control-group"><label for="placementPolicy">Placement Policy</label><select class="lmr-select" id="placementPolicy">' + scalarOptionList(["weights_first", "kv_first"], state.placementPolicy, { weights_first: "Place Weights First", kv_first: "Place KV First" }) + '</select></div><div class="lmr-control-group lmr-box"><div class="lmr-toggle"><span class="lmr-label">Override Active Params</span><input id="customActive" type="checkbox"' + (state.customActive ? " checked" : "") + '></div><input class="lmr-input" id="activeParamsText" type="text" value="' + escapeHtml(state.activeParamsText) + '"' + (state.customActive ? "" : " disabled") + '><p>Use this to test routing sparsity, speculative decode, or partial-activation experiments.</p></div><div class="lmr-control-group"><label for="extraScratchGiB">Extra Scratch / Runtime Overhead (GiB)</label><input class="lmr-input" id="extraScratchGiB" type="text" value="' + escapeHtml(state.extraScratchGiB) + '"></div></aside><section class="lmr-main"><div class="lmr-grid-4"><div class="lmr-card lmr-stat-card"><div class="lmr-stat-label">Weights</div><div class="lmr-stat-value">' + formatGiB(derived.weightsGiB) + '</div></div><div class="lmr-card lmr-stat-card"><div class="lmr-stat-label">KV Per Token</div><div class="lmr-stat-value">' + formatKiB(derived.kvTokenBytes / 1024) + '</div></div><div class="lmr-card lmr-stat-card"><div class="lmr-stat-label">Total KV Across Sessions</div><div class="lmr-stat-value">' + formatGiB(derived.kvTotalGiB) + '</div></div><div class="lmr-card lmr-stat-card"><div class="lmr-stat-label">Effective Decode Ceiling</div><div class="lmr-stat-value">' + formatNum(derived.effectiveTokPerSec) + ' tok/s</div></div></div><div class="lmr-card"><h2>Tiered Memory System</h2><div class="lmr-mini-grid"><div class="lmr-mini-card"><div class="lmr-mini-label">Local HBM</div><div class="lmr-tier-value">' + formatNum(derived.localHbmCapacityGiB) + ' GiB</div></div><div class="lmr-mini-card"><div class="lmr-mini-label">Peer HBM Pool</div><div class="lmr-tier-value">' + formatNum(derived.peerHbmCapacityGiB) + ' GiB</div></div><div class="lmr-mini-card"><div class="lmr-mini-label">Total Demand</div><div class="lmr-tier-value">' + formatGiB(derived.totalDemandGiB) + '</div></div><div class="lmr-result-card ' + derived.fitClass + '"><div class="lmr-mini-label">Placement Result</div><div class="lmr-result-value">' + fitLabel(derived.fitClass) + '</div></div><div class="lmr-mini-card"><div class="lmr-mini-label">Unplaced</div><div class="lmr-tier-value">' + formatGiB(derived.unplacedGiB) + '</div></div></div><div class="lmr-chart-grid"><div class="lmr-chart-card"><h3>Capacity by Tier</h3><div class="lmr-bar-list">' + capacityChartHtml(derived) + '</div></div><div class="lmr-chart-card"><h3>Per-Token Traffic by Tier</h3><div class="lmr-bar-list">' + trafficChartHtml(derived) + '</div></div></div></div><div class="lmr-tier-section"><div class="lmr-tier-card"><h2>CXL.mem</h2><div class="lmr-control-group"><div class="lmr-toggle"><span class="lmr-label">Enable</span><input id="enableCxlTier" type="checkbox"' + (state.enableCxlTier ? " checked" : "") + '></div></div><div class="lmr-control-group"><label for="cxlCapacity">Capacity (GiB)</label><input class="lmr-input" id="cxlCapacity" type="text" value="' + escapeHtml(state.cxlCapacity) + '"' + (state.enableCxlTier ? "" : " disabled") + '></div><div class="lmr-control-group"><label for="cxlBandwidth">Bandwidth (GiB/s)</label><input class="lmr-input" id="cxlBandwidth" type="text" value="' + escapeHtml(state.cxlBandwidth) + '"' + (state.enableCxlTier ? "" : " disabled") + '></div></div><div class="lmr-tier-card"><h2>CPU Memory</h2><div class="lmr-control-group"><div class="lmr-toggle"><span class="lmr-label">Enable</span><input id="enableCpuTier" type="checkbox"' + (state.enableCpuTier ? " checked" : "") + '></div></div><div class="lmr-control-group"><label for="cpuCapacity">Capacity (GiB)</label><input class="lmr-input" id="cpuCapacity" type="text" value="' + escapeHtml(state.cpuCapacity) + '"' + (state.enableCpuTier ? "" : " disabled") + '></div><div class="lmr-control-group"><label for="cpuBandwidth">Bandwidth (GiB/s)</label><input class="lmr-input" id="cpuBandwidth" type="text" value="' + escapeHtml(state.cpuBandwidth) + '"' + (state.enableCpuTier ? "" : " disabled") + '></div></div><div class="lmr-tier-card"><h2>SSD Backup</h2><div class="lmr-control-group"><div class="lmr-toggle"><span class="lmr-label">Enable</span><input id="enableSsdTier" type="checkbox"' + (state.enableSsdTier ? " checked" : "") + '></div></div><div class="lmr-control-group"><label for="ssdCapacity">Capacity (GiB)</label><input class="lmr-input" id="ssdCapacity" type="text" value="' + escapeHtml(state.ssdCapacity) + '"' + (state.enableSsdTier ? "" : " disabled") + '></div><div class="lmr-control-group"><label for="ssdBandwidth">Bandwidth (GiB/s)</label><input class="lmr-input" id="ssdBandwidth" type="text" value="' + escapeHtml(state.ssdBandwidth) + '"' + (state.enableSsdTier ? "" : " disabled") + '></div></div></div><div class="lmr-tabs"><button class="lmr-tab' + (state.activeTab === "placement" ? " active" : "") + '" data-tab="placement" type="button">Placement</button><button class="lmr-tab' + (state.activeTab === "roofline" ? " active" : "") + '" data-tab="roofline" type="button">Roofline</button><button class="lmr-tab' + (state.activeTab === "rules" ? " active" : "") + '" data-tab="rules" type="button">Rule Shifts</button></div><div class="lmr-tab-panel">' + activeTabContent + "</div></section></div></section>";
+    root.innerHTML = '<section class="lmr-shell"><div class="lmr-topbar"><a class="lmr-home-link" href="../">Back to Homepage</a></div><div class="lmr-intro"><h1>LLM Memory Hierarchy and Roofline Explorer</h1><p>Choose accelerator count, peer memory over NVLink-class links, CXL.mem, CPU memory, and SSD backup. The page places weights, KV cache, and scratch across tiers and estimates how that changes fit and decode speed.</p></div><div class="lmr-layout"><aside class="lmr-panel"><h2>Controls</h2><div class="lmr-control-group"><label for="modelKey">Model</label><select class="lmr-select" id="modelKey">' + optionList(MODELS, state.modelKey, "name") + '</select><p>' + escapeHtml(model.notes) + '</p></div><div class="lmr-control-group"><label for="acceleratorKey">Accelerator</label><select class="lmr-select" id="acceleratorKey">' + optionList(ACCELERATORS, state.acceleratorKey, "name") + '</select></div><div class="lmr-control-group"><div class="lmr-range-row"><span>Accelerator Count</span><strong>' + state.gpuCount + '</strong></div><input class="lmr-range" id="gpuCount" type="range" min="1" max="16" step="1" value="' + state.gpuCount + '"></div><div class="lmr-control-group lmr-box"><div class="lmr-toggle"><span class="lmr-label">Pool Peer HBM Over ' + escapeHtml(accelerator.peerName) + '</span><input id="poolPeerHbm" type="checkbox"' + (state.poolPeerHbm ? " checked" : "") + (state.gpuCount === 1 ? " disabled" : "") + '></div><p>When enabled, the model may shard across multiple accelerators. Peer memory increases capacity, but remote accesses are limited by the interconnect, not by local HBM bandwidth.</p></div><div class="lmr-grid-2"><div class="lmr-control-group"><label for="weightBits">Weight Precision</label><select class="lmr-select" id="weightBits">' + scalarOptionList(["16", "8", "4"], state.weightBits, { "16": "bf16 / fp16", "8": "fp8 / int8", "4": "int4" }) + '</select></div><div class="lmr-control-group"><label for="kvBits">KV Precision</label><select class="lmr-select" id="kvBits">' + scalarOptionList(["16", "8"], state.kvBits, { "16": "bf16 / fp16", "8": "fp8 / int8" }) + '</select></div></div><div class="lmr-control-group"><label for="workloadKey">Workload Preset</label><select class="lmr-select" id="workloadKey">' + optionList(WORKLOADS, state.workloadKey, "label") + '</select></div><div class="lmr-control-group"><div class="lmr-range-row"><span>Base Prompt Tokens</span><strong>' + state.basePrompt.toLocaleString() + '</strong></div><input class="lmr-range" id="basePrompt" type="range" min="1000" max="128000" step="1000" value="' + state.basePrompt + '"><p>Effective live tokens = base prompt + workload overhead = ' + derived.liveTokens.toLocaleString() + ' tokens</p></div><div class="lmr-control-group"><div class="lmr-range-row"><span>Concurrent Sessions</span><strong>' + state.sessions + '</strong></div><input class="lmr-range" id="sessions" type="range" min="1" max="16" step="1" value="' + state.sessions + '"><p>Effective session count respects minimum workload branch count = ' + derived.effectiveSessions + '</p></div><div class="lmr-control-group"><label for="placementPolicy">Placement Policy</label><select class="lmr-select" id="placementPolicy">' + scalarOptionList(["weights_first", "kv_first"], state.placementPolicy, { weights_first: "Place Weights First", kv_first: "Place KV First" }) + '</select></div><div class="lmr-control-group lmr-box"><div class="lmr-toggle"><span class="lmr-label">Override Active Params</span><input id="customActive" type="checkbox"' + (state.customActive ? " checked" : "") + '></div><input class="lmr-input" id="activeParamsText" type="text" value="' + escapeHtml(state.activeParamsText) + '"' + (state.customActive ? "" : " disabled") + '><p>Use this to test routing sparsity, speculative decode, or partial-activation experiments.</p></div><div class="lmr-control-group"><label for="extraScratchGiB">Extra Scratch / Runtime Overhead (GiB)</label><input class="lmr-input" id="extraScratchGiB" type="text" value="' + escapeHtml(state.extraScratchGiB) + '"></div></aside><section class="lmr-main"><div class="lmr-grid-4"><div class="lmr-card lmr-stat-card"><div class="lmr-stat-label">Weights</div><div class="lmr-stat-value">' + formatGiB(derived.weightsGiB) + '</div></div><div class="lmr-card lmr-stat-card"><div class="lmr-stat-label">KV Per Token</div><div class="lmr-stat-value">' + formatKiB(derived.kvTokenBytes / 1024) + '</div></div><div class="lmr-card lmr-stat-card"><div class="lmr-stat-label">Total KV Across Sessions</div><div class="lmr-stat-value">' + formatGiB(derived.kvTotalGiB) + '</div></div><div class="lmr-card lmr-stat-card"><div class="lmr-stat-label">Effective Decode Ceiling</div><div class="lmr-stat-value">' + formatNum(derived.effectiveTokPerSec) + ' tok/s</div></div></div><div class="lmr-card"><h2>Tiered Memory System</h2><div class="lmr-mini-grid"><div class="lmr-mini-card"><div class="lmr-mini-label">Local HBM</div><div class="lmr-tier-value">' + formatNum(derived.localHbmCapacityGiB) + ' GiB</div></div><div class="lmr-mini-card"><div class="lmr-mini-label">Peer HBM Pool</div><div class="lmr-tier-value">' + formatNum(derived.peerHbmCapacityGiB) + ' GiB</div></div><div class="lmr-mini-card"><div class="lmr-mini-label">Total Demand</div><div class="lmr-tier-value">' + formatGiB(derived.totalDemandGiB) + '</div></div><div class="lmr-result-card ' + derived.fitClass + '"><div class="lmr-mini-label">Placement Result</div><div class="lmr-result-value">' + fitLabel(derived.fitClass) + '</div></div><div class="lmr-mini-card"><div class="lmr-mini-label">Unplaced</div><div class="lmr-tier-value">' + formatGiB(derived.unplacedGiB) + '</div></div></div><div class="lmr-chart-grid"><div class="lmr-chart-card"><h3>Capacity by Tier</h3>' + capacityChartHtml(derived) + '</div><div class="lmr-chart-card"><h3>Per-Token Traffic by Tier</h3>' + trafficChartHtml(derived) + '</div></div></div><div class="lmr-tier-section"><div class="lmr-tier-card"><h2>CXL.mem</h2><div class="lmr-control-group"><div class="lmr-toggle"><span class="lmr-label">Enable</span><input id="enableCxlTier" type="checkbox"' + (state.enableCxlTier ? " checked" : "") + '></div></div><div class="lmr-control-group"><label for="cxlCapacity">Capacity (GiB)</label><input class="lmr-input" id="cxlCapacity" type="text" value="' + escapeHtml(state.cxlCapacity) + '"' + (state.enableCxlTier ? "" : " disabled") + '></div><div class="lmr-control-group"><label for="cxlBandwidth">Bandwidth (GiB/s)</label><input class="lmr-input" id="cxlBandwidth" type="text" value="' + escapeHtml(state.cxlBandwidth) + '"' + (state.enableCxlTier ? "" : " disabled") + '></div></div><div class="lmr-tier-card"><h2>CPU Memory</h2><div class="lmr-control-group"><div class="lmr-toggle"><span class="lmr-label">Enable</span><input id="enableCpuTier" type="checkbox"' + (state.enableCpuTier ? " checked" : "") + '></div></div><div class="lmr-control-group"><label for="cpuCapacity">Capacity (GiB)</label><input class="lmr-input" id="cpuCapacity" type="text" value="' + escapeHtml(state.cpuCapacity) + '"' + (state.enableCpuTier ? "" : " disabled") + '></div><div class="lmr-control-group"><label for="cpuBandwidth">Bandwidth (GiB/s)</label><input class="lmr-input" id="cpuBandwidth" type="text" value="' + escapeHtml(state.cpuBandwidth) + '"' + (state.enableCpuTier ? "" : " disabled") + '></div></div><div class="lmr-tier-card"><h2>SSD Backup</h2><div class="lmr-control-group"><div class="lmr-toggle"><span class="lmr-label">Enable</span><input id="enableSsdTier" type="checkbox"' + (state.enableSsdTier ? " checked" : "") + '></div></div><div class="lmr-control-group"><label for="ssdCapacity">Capacity (GiB)</label><input class="lmr-input" id="ssdCapacity" type="text" value="' + escapeHtml(state.ssdCapacity) + '"' + (state.enableSsdTier ? "" : " disabled") + '></div><div class="lmr-control-group"><label for="ssdBandwidth">Bandwidth (GiB/s)</label><input class="lmr-input" id="ssdBandwidth" type="text" value="' + escapeHtml(state.ssdBandwidth) + '"' + (state.enableSsdTier ? "" : " disabled") + '></div></div></div><div class="lmr-tabs"><button class="lmr-tab' + (state.activeTab === "placement" ? " active" : "") + '" data-tab="placement" type="button">Placement</button><button class="lmr-tab' + (state.activeTab === "roofline" ? " active" : "") + '" data-tab="roofline" type="button">Roofline</button><button class="lmr-tab' + (state.activeTab === "rules" ? " active" : "") + '" data-tab="rules" type="button">Rule Shifts</button></div><div class="lmr-tab-panel">' + activeTabContent + "</div></section></div></section>";
     bindEvents();
   }
 
