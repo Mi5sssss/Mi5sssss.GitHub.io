@@ -4,7 +4,7 @@ excerpt: "About Me..."
 menutitle: Home
 menuorder: 1
 ---
-**Welcome!** I am a PhD candidate in the ECSE Department at Rensselaer Polytechnic Institute, advised by [Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
+**Welcome!** I received PhD from the ECSE Department at Rensselaer Polytechnic Institute, advised by [Tong Zhang](https://sites.ecse.rpi.edu/~tzhang/).
 I earned my BE in Southern University of Science and Technology.
 
 My research focuses on optimizing memory architectures, primarily DRAM and SSDs, to enhance hardware performance and software efficiency. I explore solutions in data processing and AI, aiming to contribute to more efficient and sustainable computing systems.
@@ -13,12 +13,6 @@ My research focuses on optimizing memory architectures, primarily DRAM and SSDs,
 
 Feel free to reach out. I am always happy to chat!
 📧 Email: xier2 [at] rpi (dot) edu
-
-## Featured Interactive
-
-I built an interactive explorer for tiered LLM memory placement and effective decode rooflines.
-
-[Open the LLM Memory Roofline Explorer](llm-memory-roofline/)
 
 ## 🏫 Education
 **PhD Candidate in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
