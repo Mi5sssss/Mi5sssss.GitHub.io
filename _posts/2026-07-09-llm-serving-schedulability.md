@@ -35,7 +35,7 @@ Most techniques that look new in AI infrastructure re-express old systems ideas 
 Hover any point or bar for exact values with one standard deviation, click a legend entry to hide or show a series, switch the latency metric between mean, P95, and P99, and flip the latency axis between linear and log.
 
 <iframe id="llmserve" src="/llm-serving-schedulability/" title="Interactive figures for LLM serving"
-        style="width:100%; height:1500px; border:1px solid #ddd; border-radius:8px;" loading="lazy"></iframe>
+        style="width:100%; height:7200px; border:1px solid #ddd; border-radius:8px;" loading="lazy"></iframe>
 
 <p><a href="/llm-serving-schedulability/" target="_blank" rel="noopener">Open the interactive page in a new tab</a></p>
 
@@ -53,6 +53,7 @@ Hover any point or bar for exact values with one standard deviation, click a leg
     resize();
     setTimeout(resize, 300);
     try { f.contentWindow.document.addEventListener('click', function () { setTimeout(resize, 80); }); } catch (e) {}
+    try { f.contentWindow.document.addEventListener('change', function () { setTimeout(resize, 80); }); } catch (e) {}
   });
   window.addEventListener('resize', function () { setTimeout(resize, 120); });
 })();

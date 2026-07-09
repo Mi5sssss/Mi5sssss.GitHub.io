@@ -3,45 +3,41 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>LLM Serving: interactive figures</title>
+<title>LLM Serving interactive figures</title>
 <style>
   :root { --ink:#111; --mut:#666; --line:#d9d9d9; --bg:#fff; }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink);
-         font-family: Georgia, "Times New Roman", serif; line-height:1.5; }
-  header { padding:28px 32px 8px; border-bottom:1px solid var(--line); }
-  h1 { font-size:22px; margin:0 0 6px; font-weight:600; }
-  header p { margin:4px 0; color:var(--mut); font-size:13px; max-width:900px; }
-  .tabs { display:flex; gap:6px; padding:14px 32px 0; border-bottom:1px solid var(--line);
-          position:sticky; top:0; background:var(--bg); z-index:5; }
-  .tab { padding:8px 16px; border:1px solid var(--line); border-bottom:none;
-         background:#f4f4f4; cursor:pointer; font-size:14px; border-radius:6px 6px 0 0; }
-  .tab.active { background:var(--bg); font-weight:600; box-shadow:0 1px 0 var(--bg); }
-  main { padding:20px 32px 60px; }
-  .panel { display:none; }
-  .panel.active { display:block; }
-  .lead { max-width:900px; color:#333; font-size:14px; margin:6px 0 18px; }
-  .charts { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:26px; }
-  figure { margin:0; border:1px solid var(--line); border-radius:8px; padding:12px 14px 10px; background:#fff; }
-  figcaption { font-size:12.5px; color:#333; margin-top:6px; }
-  .controls { display:flex; gap:14px; align-items:center; margin:2px 0 8px; font-size:13px; color:#333; flex-wrap:wrap; }
+         font-family: Georgia, "Times New Roman", serif; font-size:16px; line-height:1.6; }
+  header { padding:28px 32px 10px; border-bottom:1px solid var(--line); }
+  h1 { font-size:25px; margin:0 0 8px; font-weight:600; }
+  header p { margin:6px 0; color:#333; font-size:15px; max-width:940px; }
+  main { padding:8px 32px 70px; max-width:1000px; }
+  .panel { display:block; }
+  .section-title { font-size:20px; font-weight:600; margin:40px 0 4px; padding-top:22px; border-top:1px solid var(--line); }
+  .section-title.first { border-top:none; padding-top:6px; margin-top:10px; }
+  .lead { max-width:900px; color:#333; font-size:15.5px; margin:8px 0 20px; }
+  .charts { display:grid; grid-template-columns:1fr; gap:32px; }
+  figure { margin:0; border:1px solid var(--line); border-radius:8px; padding:14px 16px 12px; background:#fff; max-width:900px; }
+  figcaption { font-size:14px; color:#333; margin-top:10px; line-height:1.55; }
+  .controls { display:flex; gap:16px; align-items:center; margin:2px 0 12px; font-size:14px; color:#333; flex-wrap:wrap; }
   .controls label { display:inline-flex; gap:6px; align-items:center; }
-  select, button.toggle { font-family:inherit; font-size:13px; padding:3px 8px; border:1px solid var(--line);
+  select, button.toggle { font-family:inherit; font-size:14px; padding:4px 9px; border:1px solid var(--line);
            border-radius:5px; background:#fafafa; cursor:pointer; }
-  .legend { display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; font-size:12.5px; }
+  .legend { display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:13.5px; }
   .chip { display:inline-flex; gap:7px; align-items:center; cursor:pointer; user-select:none; }
   .chip.off { opacity:0.35; text-decoration:line-through; }
   .chip svg { display:block; }
   .chart-svg { width:100%; height:auto; display:block; font-family:inherit; }
-  .axis text { fill:#222; font-size:11px; }
-  .axis-title { fill:#222; font-size:12px; }
+  .axis text { fill:#222; font-size:14px; }
+  .axis-title { fill:#222; font-size:15px; }
   .grid line { stroke:var(--line); stroke-width:0.6; }
   .tick line { stroke:#333; stroke-width:0.8; }
-  .tooltip { position:fixed; pointer-events:none; background:#111; color:#fff; font-size:12px;
-             padding:7px 9px; border-radius:6px; opacity:0; transition:opacity .05s; z-index:50; max-width:260px; }
+  .tooltip { position:fixed; pointer-events:none; background:#111; color:#fff; font-size:13px;
+             padding:8px 10px; border-radius:6px; opacity:0; transition:opacity .05s; z-index:50; max-width:300px; }
   .tooltip b { font-weight:600; }
-  .note { color:var(--mut); font-size:12px; margin-top:24px; max-width:900px; }
-  code { background:#f2f2f2; padding:1px 4px; border-radius:3px; font-size:12px; }
+  .note { color:var(--mut); font-size:13.5px; margin-top:30px; max-width:900px; line-height:1.55; }
+  code { background:#f2f2f2; padding:1px 5px; border-radius:3px; font-size:13px; }
 </style>
 </head>
 <body>
@@ -51,13 +47,9 @@
      Bars and error bars show the mean and one standard deviation over multiple seeded replications.
      These are simulations of mechanisms, not measurements from real GPUs.</p>
 </header>
-<div class="tabs">
-  <div class="tab active" data-tab="e1">1 &middot; Batching and schedulability</div>
-  <div class="tab" data-tab="e2">2 &middot; KV cache lifecycle</div>
-  <div class="tab" data-tab="e3">3 &middot; Utilization vs useful tokens</div>
-</div>
 <main>
-  <section class="panel active" id="e1">
+  <section class="panel" id="e1">
+    <h2 class="section-title first">Batching and schedulability</h2>
     <p class="lead">Continuous (iteration level) batching turns an irregular arrival stream into regular per step work.
        It improves throughput and mean latency, yet the tail still grows as arrivals approach capacity.</p>
     <div class="charts">
@@ -87,6 +79,7 @@
   </section>
 
   <section class="panel" id="e2">
+    <h2 class="section-title">KV cache lifecycle</h2>
     <p class="lead">A fixed key value capacity is the only binding constraint here and weights are excluded on purpose,
        so concurrency is gated by key value lifetime rather than model size. Compression converts rejected work into useful work,
        while eviction by value discards already spent compute.</p>
@@ -115,6 +108,7 @@
   </section>
 
   <section class="panel" id="e3">
+    <h2 class="section-title">Utilization versus useful tokens</h2>
     <p class="lead">Two schedulers run at almost the same utilization. Scheduler A maximizes slot utilization,
        Scheduler B maximizes useful value under a latency target. A stays busy far longer yet delivers a fraction of the useful tokens.</p>
     <div class="charts">
@@ -147,7 +141,7 @@
 
   <p class="note">Reproduce with <code>python3 experiments.py</code> for the static figures and
      <code>python3 make_interactive.py</code> for this page. Seeds and parameters are recorded in
-     <code>run_manifest.json</code>; aggregate values are in <code>results_summary.csv</code>.</p>
+     <code>run_manifest.json</code>. Aggregate values are in <code>results_summary.csv</code>.</p>
 </main>
 
 <div class="tooltip" id="tip"></div>
@@ -287,7 +281,7 @@ function lineChart(sel, spec) {
     let html = `<b>${spec.xlabel.split("(")[0].trim()} = ${fmt(xs[bi])}</b>`;
     vis.forEach(d => {
       const e = d.err ? ` &plusmn; ${fmt(d.err[bi])}` : "";
-      html += `<br>${d.name}: ${fmt(d.y[bi])}${e}`;
+      html += `<br>${d.name} ${fmt(d.y[bi])}${e}`;
     });
     showTip(html, ev);
   });
@@ -348,7 +342,7 @@ function barChart(sel, spec) {
         const yTop = sy(acc + d.values[gi]);
         const rect = svg("rect", { x: cx - groupW / 2, y: yTop, width: groupW, height: Math.max(0, h),
           fill: d.hatch ? `url(#${uid})` : d.shade, stroke: "#000", "stroke-width": 0.8 });
-        addBarTip(rect, `<b>${spec.groups[gi].join ? spec.groups[gi].join(" ") : spec.groups[gi]}</b><br>${d.name}: ${fmt(d.values[gi])}`);
+        addBarTip(rect, `<b>${spec.groups[gi].join ? spec.groups[gi].join(" ") : spec.groups[gi]}</b><br>${d.name} ${fmt(d.values[gi])}`);
         s.appendChild(rect);
         acc += d.values[gi];
       });
@@ -359,7 +353,7 @@ function barChart(sel, spec) {
         const rect = svg("rect", { x: x, y: sy(d.values[gi]), width: bw * 0.92, height: sy(0) - sy(d.values[gi]),
           fill: d.hatch ? `url(#${uid})` : d.shade, stroke: "#000", "stroke-width": 0.8 });
         const e = d.errors ? ` &plusmn; ${fmt(d.errors[gi])}` : "";
-        addBarTip(rect, `<b>${(Array.isArray(label) ? label.join(" ") : label)}</b><br>${d.name}: ${fmt(d.values[gi])}${e}`);
+        addBarTip(rect, `<b>${(Array.isArray(label) ? label.join(" ") : label)}</b><br>${d.name} ${fmt(d.values[gi])}${e}`);
         s.appendChild(rect);
         if (d.errors) {
           const xc = x + bw * 0.46, v = d.values[gi], er = d.errors[gi];
@@ -417,12 +411,6 @@ function buildLegend(host, spec, redraw, clickable) {
 }
 
 // ---------------- wire up ---------------- //
-document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
-  document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
-  document.querySelectorAll(".panel").forEach(x => x.classList.remove("active"));
-  t.classList.add("active");
-  document.getElementById(t.dataset.tab).classList.add("active");
-}));
 
 function e1_series(metricKey) {
   const M = DATA.exp1.metrics[metricKey];

@@ -52,10 +52,10 @@ The practical consequence shows up at admission time. Starting from a full block
 
 ## Explore it
 
-Hover any point or bar for exact values, click a legend entry to hide a series, switch the importance distribution in tab 2, and toggle log axes in tab 1. Four tabs: the `q^B` gap, eviction strategy, compaction cost, and request admission.
+Hover any point or bar for exact values, click a legend entry to hide a series, switch the importance distribution in the eviction-strategy section, and toggle the log axes in the first section. The page runs in four parts, in order, the `q^B` gap, then eviction strategy, then compaction cost, then request admission.
 
 <iframe id="kvreclaim" src="/kv-reclaimability/" title="Interactive figures for logical versus physical KV savings"
-        style="width:100%; height:1600px; border:1px solid #ddd; border-radius:8px;" loading="lazy"></iframe>
+        style="width:100%; height:6800px; border:1px solid #ddd; border-radius:8px;" loading="lazy"></iframe>
 
 <p><a href="/kv-reclaimability/" target="_blank" rel="noopener">Open the interactive page in a new tab</a></p>
 
