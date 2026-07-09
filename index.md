@@ -15,8 +15,8 @@ Feel free to reach out. I am always happy to chat!
 📧 Email: xier2 [at] rpi (dot) edu
 
 ## 🏫 Education
-**PhD Candidate in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
-   📍 Troy, NY, USA | 🗓️ 2022 – Present
+**PhD in Computer & Systems Engineering** — *Rensselaer Polytechnic Institute*  
+   📍 Troy, NY, USA | 🗓️ 2022 – 2026
 
 **BE in Microelectronics Science and Engineering** — *Southern University of Science and Technology*  
    📍 Shenzhen, China | 🗓️ 2018 – 2022
