@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Logical KV Savings Are Not Physical Memory Savings"
-excerpt: "Token-level KV cache eviction can report large logical savings while returning almost no usable GPU memory to a paged allocator. An analytical model, allocator-aware metrics, and interactive simulations."
+excerpt: "Token-level KV cache eviction can report large logical savings while returning little usable GPU memory to a paged allocator. How much it actually returns is method dependent. An analytical bound, realistic eviction patterns, allocator-aware metrics, and interactive simulations."
 modified: 7/9/2026, 12:00:00
 tags: [AI infrastructure, LLM serving, KV cache, computer architecture, memory systems]
 comments: true
@@ -11,51 +11,79 @@ category: blog
 ## TL;DR
 
 - Paged KV cache runtimes (PagedAttention in vLLM, and the physical-memory variant in vAttention) allocate and free memory in whole blocks or pages. The unit of reuse is a fully free block, not a single dead token.
-- Token-level eviction and compression report savings in *logical* tokens. If the survivors are scattered across blocks, almost no blocks become free, so the *physical* footprint barely moves.
-- The gap is quantifiable. Under random scattered eviction the expected freed-block fraction is `q^B` for block size `B`, so a 50% token cut at `B=16` frees on the order of 0.0015% of blocks.
-- Admission of new requests tracks physically free blocks, not logically deleted tokens. In one simulation, five strategies with an *identical* 50% logical saving admit 0, 0, 32, 22, and 32 new requests.
-- The fix is to treat KV compression as physical memory management: measure reclaimability, prefer block-coherent or reclaimability-aware eviction, and add copy-budgeted compaction. The charts below are interactive.
+- Token-level eviction reports savings in *logical* tokens. Whether those become *physical* free blocks depends on where the survivors land, which is method dependent, not universal.
+- Under random independent eviction the expected freed-block fraction is `q^B` for block size `B`, so a 50% cut at `B=16` frees on the order of 0.0015% of blocks. That is a worst-case scatter bound, not a prediction of real methods.
+- On realistic patterns at a matched 50% retained ratio (30 seeds), zero-copy physical reclaim is high for window-plus-sink eviction (StreamingLLM, 0.47, block coherent), near zero for scattered heavy-hitter eviction (H2O, 0.001), and intermediate for SnapKV (0.29). Heavy-hitter methods either strand memory or force compaction.
+- Admission of new requests tracks physically free blocks, not logically deleted tokens. Five strategies with an *identical* 50% logical saving admit 0, 0, 32, 22.6, and 32 new requests.
+- Treat KV compression as physical memory management: report reclaimability, prefer block-coherent or reclaimability-aware eviction, and use copy-budgeted compaction only when its bandwidth cost is affordable. The charts below are interactive.
 
 ## The claim
 
-KV cache compression is usually reported with model-side metrics: retained-token ratio, compression ratio, and task accuracy. Those are necessary but they never observe the allocator's free list. In a paged runtime, memory returns to service only when an entire block is empty. A compression method can remove a large fraction of tokens and still return almost nothing to the allocator, because a block that keeps even one live token cannot be reused.
+KV cache compression is usually reported with model-side metrics: retained-token ratio, compression ratio, and task accuracy. Those are necessary but they never observe the allocator's free list. In a paged runtime, memory returns to service only when an entire block is empty, so a block that keeps even one live token cannot be reused.
 
-This is not an entirely new observation. The KV-Compress work states directly that variable-rate head eviction "adds fragmentation and cannot realize the theoretical compression rates in physical memory," and fixes it by evicting whole blocks inside PagedAttention. What this post adds is a compact analytical model of the gap, a small set of allocator-aware metrics, and reproducible simulations that make the mechanism visible. It is analytical and simulation-based. It does not measure a production runtime, it does not model attention kernels, and it says nothing about whether any eviction rule preserves output quality. It isolates one mechanism: the granularity mismatch between fine-grained token eviction and coarse-grained block allocation.
+This is not a new observation. KV-Compress states directly that variable-rate head eviction "adds fragmentation and cannot realize the theoretical compression rates in physical memory," and fixes it by evicting whole blocks inside PagedAttention; vAttention reclaims physical pages under a contiguous virtual layout. What this post adds is a compact analytical bound, a set of allocator-aware metrics, and reproducible simulations that measure how much logical saving becomes physical reclaim across *realistic* eviction patterns. It is analytical and simulation-based. It does not measure a production runtime, it does not model attention kernels, and it says nothing about whether an eviction rule preserves output quality. It isolates one mechanism: the granularity mismatch between fine-grained token eviction and coarse-grained block allocation.
 
 ## Logical deletion versus physical reclaim
 
-**Logical deletion** is a bookkeeping change. A policy decides a token no longer participates in attention and masks or drops its KV entry. **Physical reclaim** is the event that changes serving capacity: a complete block returns to the free list and can back another request. The first does not imply the second. A dead token sitting in an otherwise-live block is stranded capacity, not free capacity.
+**Logical deletion** is a bookkeeping change: a token is masked or dropped from attention. **Physical reclaim** is the event that changes serving capacity: a complete block returns to the free list. The first does not imply the second. A dead token in an otherwise-live block is stranded capacity, not free capacity.
 
-The analytical model makes this precise. With `B` tokens per block and eviction ratio `q`, random independent eviction frees a block only when all `B` of its tokens are gone:
+With `B` tokens per block and eviction ratio `q`, random independent eviction frees a block only when all `B` of its tokens are gone:
 
 - `logical_saving = q`
 - `physical_reclaim = q^B`
 - `reclaim_efficiency = q^(B-1)`
 
-At `B=16`, a 50% cut yields `0.5^16 ≈ 0.0015%` physical reclaim; a 75% cut yields about 1.0%. Physical reclaim only becomes comparable to logical saving when eviction is very aggressive or blocks are very small.
+At `B=16`, a 50% cut yields `0.5^16 ≈ 0.0015%` physical reclaim and a 75% cut about 1.0%. This `q^B` curve is the worst case: it assumes survivors are scattered independently. It is a lower bound on what a real method achieves, not a description of one.
 
 ![Logical saving versus physical block reclaim](/kv-reclaimability/figures/fig1_logical_vs_physical_reclaim.png)
 
-*Logical saving is the diagonal. Physical reclaim (`q^B`) hugs zero until the eviction ratio is high, and the knee sharpens as the block grows. Scattered eviction converts almost none of its logical saving into free blocks at production block sizes.*
+*Logical saving is the diagonal. Physical reclaim (`q^B`) hugs zero until the eviction ratio is high, and the knee sharpens as the block grows.*
 
-## Strategy decides reclaim, and it trades off against quality
+## Reclaimability is method dependent
 
-Holding the logical budget fixed, the eviction *strategy* decides whether logical removal becomes physical reclaim. Removing the globally lowest-importance tokens minimizes quality loss but frees essentially no blocks, because low-value tokens are scattered. Evicting whole low-value blocks frees memory efficiently but discards some mid-value tokens to clear a block. A reclaimability-aware policy that optimizes quality loss per *reclaimed block* sits between the two, capturing most of the reclaim at a fraction of the extra quality cost. The interactive tradeoff chart below makes this frontier explicit and lets you switch the importance distribution.
+The interesting question is not the worst case but where real methods sit. Simulating three deployed eviction shapes at a matched 50% retained ratio, `B=16`, over 30 seeds, and measuring zero-copy physical reclaim, the fraction of blocks fully evicted at eviction time:
+
+- **StreamingLLM** (contiguous attention-sink prefix plus a contiguous recent window): reclaim **0.47 ± 0.02**, moving only 0.6% of survivors. Its holes are one contiguous middle region, so it is block coherent and already allocator friendly.
+- **SnapKV** (a clustered recent selection): reclaim **0.29 ± 0.04**, intermediate.
+- **H2O** (scattered heavy hitters plus a recent window): reclaim **0.001 ± 0.005**. Heavy hitters sit in almost every old block, so almost nothing frees. This is the danger case.
+- **Random** independent: reclaim **0.000**, the worst-case bound.
+
+![Physical reclaim by realistic eviction method](/kv-reclaimability/figures/fig9_realistic_method_reclaim.png)
+
+*Zero-copy physical reclaim at a matched retained ratio. Window-plus-sink eviction is block coherent and reclaims memory for free. Scattered heavy-hitter eviction strands memory.*
+
+The direction matters, and it is the opposite of the naive intuition that more aggressive importance-based eviction frees the most memory. It also worsens with block size: as `B` grows from 4 to 64, StreamingLLM stays near 0.47 while H2O falls from 0.14 to 0.00, because larger blocks make a single scattered survivor strand more capacity.
+
+![Reclaim versus block size by method](/kv-reclaimability/figures/fig10_realistic_reclaim_vs_blocksize.png)
+
+Scattered methods have not lost the memory permanently. They hold reclaim that is unlockable only by paying compaction copy cost, quantified below.
+
+## Importance geometry decides the strategy gap
+
+Whether importance-based eviction strands memory depends on how spatially clustered the low-importance tokens are. Sweeping a spatial-correlation knob `rho` from 0 (importance independent of position) to 1 (low-importance tokens contiguous), lowest-importance token eviction goes from freeing **0.000** of blocks to **0.465**, and its gap to whole-block eviction shrinks from **0.50** to **0.035**.
+
+![Spatial-correlation sensitivity](/kv-reclaimability/figures/fig11_spatial_correlation_sensitivity.png)
+
+*As low-value tokens cluster, token-level eviction starts to look block coherent and the reason to prefer block-wise eviction fades. The strong version of the problem exists only when importance is spatially scattered.*
+
+## Strategy and the quality tradeoff
+
+Holding the logical budget fixed and varying only geometry (lognormal importance, `q=0.5`, 30 seeds): random token eviction frees 0.0 of blocks at 50% importance loss; lowest-importance eviction frees 0.0 at only 16% loss; whole-block eviction frees 0.50 at efficiency 1.0 but 38% loss; a reclaimability-aware policy that optimizes quality loss per reclaimed block frees 0.36 at 28% loss, sitting on the favorable interior of the tradeoff.
 
 ## Admission tracks free blocks, not tokens
 
-The practical consequence shows up at admission time. Starting from a full block pool, applying an identical 50% logical eviction, and admitting new requests that each need several free blocks, the number admitted depends entirely on how many *whole* blocks came free.
+Starting from a full block pool, applying an identical 50% logical eviction, and admitting new requests that each need eight free blocks, the number admitted depends entirely on how many *whole* blocks came free.
 
 ![New-request admission after eviction](/kv-reclaimability/figures/fig8_new_request_admission.png)
 
-*Every bar has the same 50% logical saving. Random and lowest-importance token eviction admit zero new requests. Block-wise eviction and random-plus-compaction reach the naive expectation of 32. Reclaimability-aware admits 22. Compaction recovers the full count by moving about 1,645 survivor tokens, which is a bandwidth cost the runtime must budget for.*
+*Every bar has the same 50% logical saving. Random and lowest-importance token eviction admit zero. Whole-block eviction admits the naive expectation of 32. Reclaimability-aware admits 22.6. Random-plus-compaction recovers the full 32 by moving about 1,649 survivor tokens, a bandwidth cost the runtime must budget for.*
 
 ## Explore it
 
-Hover any point or bar for exact values, click a legend entry to hide a series, switch the importance distribution in the eviction-strategy section, and toggle the log axes in the first section. The page runs in four parts, in order, the `q^B` gap, then eviction strategy, then compaction cost, then request admission.
+Hover any point or bar for exact values with one standard deviation, click a legend entry to hide a series, switch the importance distribution in the strategy section, and toggle the log axes. The page runs top to bottom through the `q^B` bound, the realistic methods, eviction strategy, the spatial-correlation sensitivity, compaction cost, and request admission.
 
 <iframe id="kvreclaim" src="/kv-reclaimability/" title="Interactive figures for logical versus physical KV savings"
-        style="width:100%; height:6800px; border:1px solid #ddd; border-radius:8px;" loading="lazy"></iframe>
+        style="width:100%; height:9200px; border:1px solid #ddd; border-radius:8px;" loading="lazy"></iframe>
 
 <p><a href="/kv-reclaimability/" target="_blank" rel="noopener">Open the interactive page in a new tab</a></p>
 
@@ -81,19 +109,34 @@ Hover any point or bar for exact values, click a legend entry to hide a series, 
 
 ## Compaction is the missing systems operation, and it has a cost
 
-If eviction has to stay fine-grained for quality reasons, the runtime can still reclaim memory by moving survivors into fewer blocks and freeing the emptied ones. This is garbage collection with a compacting collector, applied to KV memory. The copy cost depends on how scattered the survivors are: random eviction needs thousands of token moves to free the same blocks that block-coherent eviction frees for free. GPU training runtimes already defragment memory with virtual-memory stitching, and vAttention defers physical reclamation as an optimization; a KV compactor is the cache-level analogue. The compaction tab shows reclaimed-per-copied ROI and the raw copy bill side by side.
+When eviction must stay fine-grained, the runtime can still reclaim memory by moving survivors into fewer blocks and freeing the emptied ones, which is garbage collection with a compacting collector applied to KV memory. The honest way to score it is reclaimed capacity per token moved, on the increment that compaction actually frees. Random eviction reclaims about 2.48 blocks-worth of space per moved token and needs thousands of moves to free the pool; clustered holes reclaim about 6.65 per move; block-coherent eviction needs no copy at all because it already freed its blocks at eviction time.
+
+![Compaction reclaim per moved token](/kv-reclaimability/figures/fig6_compaction_reclaim_per_move.png)
+
+I deliberately do not headline the total-to-minimal ratio, which looks like thousands for clustered layouts only because it credits compaction with blocks that were already free. And the per-token figure is a bandwidth-only lower bound on cost: it omits block-table and position-metadata updates, kernel disruption, synchronization, and the rotary re-embedding that moved KV requires. A usable compactor must be copy-budgeted and latency-aware.
+
+![Compaction copy cost by method](/kv-reclaimability/figures/fig12_realistic_compaction_cost.png)
 
 ## Better metrics
 
-If you evaluate KV compression, report the allocator-aware quantities alongside the model-side ones: physical blocks reclaimed, reclaim efficiency (`physical_memory_reclaimed / logical_memory_removed`), fragmentation (`1 - live_tokens / (nonempty_blocks * B)`), and useful new requests admitted. A method that reduces retained-token ratio without growing the free list has not improved serving concurrency.
+If you evaluate KV compression, report the allocator-aware quantities alongside the model-side ones: physical blocks reclaimed, reclaim efficiency (`physical_memory_reclaimed / logical_memory_removed`), fragmentation (`1 - live_tokens / (nonempty_blocks * B)`), moved tokens per reclaimed block, and useful new requests admitted. A method that cuts retained-token ratio without growing the free list has not improved serving concurrency.
 
 ## What the simulation does and does not prove
 
-It proves an accounting fact: under the paged block model, physical reclaim and admission are governed by block occupancy, and fine-grained eviction generically fails to free blocks unless it is block-aware or followed by compaction. It does not prove a production speedup, it does not quantify kernel or bandwidth effects, and it does not establish model quality. The importance scores are synthetic proxies. The next step that would turn framing into evidence is running real eviction methods (H2O, SnapKV, and similar) in a paged runtime and reporting free blocks and admitted requests at matched quality.
+It proves an accounting fact: under the paged block model, physical reclaim and admission are governed by block occupancy, and fine-grained eviction frees blocks only when its survivors are block aligned or when it pays for compaction. It does not prove a production speedup, it does not quantify kernel or bandwidth effects, and it does not establish model quality. The importance scores and the three method shapes are synthetic proxies calibrated to the geometry of the real methods, not runs of the real methods. The next step that would turn this into evidence is running H2O, SnapKV, and StreamingLLM in a paged runtime and reporting free blocks and admitted requests at matched quality.
 
 ## How it was made
 
-Every number here comes from a small, deterministic simulation with a fixed seed, using numpy, pandas, and matplotlib only. The script writes the static figures, `results_summary.csv`, and the `interactive_data.json` that drives the charts above, so the interactive values match the figures exactly. Importance is modeled with uniform, lognormal, and Pareto distributions to vary how skewed token value is; it is not spatially correlated with block position, which is the honest default.
+Every number comes from a deterministic simulation with a fixed seed, 30 replications, and mean plus or minus one standard deviation on every stochastic figure, using numpy, pandas, and matplotlib only. The script sweeps block size 4 to 64, retained ratio, and the spatial-correlation knob, and writes the static figures, `results_summary.csv`, and the `interactive_data.json` that drives the charts, so the interactive values match the figures exactly.
+
+## Red team, six loops
+
+- **Novelty.** The physical-realization point is already made by KV-Compress and vAttention. This post is a reproducible mechanism study and metric proposal, not a new claim.
+- **Realism.** The corrected message is that reclaimability is method dependent: window-plus-sink eviction is high and block coherent, scattered heavy-hitter eviction is low and strands or forces compaction, SnapKV is intermediate. The `q^B` model is a worst-case scatter bound, not a prediction.
+- **Baselines.** Random independent eviction is kept only as a labeled worst-case bound; StreamingLLM is the strong allocator-friendly comparator.
+- **Isolation.** Strategies hold the logical budget fixed and vary only geometry, and a separate `rho` sweep isolates importance geometry from everything else.
+- **Statistics.** 30 seeds, mean and standard deviation, error bars on every stochastic figure, plus a block-size sweep so the headline does not rest on `B=16` alone.
+- **Honesty of metrics.** The delta reclaim-per-move replaces the inflated total-to-minimal ratio, and moved tokens are stated as a bandwidth-only lower bound that omits metadata, kernel, synchronization, and rotary re-embedding costs.
 
 ## References
 
