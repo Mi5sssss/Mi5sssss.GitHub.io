@@ -1,0 +1,371 @@
+{
+  "meta": {
+    "seed": 20240709,
+    "block_size": 16,
+    "n_blocks": 512,
+    "q": 0.5,
+    "n_blocks_exp3": 1000,
+    "req_blocks": 8,
+    "naive_admit": 32,
+    "representative_dist": "lognormal"
+  },
+  "exp1": {
+    "block_sizes": [
+      4,
+      8,
+      16,
+      32,
+      64
+    ]
+  },
+  "exp2": {
+    "strategies": [
+      "random",
+      "lowest_importance",
+      "block_wise",
+      "reclaim_aware"
+    ],
+    "distributions": [
+      "uniform",
+      "lognormal",
+      "pareto"
+    ],
+    "q": 0.5,
+    "bars": {
+      "uniform": {
+        "random": {
+          "reclaim": 0.0,
+          "loss": 0.4985,
+          "frag": 0.5,
+          "eff": 0.0
+        },
+        "lowest_importance": {
+          "reclaim": 0.002,
+          "loss": 0.2475,
+          "frag": 0.499,
+          "eff": 0.0039
+        },
+        "block_wise": {
+          "reclaim": 0.5,
+          "loss": 0.4446,
+          "frag": 0.0,
+          "eff": 1.0
+        },
+        "reclaim_aware": {
+          "reclaim": 0.3809,
+          "loss": 0.3574,
+          "frag": 0.1924,
+          "eff": 0.7617
+        }
+      },
+      "lognormal": {
+        "random": {
+          "reclaim": 0.0,
+          "loss": 0.5066,
+          "frag": 0.5,
+          "eff": 0.0
+        },
+        "lowest_importance": {
+          "reclaim": 0.0,
+          "loss": 0.1585,
+          "frag": 0.5,
+          "eff": 0.0
+        },
+        "block_wise": {
+          "reclaim": 0.5,
+          "loss": 0.3786,
+          "frag": 0.0,
+          "eff": 1.0
+        },
+        "reclaim_aware": {
+          "reclaim": 0.3652,
+          "loss": 0.2826,
+          "frag": 0.2123,
+          "eff": 0.7305
+        }
+      },
+      "pareto": {
+        "random": {
+          "reclaim": 0.0,
+          "loss": 0.471,
+          "frag": 0.5,
+          "eff": 0.0
+        },
+        "lowest_importance": {
+          "reclaim": 0.0,
+          "loss": 0.0644,
+          "frag": 0.5,
+          "eff": 0.0
+        },
+        "block_wise": {
+          "reclaim": 0.5,
+          "loss": 0.2697,
+          "frag": 0.0,
+          "eff": 1.0
+        },
+        "reclaim_aware": {
+          "reclaim": 0.3535,
+          "loss": 0.1779,
+          "frag": 0.2266,
+          "eff": 0.707
+        }
+      }
+    },
+    "sweep": {
+      "q": [
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9
+      ],
+      "random": {
+        "reclaim": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0039,
+          0.002,
+          0.0254,
+          0.1934
+        ],
+        "loss": [
+          0.099,
+          0.195,
+          0.3032,
+          0.3891,
+          0.508,
+          0.5965,
+          0.7162,
+          0.8043,
+          0.8989
+        ]
+      },
+      "lowest_importance": {
+        "reclaim": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0059,
+          0.0312,
+          0.1875
+        ],
+        "loss": [
+          0.0112,
+          0.0324,
+          0.0635,
+          0.1049,
+          0.1585,
+          0.2279,
+          0.3175,
+          0.4382,
+          0.6138
+        ]
+      },
+      "block_wise": {
+        "reclaim": [
+          0.0996,
+          0.1992,
+          0.3008,
+          0.4004,
+          0.5,
+          0.5996,
+          0.6992,
+          0.8008,
+          0.9004
+        ],
+        "loss": [
+          0.0558,
+          0.1241,
+          0.2031,
+          0.2875,
+          0.3786,
+          0.4767,
+          0.5834,
+          0.7013,
+          0.83
+        ]
+      },
+      "reclaim_aware": {
+        "reclaim": [
+          0.0547,
+          0.1191,
+          0.1934,
+          0.2734,
+          0.3652,
+          0.4668,
+          0.582,
+          0.709,
+          0.8457
+        ],
+        "loss": [
+          0.0323,
+          0.0774,
+          0.1348,
+          0.2021,
+          0.2826,
+          0.3761,
+          0.4875,
+          0.619,
+          0.7736
+        ]
+      }
+    }
+  },
+  "exp3": {
+    "patterns": [
+      "random",
+      "lowest_importance",
+      "clustered",
+      "block_coherent"
+    ],
+    "bars": {
+      "random": {
+        "free_evict": 0,
+        "freed_comp": 500,
+        "moved": 3233,
+        "roi": 2.47,
+        "total_free": 500
+      },
+      "lowest_importance": {
+        "free_evict": 0,
+        "freed_comp": 500,
+        "moved": 3221,
+        "roi": 2.48,
+        "total_free": 500
+      },
+      "clustered": {
+        "free_evict": 499,
+        "freed_comp": 1,
+        "moved": 8,
+        "roi": 1000.0,
+        "total_free": 500
+      },
+      "block_coherent": {
+        "free_evict": 500,
+        "freed_comp": 0,
+        "moved": 0,
+        "roi": 8000.0,
+        "total_free": 500
+      }
+    },
+    "n_blocks": 1000,
+    "block_size": 16,
+    "q": 0.5
+  },
+  "exp4": {
+    "configs": [
+      "A: random",
+      "B: lowest-importance",
+      "C: block-wise",
+      "D: reclaimability-aware",
+      "A + compaction"
+    ],
+    "bars": {
+      "A: random": {
+        "free": 0,
+        "admitted": 0,
+        "moved": 0
+      },
+      "B: lowest-importance": {
+        "free": 0,
+        "admitted": 0,
+        "moved": 0
+      },
+      "C: block-wise": {
+        "free": 256,
+        "admitted": 32,
+        "moved": 0
+      },
+      "D: reclaimability-aware": {
+        "free": 182,
+        "admitted": 22,
+        "moved": 0
+      },
+      "A + compaction": {
+        "free": 256,
+        "admitted": 32,
+        "moved": 1645
+      }
+    },
+    "sweep": {
+      "q": [
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9
+      ],
+      "A: random": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        13
+      ],
+      "B: lowest-importance": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        11
+      ],
+      "C: block-wise": [
+        6,
+        12,
+        19,
+        25,
+        32,
+        38,
+        44,
+        51,
+        57
+      ],
+      "D: reclaimability-aware": [
+        3,
+        7,
+        11,
+        17,
+        22,
+        29,
+        36,
+        45,
+        53
+      ],
+      "A + compaction": [
+        6,
+        12,
+        19,
+        25,
+        32,
+        38,
+        44,
+        51,
+        57
+      ]
+    },
+    "naive": 32,
+    "req_blocks": 8
+  }
+}

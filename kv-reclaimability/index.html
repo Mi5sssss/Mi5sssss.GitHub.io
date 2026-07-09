@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Logical vs physical KV savings: interactive figures</title>
+<style>
+  :root { --ink:#111; --mut:#666; --line:#d9d9d9; --bg:#fff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family: Georgia, "Times New Roman", serif; line-height:1.5; }
+  header { padding:26px 30px 8px; border-bottom:1px solid var(--line); }
+  h1 { font-size:21px; margin:0 0 6px; font-weight:600; }
+  header p { margin:4px 0; color:var(--mut); font-size:13px; max-width:920px; }
+  .tabs { display:flex; gap:6px; padding:14px 30px 0; border-bottom:1px solid var(--line);
+          position:sticky; top:0; background:var(--bg); z-index:5; flex-wrap:wrap; }
+  .tab { padding:8px 15px; border:1px solid var(--line); border-bottom:none;
+         background:#f4f4f4; cursor:pointer; font-size:13.5px; border-radius:6px 6px 0 0; }
+  .tab.active { background:var(--bg); font-weight:600; box-shadow:0 1px 0 var(--bg); }
+  main { padding:20px 30px 60px; }
+  .panel { display:none; }
+  .panel.active { display:block; }
+  .lead { max-width:920px; color:#333; font-size:14px; margin:6px 0 18px; }
+  .charts { display:grid; grid-template-columns:repeat(auto-fit,minmax(460px,1fr)); gap:26px; }
+  figure { margin:0; border:1px solid var(--line); border-radius:8px; padding:12px 14px 12px; background:#fff; }
+  figcaption { font-size:12.5px; color:#333; margin-top:8px; }
+  .controls { display:flex; gap:16px; align-items:center; margin:2px 0 10px; font-size:13px; color:#333; flex-wrap:wrap; }
+  .controls label { display:inline-flex; gap:6px; align-items:center; }
+  select { font-family:inherit; font-size:13px; padding:3px 8px; border:1px solid var(--line);
+           border-radius:5px; background:#fafafa; cursor:pointer; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; }
+  .chip { display:inline-flex; gap:7px; align-items:center; cursor:pointer; user-select:none; }
+  .chip.off { opacity:0.34; text-decoration:line-through; }
+  .chart-svg { width:100%; height:auto; display:block; font-family:inherit; }
+  .axis { fill:#222; font-size:11px; }
+  .axis-title { fill:#222; font-size:12px; }
+  .tooltip { position:fixed; pointer-events:none; background:#111; color:#fff; font-size:12px;
+             padding:7px 9px; border-radius:6px; opacity:0; transition:opacity .05s; z-index:50; max-width:280px; }
+  .tooltip b { font-weight:600; }
+  .note { color:var(--mut); font-size:12px; margin-top:26px; max-width:920px; }
+  code { background:#f2f2f2; padding:1px 4px; border-radius:3px; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Logical KV savings are not physical memory savings. Interactive figures.</h1>
+  <p>Paged KV cache runtimes allocate and free memory in whole blocks, so the unit of reuse is a fully free block, not a single dead token. Hover any point or bar for exact values, click a legend entry to hide a series, and use the controls to switch distributions or axis scales. These are memory-accounting simulations, not measurements from a real GPU or model.</p>
+</header>
+<div class="tabs">
+  <div class="tab active" data-tab="e1">1 &middot; The q<sup>B</sup> gap</div>
+  <div class="tab" data-tab="e2">2 &middot; Eviction strategy</div>
+  <div class="tab" data-tab="e3">3 &middot; Compaction</div>
+  <div class="tab" data-tab="e4">4 &middot; Request admission</div>
+</div>
+<main>
+  <section class="panel active" id="e1">
+    <p class="lead">Under random scattered eviction a block is freed only when all B of its tokens are evicted, so the freed fraction is q<sup>B</sup> while the logical saving is only q. Reclaim efficiency, the physical reclaim earned per unit of logical saving, is q<sup>B&minus;1</sup> and collapses as the block grows.</p>
+    <div class="charts">
+      <figure>
+        <div class="controls"><label><input type="checkbox" id="t1a_log"/> log y axis</label></div>
+        <div id="c_t1a"></div>
+        <figcaption>Logical saving (dashed) versus physical block reclaim q<sup>B</sup>. At B=16 a 50% token cut frees about 0.0015% of blocks. Toggle a log axis to see the smaller block sizes.</figcaption>
+      </figure>
+      <figure>
+        <div class="controls"><label><input type="checkbox" id="t1b_log" checked/> log y axis</label></div>
+        <div id="c_t1b"></div>
+        <figcaption>Reclaim efficiency q<sup>B&minus;1</sup>. Even a large token cut earns almost no reusable blocks at production block sizes until the eviction ratio is very high.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="panel" id="e2">
+    <p class="lead">Four strategies remove the same number of tokens, so logical saving is held fixed and only the physical consequences differ. Lowest-importance eviction minimizes quality loss yet frees no blocks. Block-wise eviction frees blocks at higher quality loss. Reclaimability-aware eviction sits between them.</p>
+    <div class="controls">
+      <label>Importance distribution
+        <select id="t2_dist">
+          <option value="uniform">uniform</option>
+          <option value="lognormal" selected>lognormal</option>
+          <option value="pareto">pareto</option>
+        </select>
+      </label>
+    </div>
+    <div class="charts">
+      <figure>
+        <div id="c_t2a"></div>
+        <figcaption>Physical reclaim by strategy at q=0.5. The dashed line is the logical saving. Random and lowest-importance token eviction sit near zero.</figcaption>
+      </figure>
+      <figure>
+        <div id="c_t2b"></div>
+        <figcaption>Quality versus reclaim tradeoff. Lowest-importance is low-loss but low-reclaim, block-wise is high-reclaim but higher-loss, reclaimability-aware occupies the favorable interior.</figcaption>
+      </figure>
+      <figure>
+        <div id="c_t2c"></div>
+        <figcaption>Internal fragmentation of surviving blocks. Scattered strategies strand about half of each live block. Block-wise eviction leaves near zero.</figcaption>
+      </figure>
+      <figure>
+        <div id="c_t2d"></div>
+        <figcaption>Physical reclaim as the eviction ratio grows (lognormal importance). Block-wise tracks the ideal, reclaimability-aware trails it, scattered strategies stay flat until very high ratios.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="panel" id="e3">
+    <p class="lead">Compaction moves survivor entries into fewer blocks and frees the emptied ones. Its copy cost depends on how scattered the survivors are. Block-aligned holes reach the minimal footprint with little or no copying.</p>
+    <div class="charts">
+      <figure>
+        <div id="c_t3a"></div>
+        <figcaption>Where free blocks come from. Scattered patterns get free blocks only through copy-heavy compaction. Clustered and block-coherent holes are already free at eviction.</figcaption>
+      </figure>
+      <figure>
+        <div id="c_t3b"></div>
+        <figcaption>Compaction ROI, reclaimed capacity per token copied, on a log axis. Higher means cheaper physical reclaim. Block-aligned patterns are orders of magnitude cheaper.</figcaption>
+      </figure>
+      <figure>
+        <div id="c_t3c"></div>
+        <figcaption>Survivor tokens copied to reach the minimal footprint. This is the bandwidth bill of compaction, and it is large exactly for scattered eviction.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="panel" id="e4">
+    <p class="lead">A full pool of 512 blocks is evicted by 50% and new requests each need 8 free blocks. The logical saving is identical across strategies, yet admission is not, because admission is gated by physically free blocks.</p>
+    <div class="charts">
+      <figure>
+        <div id="c_t4a"></div>
+        <figcaption>New requests admitted after an identical 50% logical eviction. The dashed line is what logical saving alone would predict. Random and lowest-importance admit zero.</figcaption>
+      </figure>
+      <figure>
+        <div id="c_t4b"></div>
+        <figcaption>Admission as the eviction ratio grows. Block-wise and random-plus-compaction overlap at the ceiling. Use the legend to separate overlapping lines.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <p class="note">Reproduce with <code>python kv_reclaimability_blog_experiments.py</code>, which writes the static figures, <code>results_summary.csv</code>, and the <code>interactive_data.json</code> that drives this page. Fixed seed, numpy, pandas, matplotlib only. Importance scores are synthetic proxies for token value, not attention weights from a real model.</p>
+</main>
+
+<div class="tooltip" id="tip"></div>
+
+<script>
+const DATA={
+ meta:{block_size:16,n_blocks:512,q:0.5,n_blocks_exp3:1000,req_blocks:8,naive_admit:32,representative_dist:"lognormal",seed:20240709},
+ exp1:{block_sizes:[4,8,16,32,64]},
+ exp2:{strategies:["random","lowest_importance","block_wise","reclaim_aware"],distributions:["uniform","lognormal","pareto"],q:0.5,
+  bars:{
+   uniform:{random:{reclaim:0.0,loss:0.4985,frag:0.5,eff:0.0},lowest_importance:{reclaim:0.002,loss:0.2475,frag:0.499,eff:0.0039},block_wise:{reclaim:0.5,loss:0.4446,frag:0.0,eff:1.0},reclaim_aware:{reclaim:0.3809,loss:0.3574,frag:0.1924,eff:0.7617}},
+   lognormal:{random:{reclaim:0.0,loss:0.5066,frag:0.5,eff:0.0},lowest_importance:{reclaim:0.0,loss:0.1585,frag:0.5,eff:0.0},block_wise:{reclaim:0.5,loss:0.3786,frag:0.0,eff:1.0},reclaim_aware:{reclaim:0.3652,loss:0.2826,frag:0.2123,eff:0.7305}},
+   pareto:{random:{reclaim:0.0,loss:0.471,frag:0.5,eff:0.0},lowest_importance:{reclaim:0.0,loss:0.0644,frag:0.5,eff:0.0},block_wise:{reclaim:0.5,loss:0.2697,frag:0.0,eff:1.0},reclaim_aware:{reclaim:0.3535,loss:0.1779,frag:0.2266,eff:0.707}}
+  },
+  sweep:{q:[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9],
+   random:{reclaim:[0.0,0.0,0.0,0.0,0.0,0.0039,0.002,0.0254,0.1934],loss:[0.099,0.195,0.3032,0.3891,0.508,0.5965,0.7162,0.8043,0.8989]},
+   lowest_importance:{reclaim:[0.0,0.0,0.0,0.0,0.0,0.0,0.0059,0.0312,0.1875],loss:[0.0112,0.0324,0.0635,0.1049,0.1585,0.2279,0.3175,0.4382,0.6138]},
+   block_wise:{reclaim:[0.0996,0.1992,0.3008,0.4004,0.5,0.5996,0.6992,0.8008,0.9004],loss:[0.0558,0.1241,0.2031,0.2875,0.3786,0.4767,0.5834,0.7013,0.83]},
+   reclaim_aware:{reclaim:[0.0547,0.1191,0.1934,0.2734,0.3652,0.4668,0.582,0.709,0.8457],loss:[0.0323,0.0774,0.1348,0.2021,0.2826,0.3761,0.4875,0.619,0.7736]}
+  }
+ },
+ exp3:{patterns:["random","lowest_importance","clustered","block_coherent"],n_blocks:1000,block_size:16,q:0.5,
+  bars:{random:{free_evict:0,freed_comp:500,moved:3233,roi:2.47,total_free:500},lowest_importance:{free_evict:0,freed_comp:500,moved:3221,roi:2.48,total_free:500},clustered:{free_evict:499,freed_comp:1,moved:8,roi:1000.0,total_free:500},block_coherent:{free_evict:500,freed_comp:0,moved:0,roi:8000.0,total_free:500}}
+ },
+ exp4:{configs:["A: random","B: lowest-importance","C: block-wise","D: reclaimability-aware","A + compaction"],naive:32,req_blocks:8,
+  bars:{"A: random":{free:0,admitted:0,moved:0},"B: lowest-importance":{free:0,admitted:0,moved:0},"C: block-wise":{free:256,admitted:32,moved:0},"D: reclaimability-aware":{free:182,admitted:22,moved:0},"A + compaction":{free:256,admitted:32,moved:1645}},
+  sweep:{q:[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9],"A: random":[0,0,0,0,0,0,0,1,13],"B: lowest-importance":[0,0,0,0,0,0,0,1,11],"C: block-wise":[6,12,19,25,32,38,44,51,57],"D: reclaimability-aware":[3,7,11,17,22,29,36,45,53],"A + compaction":[6,12,19,25,32,38,44,51,57]}
+ }
+};
+
+// Okabe-Ito colorblind-safe palette
+const PALETTE={
+  random:"#D55E00", lowest_importance:"#E69F00", block_wise:"#0072B2", reclaim_aware:"#009E73",
+  "A: random":"#D55E00", "B: lowest-importance":"#E69F00", "C: block-wise":"#0072B2",
+  "D: reclaimability-aware":"#009E73", "A + compaction":"#CC79A7"
+};
+const SLABEL={ random:"A \u00b7 random", lowest_importance:"B \u00b7 lowest-importance",
+  block_wise:"C \u00b7 block-wise", reclaim_aware:"D \u00b7 reclaimability-aware" };
+const PLABEL={ random:"random", lowest_importance:"lowest-importance", clustered:"clustered", block_coherent:"block-coherent" };
+const PCOLOR={ random:"#D55E00", lowest_importance:"#E69F00", clustered:"#56B4E9", block_coherent:"#0072B2" };
+const BCOLOR={4:"#56B4E9",8:"#009E73",16:"#0072B2",32:"#E69F00",64:"#D55E00"};
+const GRID="#d9d9d9";
+
+const NS="http://www.w3.org/2000/svg";
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+const tip=document.getElementById("tip");
+function showTip(html,ev){tip.innerHTML=html;tip.style.opacity=1;tip.style.left=(ev.clientX+14)+"px";tip.style.top=(ev.clientY+14)+"px";}
+function hideTip(){tip.style.opacity=0;}
+function clamp(v,a,b){return Math.min(Math.max(v,a),b);}
+function fmt(v){const a=Math.abs(v);if(a!==0&&(a>=1e5||a<1e-3))return v.toExponential(1);if(a>=100)return v.toFixed(0);if(a>=1)return (+v.toFixed(2)).toString();return (+v.toFixed(3)).toString();}
+function pct(v){if(v===0)return "0%";if(v<0.01)return (v*100).toFixed(4)+"%";return (v*100).toFixed(2)+"%";}
+function ticksLinear(min,max,n){if(min===max)max=min+1;const span=max-min;const step0=Math.pow(10,Math.floor(Math.log10(span/n)));const err=(span/n)/step0;let step=step0;if(err>=7.5)step=step0*10;else if(err>=3.5)step=step0*5;else if(err>=1.5)step=step0*2;const start=Math.ceil(min/step)*step;const out=[];for(let v=start;v<=max+step*1e-9;v+=step)out.push(+v.toFixed(10));return out;}
+function ticksLog(min,max){const out=[];const lo=Math.floor(Math.log10(min)),hi=Math.ceil(Math.log10(max));for(let e=lo;e<=hi;e++)out.push(Math.pow(10,e));return out;}
+function scaleLinear(d0,d1,r0,r1){const m=(r1-r0)/((d1-d0)||1);return v=>r0+(v-d0)*m;}
+function scaleLog(d0,d1,r0,r1){const l0=Math.log10(d0),l1=Math.log10(d1);const m=(r1-r0)/((l1-l0)||1);return v=>r0+(Math.log10(v)-l0)*m;}
+function localX(s,ev){const r=s.getBoundingClientRect();const vb=s.viewBox.baseVal;return (ev.clientX-r.left)*(vb.width/(r.width||1));}
+function buildLegend(host,items,hidden,rerender){const lg=document.createElement("div");lg.className="legend";items.forEach(it=>{const chip=document.createElement("span");chip.className="chip"+(hidden.has(it.name)?" off":"");chip.innerHTML="<svg width='14' height='14'><rect width='14' height='14' rx='3' fill='"+it.color+"'></rect></svg>"+it.name;chip.onclick=()=>{if(hidden.has(it.name))hidden.delete(it.name);else hidden.add(it.name);rerender();};lg.appendChild(chip);});host.appendChild(lg);}
+function wrapLabel(textEl,label,x){if(label.length<=14){textEl.textContent=label;return;}const parts=label.split(" ");let l1="",l2="";for(const p of parts){if(!l2&&(l1+" "+p).trim().length<=14)l1=(l1+" "+p).trim();else l2=(l2+" "+p).trim();}const t1=el("tspan",{x:x,dy:0});t1.textContent=l1;const t2=el("tspan",{x:x,dy:13});t2.textContent=l2;textEl.appendChild(t1);textEl.appendChild(t2);}
+
+// ---------------- line chart ---------------- //
+function lineChart(sel,spec){
+  const host=document.querySelector(sel);host.innerHTML="";
+  spec._hidden=spec._hidden||new Set();
+  const W=760,H=430,m={l:78,r:18,t:16,b:60};
+  const pw=W-m.l-m.r,ph=H-m.t-m.b;
+  const s=el("svg",{viewBox:`0 0 ${W} ${H}`,class:"chart-svg"});
+  let xs=[],ys=[];
+  spec.series.forEach(se=>{se.x.forEach(v=>xs.push(v));if(!spec._hidden.has(se.name))se.y.forEach(v=>ys.push(v));});
+  const xmin=spec.xdomain?spec.xdomain[0]:Math.min(...xs),xmax=spec.xdomain?spec.xdomain[1]:Math.max(...xs);
+  let ymin,ymax,yticks;
+  if(spec.log){const pos=ys.filter(v=>v>0);const lo=pos.length?Math.min(...pos):1e-8;ymin=spec.ymin||Math.pow(10,Math.floor(Math.log10(lo)));ymax=Math.pow(10,Math.ceil(Math.log10(Math.max(...pos,ymin*10))));yticks=ticksLog(ymin,ymax);}
+  else{ymin=0;ymax=Math.max(...ys,1e-9);yticks=ticksLinear(0,ymax,5);ymax=yticks[yticks.length-1];}
+  const sx=scaleLinear(xmin,xmax,m.l,m.l+pw);
+  const sy=spec.log?scaleLog(ymin,ymax,m.t+ph,m.t):scaleLinear(ymin,ymax,m.t+ph,m.t);
+  yticks.forEach(t=>{const y=sy(t);s.appendChild(el("line",{x1:m.l,y1:y,x2:m.l+pw,y2:y,stroke:GRID,"stroke-width":0.6}));const e=el("text",{x:m.l-8,y:y+3,"text-anchor":"end",class:"axis"});e.textContent=spec.py?spec.py(t):fmt(t);s.appendChild(e);});
+  ticksLinear(xmin,xmax,6).forEach(t=>{if(t<xmin-1e-9||t>xmax+1e-9)return;const x=sx(t);s.appendChild(el("line",{x1:x,y1:m.t,x2:x,y2:m.t+ph,stroke:GRID,"stroke-width":0.4}));const e=el("text",{x:x,y:m.t+ph+18,"text-anchor":"middle",class:"axis"});e.textContent=spec.px?spec.px(t):fmt(t);s.appendChild(e);});
+  const xt=el("text",{x:m.l+pw/2,y:H-12,"text-anchor":"middle",class:"axis-title"});xt.textContent=spec.xlabel;s.appendChild(xt);
+  const yt=el("text",{x:16,y:m.t+ph/2,"text-anchor":"middle",class:"axis-title",transform:`rotate(-90 16 ${m.t+ph/2})`});yt.textContent=spec.ylabel;s.appendChild(yt);
+  spec.series.forEach(se=>{if(spec._hidden.has(se.name))return;let d="";for(let i=0;i<se.x.length;i++){let yv=se.y[i];if(spec.log&&yv<=0)yv=ymin;const X=sx(se.x[i]),Y=sy(yv);d+=(i?"L":"M")+X.toFixed(2)+" "+Y.toFixed(2)+" ";}s.appendChild(el("path",{d,fill:"none",stroke:se.color,"stroke-width":2.2,"stroke-dasharray":se.dash||"","stroke-linejoin":"round"}));});
+  const guide=el("line",{x1:0,y1:m.t,x2:0,y2:m.t+ph,stroke:"#999","stroke-width":1,opacity:0});s.appendChild(guide);
+  const dotG=el("g",{});s.appendChild(dotG);
+  const rect=el("rect",{x:m.l,y:m.t,width:pw,height:ph,fill:"transparent"});s.appendChild(rect);
+  rect.addEventListener("mousemove",ev=>{const px=clamp(localX(s,ev)-m.l,0,pw);const xv=xmin+(px/pw)*(xmax-xmin);const xa=spec.series[0].x;let idx=0,best=1e9;for(let i=0;i<xa.length;i++){const dd=Math.abs(xa[i]-xv);if(dd<best){best=dd;idx=i;}}const gx=sx(xa[idx]);guide.setAttribute("x1",gx);guide.setAttribute("x2",gx);guide.setAttribute("opacity",1);dotG.innerHTML="";let rows="<b>"+(spec.px?spec.px(xa[idx]):fmt(xa[idx]))+"</b>";spec.series.forEach(se=>{if(spec._hidden.has(se.name))return;const yv=se.y[idx];const Y=sy(spec.log&&yv<=0?ymin:yv);dotG.appendChild(el("circle",{cx:gx,cy:Y,r:3.2,fill:se.color,stroke:"#fff","stroke-width":1}));rows+="<br><span style='color:"+se.color+"'>&#9632;</span> "+se.name+": "+(spec.vy?spec.vy(yv):fmt(yv));});showTip(rows,ev);});
+  rect.addEventListener("mouseleave",()=>{hideTip();guide.setAttribute("opacity",0);dotG.innerHTML="";});
+  host.appendChild(s);
+  buildLegend(host,spec.series.map(se=>({name:se.name,color:se.color})),spec._hidden,()=>lineChart(sel,spec));
+}
+
+// ---------------- bar chart ---------------- //
+function barChart(sel,spec){
+  const host=document.querySelector(sel);host.innerHTML="";
+  spec._hidden=spec._hidden||new Set();
+  const W=760,H=440,m={l:80,r:18,t:16,b:80};
+  const pw=W-m.l-m.r,ph=H-m.t-m.b;
+  const s=el("svg",{viewBox:`0 0 ${W} ${H}`,class:"chart-svg"});
+  const multi=spec.legend.length>1;
+  let vals=[];
+  spec.groups.forEach(g=>{if(spec.mode==="stacked"){let sum=0;g.segments.forEach(se=>{if(!spec._hidden.has(se.name))sum+=se.value;});vals.push(sum);}else{g.segments.forEach(se=>{if(!spec._hidden.has(se.name))vals.push(se.value);});}});
+  if(spec.refLine)vals.push(spec.refLine.y);
+  let ymin,ymax,yticks;
+  if(spec.log){const pos=vals.filter(v=>v>0);ymin=spec.ymin||1;ymax=Math.pow(10,Math.ceil(Math.log10(Math.max(...pos,10))));yticks=ticksLog(ymin,ymax);}
+  else{ymin=0;ymax=Math.max(...vals,1e-9);yticks=ticksLinear(0,ymax,5);ymax=yticks[yticks.length-1]||1;}
+  const sy=spec.log?scaleLog(ymin,ymax,m.t+ph,m.t):scaleLinear(ymin,ymax,m.t+ph,m.t);
+  yticks.forEach(t=>{const y=sy(t);s.appendChild(el("line",{x1:m.l,y1:y,x2:m.l+pw,y2:y,stroke:GRID,"stroke-width":0.6}));const e=el("text",{x:m.l-8,y:y+3,"text-anchor":"end",class:"axis"});e.textContent=spec.py?spec.py(t):fmt(t);s.appendChild(e);});
+  const n=spec.groups.length,gw=pw/n,pad=0.18*gw;
+  spec.groups.forEach((g,gi)=>{const gx=m.l+gi*gw;const vis=g.segments.filter(se=>!spec._hidden.has(se.name));
+    if(spec.mode==="stacked"){let acc=0;const bw=gw-2*pad;vis.forEach(se=>{const y0=sy(acc),y1=sy(acc+se.value);const r=el("rect",{x:gx+pad,y:y1,width:bw,height:Math.max(0,y0-y1),fill:se.color,stroke:"#fff","stroke-width":0.6});barHover(r,se.name+" \u00b7 "+g.label,se.value,spec);s.appendChild(r);acc+=se.value;});}
+    else{const k=vis.length||1;const bw=(gw-2*pad)/k;vis.forEach((se,si)=>{const x=gx+pad+si*bw;const y1=sy(se.value);const y0=sy(spec.log?ymin:0);const r=el("rect",{x:x,y:y1,width:bw*0.92,height:Math.max(0,y0-y1),fill:se.color,stroke:"#fff","stroke-width":0.6});barHover(r,(multi?se.name+" \u00b7 ":"")+g.label,se.value,spec);s.appendChild(r);});}
+    const lab=el("text",{x:gx+gw/2,y:m.t+ph+16,"text-anchor":"middle",class:"axis"});wrapLabel(lab,g.label,gx+gw/2);s.appendChild(lab);
+  });
+  if(spec.refLine){const y=sy(spec.refLine.y);s.appendChild(el("line",{x1:m.l,y1:y,x2:m.l+pw,y2:y,stroke:"#111","stroke-width":1.4,"stroke-dasharray":"6 4"}));const e=el("text",{x:m.l+pw-4,y:y-6,"text-anchor":"end",class:"axis"});e.textContent=spec.refLine.label;s.appendChild(e);}
+  const yt=el("text",{x:16,y:m.t+ph/2,"text-anchor":"middle",class:"axis-title",transform:`rotate(-90 16 ${m.t+ph/2})`});yt.textContent=spec.ylabel;s.appendChild(yt);
+  host.appendChild(s);
+  if(multi)buildLegend(host,spec.legend,spec._hidden,()=>barChart(sel,spec));
+}
+function barHover(r,label,value,spec){r.style.cursor="pointer";r.addEventListener("mousemove",ev=>showTip("<b>"+label+"</b><br>"+(spec.vy?spec.vy(value):fmt(value)),ev));r.addEventListener("mouseleave",hideTip);}
+
+// ---------------- scatter chart ---------------- //
+function scatterChart(sel,spec){
+  const host=document.querySelector(sel);host.innerHTML="";
+  const W=760,H=430,m={l:82,r:26,t:18,b:60};
+  const pw=W-m.l-m.r,ph=H-m.t-m.b;
+  const s=el("svg",{viewBox:`0 0 ${W} ${H}`,class:"chart-svg"});
+  let xmax=Math.max(...spec.points.map(p=>p.x),0.05)*1.18;
+  let ymax=Math.max(...spec.points.map(p=>p.y),0.05)*1.18;
+  const tx=ticksLinear(0,xmax,5);xmax=tx[tx.length-1];
+  const ty=ticksLinear(0,ymax,5);ymax=ty[ty.length-1];
+  const sx=scaleLinear(0,xmax,m.l,m.l+pw),sy=scaleLinear(0,ymax,m.t+ph,m.t);
+  ty.forEach(t=>{const y=sy(t);s.appendChild(el("line",{x1:m.l,y1:y,x2:m.l+pw,y2:y,stroke:GRID,"stroke-width":0.6}));const e=el("text",{x:m.l-8,y:y+3,"text-anchor":"end",class:"axis"});e.textContent=spec.py?spec.py(t):fmt(t);s.appendChild(e);});
+  tx.forEach(t=>{const x=sx(t);s.appendChild(el("line",{x1:x,y1:m.t,x2:x,y2:m.t+ph,stroke:GRID,"stroke-width":0.6}));const e=el("text",{x:x,y:m.t+ph+18,"text-anchor":"middle",class:"axis"});e.textContent=spec.px?spec.px(t):fmt(t);s.appendChild(e);});
+  const xt=el("text",{x:m.l+pw/2,y:H-12,"text-anchor":"middle",class:"axis-title"});xt.textContent=spec.xlabel;s.appendChild(xt);
+  const yt=el("text",{x:16,y:m.t+ph/2,"text-anchor":"middle",class:"axis-title",transform:`rotate(-90 16 ${m.t+ph/2})`});yt.textContent=spec.ylabel;s.appendChild(yt);
+  spec.points.forEach(p=>{const X=sx(p.x),Y=sy(p.y);const c=el("circle",{cx:X,cy:Y,r:7,fill:p.color,stroke:"#fff","stroke-width":1.5});c.style.cursor="pointer";c.addEventListener("mousemove",ev=>showTip("<b>"+p.label+"</b><br>reclaim: "+pct(p.x)+"<br>importance loss: "+pct(p.y),ev));c.addEventListener("mouseleave",hideTip);s.appendChild(c);const t=el("text",{x:X+11,y:Y-9,class:"axis"});t.textContent=p.label;s.appendChild(t);});
+  host.appendChild(s);
+}
+
+// ---------------- build tabs ---------------- //
+function buildTab1(){
+  const qs=[];for(let i=0;i<=100;i++)qs.push(+(i/100).toFixed(2));
+  const bs=DATA.exp1.block_sizes;
+  const s1=[{name:"logical saving = q",color:"#111",dash:"6 4",x:qs,y:qs.slice()}];
+  bs.forEach(B=>s1.push({name:"physical reclaim, B="+B,color:BCOLOR[B],x:qs,y:qs.map(q=>Math.pow(q,B))}));
+  window._t1a={series:s1,xlabel:"token eviction ratio q",ylabel:"fraction of KV cache",log:false,ymin:1e-8,px:q=>q.toFixed(1),py:v=>fmt(v),vy:v=>pct(v)};
+  document.getElementById("t1a_log").onchange=e=>{window._t1a.log=e.target.checked;lineChart("#c_t1a",window._t1a);};
+  lineChart("#c_t1a",window._t1a);
+  const s2=bs.map(B=>({name:"efficiency, B="+B,color:BCOLOR[B],x:qs,y:qs.map(q=>Math.pow(q,B-1))}));
+  window._t1b={series:s2,xlabel:"token eviction ratio q",ylabel:"reclaim efficiency (physical / logical)",log:true,ymin:1e-8,px:q=>q.toFixed(1),py:v=>fmt(v),vy:v=>pct(v)};
+  document.getElementById("t1b_log").onchange=e=>{window._t1b.log=e.target.checked;lineChart("#c_t1b",window._t1b);};
+  lineChart("#c_t1b",window._t1b);
+}
+function buildTab2(){
+  const strat=DATA.exp2.strategies;
+  function render(dist){
+    const b=DATA.exp2.bars[dist];
+    barChart("#c_t2a",{mode:"grouped",legend:[{name:"reclaim",color:"#0072B2"}],
+      groups:strat.map(x=>({label:SLABEL[x],segments:[{name:"reclaim",color:PALETTE[x],value:b[x].reclaim}]})),
+      ylabel:"physical reclaim (free blocks / total)",refLine:{y:DATA.exp2.q,label:"logical saving = "+DATA.exp2.q},py:v=>v.toFixed(2),vy:v=>pct(v)});
+    scatterChart("#c_t2b",{points:strat.map(x=>({label:SLABEL[x],color:PALETTE[x],x:b[x].reclaim,y:b[x].loss})),
+      xlabel:"physical reclaim \u2192 better",ylabel:"importance loss \u2192 worse",px:v=>v.toFixed(2),py:v=>v.toFixed(2)});
+    barChart("#c_t2c",{mode:"grouped",legend:[{name:"fragmentation",color:"#888"}],
+      groups:strat.map(x=>({label:SLABEL[x],segments:[{name:"fragmentation",color:PALETTE[x],value:b[x].frag}]})),
+      ylabel:"fragmentation of surviving blocks",py:v=>v.toFixed(2),vy:v=>v.toFixed(3)});
+  }
+  const sel=document.getElementById("t2_dist");sel.onchange=()=>render(sel.value);render(sel.value);
+  const sw=DATA.exp2.sweep;
+  window._t2d={series:strat.map(x=>({name:SLABEL[x],color:PALETTE[x],x:sw.q,y:sw[x].reclaim})),
+    xlabel:"token eviction ratio q",ylabel:"physical reclaim (free blocks / total)",log:false,px:q=>q.toFixed(1),py:v=>v.toFixed(2),vy:v=>pct(v)};
+  lineChart("#c_t2d",window._t2d);
+}
+function buildTab3(){
+  const pats=DATA.exp3.patterns,b=DATA.exp3.bars;
+  barChart("#c_t3a",{mode:"stacked",
+    legend:[{name:"free at eviction (no copy)",color:"#009E73"},{name:"freed by compaction (needs copy)",color:"#D55E00"}],
+    groups:pats.map(p=>({label:PLABEL[p],segments:[{name:"free at eviction (no copy)",color:"#009E73",value:b[p].free_evict},{name:"freed by compaction (needs copy)",color:"#D55E00",value:b[p].freed_comp}]})),
+    ylabel:"free blocks (of "+DATA.exp3.n_blocks+")",py:v=>fmt(v),vy:v=>fmt(v)+" blocks"});
+  barChart("#c_t3b",{mode:"grouped",log:true,ymin:1,legend:[{name:"ROI",color:"#0072B2"}],
+    groups:pats.map(p=>({label:PLABEL[p],segments:[{name:"ROI",color:PCOLOR[p],value:b[p].roi}]})),
+    ylabel:"compaction ROI (reclaimed / copied), log",py:v=>fmt(v),vy:v=>fmt(v)});
+  barChart("#c_t3c",{mode:"grouped",legend:[{name:"moved",color:"#CC79A7"}],
+    groups:pats.map(p=>({label:PLABEL[p],segments:[{name:"moved",color:PCOLOR[p],value:b[p].moved}]})),
+    ylabel:"survivor tokens copied",py:v=>fmt(v),vy:v=>fmt(v)+" tokens"});
+}
+function buildTab4(){
+  const cfgs=DATA.exp4.configs,b=DATA.exp4.bars;
+  barChart("#c_t4a",{mode:"grouped",legend:[{name:"admitted",color:"#0072B2"}],
+    groups:cfgs.map(c=>({label:c,segments:[{name:"admitted",color:PALETTE[c]||"#0072B2",value:b[c].admitted}]})),
+    ylabel:"new requests admitted",refLine:{y:DATA.exp4.naive,label:"naive expectation = "+DATA.exp4.naive},py:v=>fmt(v),vy:v=>fmt(v)+" requests"});
+  const sw=DATA.exp4.sweep;
+  window._t4b={series:cfgs.map(c=>({name:c,color:PALETTE[c]||"#0072B2",x:sw.q,y:sw[c]})),
+    xlabel:"token eviction ratio q",ylabel:"new requests admitted",log:false,px:q=>q.toFixed(1),py:v=>fmt(v),vy:v=>fmt(v)};
+  lineChart("#c_t4b",window._t4b);
+}
+
+// tabs
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  document.getElementById(t.dataset.tab).classList.add("active");
+}));
+
+buildTab1();buildTab2();buildTab3();buildTab4();
+</script>
+</body>
+</html>
