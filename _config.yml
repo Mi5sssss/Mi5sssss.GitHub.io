@@ -8,7 +8,7 @@ logo: # filename of a logo image that has been placed into your images directory
 owner:
   name: Rui (Rick) Xie
   avatar: IMG_1453.JPG
-  bio: "Rick @ RPI"
+  bio: "Building Efficient AI Infrastructure"
   email: #xier2@rpi.edu #emailaddress
   # Do not include the @ symbol in your Twitter username
   twitter: rickatny #username
