@@ -2,7 +2,7 @@
 layout: post
 title: "The Hardware Lottery"
 excerpt: "Part 2. Why every frontier model has converged on the same skeleton, and why the silicon, not the science, is what chose it."
-modified: 7/17/2026, 00:00:00
+modified: 2026-07-07
 tags: [AI infrastructure, pretraining, large language models, scaling laws, semiconductors]
 comments: true
 category: blog

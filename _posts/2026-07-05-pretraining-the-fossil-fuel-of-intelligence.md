@@ -2,7 +2,7 @@
 layout: post
 title: "The Fossil Fuel of Intelligence"
 excerpt: "A field guide to pretraining for engineers, and why most of what you have read about it is already obsolete."
-modified: 7/11/2026, 00:00:00
+modified: 2026-07-05
 tags: [AI infrastructure, pretraining, large language models, scaling laws, semiconductors]
 comments: true
 category: blog

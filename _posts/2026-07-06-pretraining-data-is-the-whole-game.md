@@ -2,7 +2,7 @@
 layout: post
 title: "Data Is the Whole Game"
 excerpt: "Part 1. Why the corpus, not the architecture, is the moat, and why the two loudest panics about running out of data are both told wrong."
-modified: 7/14/2026, 00:00:00
+modified: 2026-07-06
 tags: [AI infrastructure, pretraining, large language models, scaling laws, semiconductors]
 comments: true
 category: blog

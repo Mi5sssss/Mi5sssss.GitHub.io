@@ -2,7 +2,7 @@
 layout: post
 title: "The Closing of the Recipe"
 excerpt: "Part 5. When every model shares one skeleton, the moat becomes the thing nobody publishes."
-modified: 7/26/2026, 00:00:00
+modified: 2026-07-11
 tags: [AI infrastructure, pretraining, large language models, scaling laws, semiconductors]
 comments: true
 category: blog

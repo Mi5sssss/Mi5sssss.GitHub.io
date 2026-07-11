@@ -2,7 +2,7 @@
 layout: post
 title: "The Death of Chinchilla"
 excerpt: "Part 4. Why the most cited recipe in pretraining optimizes the wrong thing, and why emergence is mostly a measurement artifact."
-modified: 7/23/2026, 00:00:00
+modified: 2026-07-10
 tags: [AI infrastructure, pretraining, large language models, scaling laws, semiconductors]
 comments: true
 category: blog

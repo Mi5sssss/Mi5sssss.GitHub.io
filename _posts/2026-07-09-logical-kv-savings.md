@@ -2,7 +2,7 @@
 layout: post
 title: "Logical KV Savings Are Not Physical Memory Savings"
 excerpt: "Token-level KV cache eviction can report large logical savings while returning little usable GPU memory to a paged allocator. How much it actually returns is method dependent. An analytical bound, realistic eviction patterns, allocator-aware metrics, and interactive simulations."
-modified: 7/9/2026, 12:00:00
+modified: 2026-07-09
 tags: [AI infrastructure, LLM serving, KV cache, computer architecture, memory systems]
 comments: true
 category: blog

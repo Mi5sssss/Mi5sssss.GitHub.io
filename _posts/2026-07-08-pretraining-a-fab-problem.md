@@ -2,7 +2,7 @@
 layout: post
 title: "Pretraining Is a Fab Problem"
 excerpt: "Part 3. Why the frontier is gated by memory bandwidth, packaging capacity, and depreciation, and barely at all by ideas about intelligence."
-modified: 7/20/2026, 00:00:00
+modified: 2026-07-08
 tags: [AI infrastructure, pretraining, large language models, scaling laws, semiconductors]
 comments: true
 category: blog

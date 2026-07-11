@@ -2,7 +2,7 @@
 layout: post
 title: "Why a Busy GPU Is Not a Useful GPU in LLM Serving"
 excerpt: "A reproducible mechanism study of schedulability, KV-cache lifecycle, and useful tokens per dollar in LLM serving, with a controlled scheduler ablation and honest error bars."
-modified: 7/9/2026, 00:00:00
+modified: 2026-07-09
 tags: [AI infrastructure, LLM serving, computer architecture, scheduling]
 comments: true
 category: blog
