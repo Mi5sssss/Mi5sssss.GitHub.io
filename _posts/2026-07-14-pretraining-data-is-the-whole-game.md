@@ -95,7 +95,18 @@ The reframe to carry forward is simple. Stop thinking of the model as the produc
 <script>
 (function(){
   var frames = Array.prototype.slice.call(document.querySelectorAll('iframe.pf-frame'));
-  function resize(f){ try{ var d=f.contentWindow.document.documentElement; f.style.height=(d.scrollHeight+24)+'px'; }catch(e){} }
+  function resize(f){
+    try{
+      var b = f.contentWindow.document.body;
+      if(!b) return;
+      // Measure the body content height, not documentElement.scrollHeight. The latter is
+      // floored to the iframe viewport, so setting the height back would ratchet upward on
+      // every call. body.scrollHeight reflects true content, and the guard below stops any
+      // sub-pixel feedback so clicking no longer adds a strip of blank space each time.
+      var h = b.scrollHeight;
+      if(h && Math.abs(h - (f._h || 0)) > 1){ f.style.height = h + 'px'; f._h = h; }
+    }catch(e){}
+  }
   frames.forEach(function(f){
     f.addEventListener('load', function(){
       resize(f); setTimeout(function(){resize(f);}, 300);
@@ -104,6 +115,6 @@ The reframe to carry forward is simple. Stop thinking of the model as the produc
       });
     });
   });
-  window.addEventListener('resize', function(){ frames.forEach(function(f){ setTimeout(function(){resize(f);}, 120); }); });
+  window.addEventListener('resize', function(){ frames.forEach(function(f){ f._h = 0; setTimeout(function(){resize(f);}, 120); }); });
 })();
 </script>
