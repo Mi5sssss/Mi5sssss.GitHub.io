@@ -93,8 +93,13 @@ Hover any point or bar for exact values with one standard deviation, click a leg
   if (!f) return;
   function resize() {
     try {
-      var doc = f.contentWindow.document.documentElement;
-      f.style.height = (doc.scrollHeight + 24) + 'px';
+      var b = f.contentWindow.document.body;
+      if (!b) return;
+      // body.scrollHeight reflects true content height and is not floored to the iframe
+      // viewport, so setting the height back does not ratchet upward. The guard stops any
+      // sub-pixel feedback, so clicking no longer adds a strip of blank space each time.
+      var h = b.scrollHeight;
+      if (h && Math.abs(h - (f._h || 0)) > 1) { f.style.height = h + 'px'; f._h = h; }
     } catch (e) { /* cross-origin only, ignored on the live same-origin site */ }
   }
   f.addEventListener('load', function () {
@@ -103,7 +108,7 @@ Hover any point or bar for exact values with one standard deviation, click a leg
     try { f.contentWindow.document.addEventListener('click', function () { setTimeout(resize, 80); }); } catch (e) {}
     try { f.contentWindow.document.addEventListener('change', function () { setTimeout(resize, 80); }); } catch (e) {}
   });
-  window.addEventListener('resize', function () { setTimeout(resize, 120); });
+  window.addEventListener('resize', function () { f._h = 0; setTimeout(resize, 120); });
 })();
 </script>
 
