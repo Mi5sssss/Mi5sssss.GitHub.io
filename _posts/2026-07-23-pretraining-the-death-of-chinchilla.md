@@ -8,29 +8,29 @@ comments: true
 category: blog
 ---
 
-*Part 4 of the series. The hub is [The Fossil Fuel of Intelligence](/blog/pretraining-the-fossil-fuel-of-intelligence/). This post goes deep on scaling, the one part of pretraining with a real quantitative theory, and shows where that theory is dead, where it is a mirage, and where it hides the deepest open problem in the field. The numbers are all explorable in the interactive figures below.*
+*Part 4 of a six part series. It begins with [The Fossil Fuel of Intelligence](/blog/pretraining-the-fossil-fuel-of-intelligence/).*
 
 ---
 
-Scaling laws are the closest thing pretraining has to physics. Loss falls as a smooth power law in model size, in data, and in compute, across many orders of magnitude, and that regularity is genuinely astonishing and genuinely useful. It is why you can predict the loss of a model you have not trained yet from the losses of smaller ones. Almost everything else in this series is contested craft. This is a law.
+Scaling laws are the closest thing pretraining has to physics. Loss falls as a smooth power law in model size, in data, and in compute, across many orders of magnitude, and that regularity is both reliable and useful. It allows the loss of an untrained model to be predicted from the losses of smaller ones. Most of the rest of pretraining is contested craft, while this part rests on a stable law.
 
-And yet the single most cited practical result built on that law, the Chinchilla compute optimal recipe, is in 2026 mostly a corpse that tutorials keep propping up in a chair and addressing as though it were alive. Understanding exactly how it died, and exactly what part of the theory is a measurement artifact, and exactly what real mystery is left standing after you clear away the dead and the fake, is the most clarifying thing you can do for your intuition about where models are going.
-
----
-
-## The law, and the recipe built on it
-
-The early scaling laws came from Kaplan and colleagues. The sharper version came from Hoffmann and colleagues at DeepMind, the Chinchilla paper, and it answered a specific question. Given a fixed compute budget, how should you split it between making the model bigger and training it on more data. Their answer, widely repeated as a rule of thumb, was to scale both together, roughly twenty tokens of training data per parameter.
-
-The interactive figure below shows the frontier the parametric loss produces, the optimal model size climbing with the compute budget along a smooth curve. But look closely at the tokens per parameter column and you find the first crack. It does not sit at twenty. It drifts from about thirty up past a hundred as the budget grows. That is not a bug in the experiment. The famous twenty comes from one of the three estimation methods in the Chinchilla paper, and the parametric loss form, from a different method in the same paper, implies a ratio that moves with scale. The paper's own methods disagree with each other. That disagreement is not a footnote to skip. It is the first sign that the optimal ratio was never a constant of nature, which is precisely why it turned out to be so easy to abandon.
+The most cited practical result built on that law, the Chinchilla compute optimal recipe, no longer holds as advice by 2026, though tutorials still repeat it. How it stopped applying, which part of the theory is a measurement artifact, and which real open problem remains once those are set aside, together clarify where models are heading.
 
 ---
 
-## How it actually died. The basin is flat
+## The scaling law and the Chinchilla recipe
 
-Here is the real cause of death, and it is beautiful because it is visible in the numbers.
+The early scaling laws came from Kaplan and colleagues. A refined version came from Hoffmann and colleagues at DeepMind, in the Chinchilla paper, which answered a specific question. Given a fixed compute budget, it asked how to divide that budget between making the model bigger and training it on more data. The answer, widely repeated as a rule of thumb, was to scale both together, at roughly twenty tokens of training data per parameter.
 
-Chinchilla optimizes the compute spent to reach a given loss during training. But a deployed model spends the overwhelming majority of its lifetime compute not on the one time training run but on inference, answering billions of requests. And the loss surface around the compute optimal point is remarkably flat. Fix the budget in that same figure and shrink the model below the optimum. Cutting the model to one eighth of the optimal size, and training it on eight times the tokens per parameter to spend the same compute, costs about three and a half percent of loss. Three and a half percent. In exchange you get a model one eighth the size, which is close to one eighth the cost on every single forward pass it will ever perform in production.
+The figure below shows the frontier the parametric loss produces, with the optimal model size climbing along a smooth curve as the compute budget grows. The tokens per parameter column reveals the first problem. The ratio climbs with the budget, from about thirty up past a hundred, well above the twenty of the rule of thumb. This reflects the estimation method rather than an error in the experiment. The value of twenty comes from one of the three estimation methods in the Chinchilla paper, while the parametric loss form, drawn from a different method in the same paper, implies a ratio that moves with scale. The paper's own methods disagree with each other. That disagreement matters, because it is an early sign that the optimal ratio was never a constant of nature, which is part of why it proved easy to abandon.
+
+---
+
+## The flat loss basin and inference economics
+
+The main cause is visible directly in the numbers.
+
+Chinchilla optimizes the compute spent to reach a given loss during training. A deployed model spends most of its lifetime compute on inference, answering billions of requests, rather than on the one time training run. The loss surface around the compute optimal point is flat. Holding the budget fixed and shrinking the model below the optimum shows the effect. Cutting the model to one eighth of the optimal size, and training it on eight times the tokens per parameter to spend the same compute, costs about three and a half percent of loss. That gives a model one eighth the size, which is close to one eighth the cost on every forward pass it performs in production.
 
 
 <iframe class="pf-frame" src="/pretraining/05-scaling-laws.html" title="Interactive figure. The death of Chinchilla" loading="lazy" style="width:100%; height:800px; border:1px solid #ddd; border-radius:8px;"></iframe>
@@ -38,17 +38,17 @@ Chinchilla optimizes the compute spent to reach a given loss during training. Bu
 <p style="margin-top:-4px; font-size:14px;"><a href="/pretraining/05-scaling-laws.html" target="_blank" rel="noopener">Open this figure in a new tab</a></p>
 
 
-Now do the amortization, which is the argument the fab post makes in its own terms. A tiny, permanent, per request saving multiplied across the entire deployed life of a model dwarfs a one time training penalty of a few percent of loss. So the rational move is to leave the compute optimal point on purpose, train a smaller model far past the point of training efficiency, and bank the serving savings forever. This is why the frontier trains small models on absurd token counts. It is not a machine learning result at all. It is an amortization decision made against an inference bill, which is to say it is the semiconductor economics of the fab post wearing a scaling laws costume. Chinchilla answered the training compute question correctly and then the world stopped asking that question.
+The amortization rests on semiconductor economics. A small, permanent, per request saving multiplied across the entire deployed life of a model outweighs a one time training penalty of a few percent of loss. The rational move is to leave the compute optimal point on purpose, train a smaller model well past the point of training efficiency, and keep the serving savings. This is why the frontier trains small models on very large token counts. The reasoning is closer to amortization than to model quality. A one time training cost is spread against the inference bill across the enormous number of requests the model will serve. Chinchilla answered the training compute question correctly, and then the field stopped asking that question.
 
-There is also a new axis that did not exist when Chinchilla was written. Test time compute, the reasoning models that generate long chains of thought before answering, buys capability at inference time rather than baking all of it in during pretraining. It partially substitutes for pretraining scale, and it shifts the hardware demand toward the low latency, memory bound serving regime the roofline experiment showed running at a fraction of peak. The scaling picture is no longer a single knob. It is at least three, and the compute optimal recipe only ever described one of them.
+A new axis has appeared that did not exist when Chinchilla was written. Test time compute, the reasoning models that generate long chains of thought before answering, buys capability at inference time instead of baking all of it in during pretraining. It partially substitutes for pretraining scale, and it shifts the hardware demand toward the low latency, memory bound serving regime that runs at a fraction of peak throughput. The scaling picture now involves at least three knobs, and the compute optimal recipe only ever described one of them.
 
 ---
 
-## Emergence is mostly a mirage
+## Why emergence is mostly a measurement artifact
 
-The other romantic idea in scaling is emergence, the claim that qualitatively new abilities appear suddenly and unpredictably once a model crosses a size threshold. It is a thrilling story and it launched a thousand think pieces. It is also, in large part, a measurement artifact, and you can reproduce the illusion in a few lines.
+A second idea in scaling is emergence, the claim that qualitatively new abilities appear suddenly and unpredictably once a model crosses a size threshold. It has been widely reported. It is also, in large part, a measurement artifact, and the effect can be reproduced in a few lines.
 
-The interactive figure below models a per token correctness probability that improves perfectly smoothly with scale, nothing sudden anywhere in the ground truth. Then it scores that smooth improvement two ways. Per token accuracy, which climbs smoothly and boringly from 0.1 to 0.96. And exact match accuracy over a twenty token answer, which requires every token to be right at once. The exact match number stays near zero while per token accuracy is merely good, then leaps from essentially zero toward one over a single scale step. That leap is the celebrated emergent ability, and it is nothing but a smooth number raised to a high power. Schaeffer and colleagues made this argument carefully in 2023, and the toy reproduces its spine. Change from an all or nothing metric to one that gives partial credit and the cliff dissolves back into the smooth slope it always was.
+The figure below models a per token correctness probability that improves smoothly with scale, with nothing sudden in the ground truth. It then scores that smooth improvement two ways. Per token accuracy climbs steadily from 0.1 to 0.96. Exact match accuracy over a twenty token answer, which requires every token to be right at once, behaves differently. The exact match number stays near zero while per token accuracy is only moderate, then rises from near zero toward one over a single scale step. That rise is the reported emergent ability, and it is a smooth number raised to a high power. Schaeffer and colleagues made this argument in 2023, and the toy model reproduces it. Switching from an all or nothing metric to one that gives partial credit returns the sharp step to the smooth slope underneath.
 
 
 <iframe class="pf-frame" src="/pretraining/12-emergence-mirage.html" title="Interactive figure. Emergence as a mirage" loading="lazy" style="width:100%; height:800px; border:1px solid #ddd; border-radius:8px;"></iframe>
@@ -56,27 +56,27 @@ The interactive figure below models a per token correctness probability that imp
 <p style="margin-top:-4px; font-size:14px;"><a href="/pretraining/12-emergence-mirage.html" target="_blank" rel="noopener">Open this figure in a new tab</a></p>
 
 
-The practical discipline that follows is severe. Distrust any emergence claim built on a discontinuous metric, which is most of them. A great deal of breathless capability reporting is a hard threshold applied to a smooth underlying trend.
+The practical guidance that follows is clear. Emergence claims built on a discontinuous metric, which is most of them, deserve caution. A great deal of capability reporting is a hard threshold applied to a smooth underlying trend.
 
 ---
 
-## The mystery that survives
+## The open problem that remains
 
-Now clear away the dead recipe and the fake cliff and look at what is still standing, because something is, and it is the most important unsolved problem in the science of pretraining.
+Setting aside the outdated recipe and the metric artifact, a real open problem remains, and it is central to the science of pretraining.
 
-The loss is smooth and predictable. The capabilities the loss is supposed to represent do not feel smooth. Grokking, the sudden late generalization after a long plateau of apparent memorization, is real and reproducible and not a metric artifact. Internal reorganizations, circuits forming, features separating, do seem to happen in something closer to phases than to a smooth glide. So we are left with a genuine and uncomfortable gap. We have a beautiful predictive theory for the loss, and almost no predictive theory for the abilities that matter, the ones the loss stands in for. We can tell you what the next model's loss will be. We cannot reliably tell you what it will be able to do.
+The loss is smooth and predictable. The capabilities the loss is meant to represent do not appear smooth. Grokking, the sudden late generalization after a long plateau of apparent memorization, is real, reproducible, and not a metric artifact. Internal reorganizations, circuits forming and features separating, seem to happen in something closer to phases than a smooth glide. The result is a real gap. There is a strong predictive theory for the loss and almost no predictive theory for the abilities it stands in for. The next model's loss can be predicted. What it will be able to do cannot yet be predicted reliably.
 
-That gap is where the real science is. Predicting downstream capability from upstream loss, understanding which abilities track loss smoothly and which reorganize in steps, and knowing in advance which is which, is unsolved and central. Emergence as usually reported is a mirage. But the thing the mirage was pointing at, the mismatch between our smooth theory and the jagged reality of capability, is real, and it is the frontier of understanding rather than a settled law.
+That gap is where the open science lies. Predicting downstream capability from upstream loss, understanding which abilities track loss smoothly and which reorganize in steps, and knowing in advance which is which, remains unsolved and central. Emergence as usually reported is a measurement artifact. The underlying point, the mismatch between the smooth theory and the uneven reality of capability, is real, and it remains an open area of understanding rather than a settled law.
 
 ---
 
-## What to take away
+## Summary
 
-Hold three things at once, because they are all true and they are usually confused for one another. The Chinchilla recipe is dead, killed not by a better law but by the flat basin and the arithmetic of inference. Emergence, as popularly reported, is mostly an artifact of cruel metrics. And underneath both, the gap between predictable loss and unpredictable capability is a live, deep, open problem that neither the dead recipe nor the fake cliff should distract you from.
+Three points hold together. The Chinchilla recipe no longer applies, set aside because of the flat loss basin and the arithmetic of inference rather than any better law. Emergence, as popularly reported, is mostly an artifact of all or nothing metrics. Underneath both, the gap between predictable loss and unpredictable capability is a live open problem that neither the outdated recipe nor the metric artifact should obscure.
 
-The through line to the rest of the series is the same one that keeps appearing. Even scaling, the most scientific corner of pretraining, turns out on inspection to be governed by inference economics and by what we can and cannot measure, more than by any clean law about intelligence. The law is real. It just does not decide as much as its fame suggests.
+The same pattern appears across pretraining. Even scaling, one of its more scientific areas, turns out on inspection to be governed by inference economics and by the limits of measurement, more than by any clean law about intelligence. The law is real, though it decides less than its reputation suggests.
 
-*The figures above are interactive, so drag and toggle them. Sources and hedges for every claim are in [references.md](/pretraining/references.md).*
+*Sources and notes are in [references.md](/pretraining/references.md).*
 
 <script>
 (function(){
