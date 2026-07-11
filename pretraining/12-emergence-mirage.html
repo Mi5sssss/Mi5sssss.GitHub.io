@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Emergence as a mirage</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="em-root" class="em-root">
+  <style>
+    .em-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .em-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .em-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .em-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .em-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+    .em-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .em-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .em-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+    .em-canvas-wrap{position:relative;width:100%;overflow-x:auto;}
+    canvas.em-canvas{width:100%;height:320px;display:block;touch-action:none;cursor:grab;}
+    canvas.em-canvas:active{cursor:grabbing;}
+    .em-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    .em-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .em-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .em-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+    .em-stat.pt .v{color:var(--accent);}
+    .em-stat.ex .v{color:var(--accent-2);}
+    .em-controls{margin-top:14px;}
+    .em-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
+    .em-row label{font-size:12.5px;color:var(--muted);min-width:150px;}
+    .em-row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;min-width:84px;text-align:right;}
+    .em-root input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:3px;background:var(--line);outline:none;}
+    .em-root input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent-2);cursor:pointer;border:2px solid var(--surface);}
+    .em-root input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent-2);cursor:pointer;border:2px solid var(--surface);}
+    .em-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    .em-note b{color:var(--ink);font-weight:600;}
+    .em-cap{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.55;font-style:italic;}
+    .em-cap b{color:var(--ink);font-weight:600;font-style:normal;}
+    @media (max-width:520px){.em-readout{grid-template-columns:repeat(2,1fr);}.em-row label{min-width:120px;}}
+    @media (prefers-reduced-motion:reduce){.em-root *{transition:none !important;}}
+  </style>
+
+  <div class="em-card">
+    <p class="em-title">Emergence as a mirage. Watch a metric invent a cliff.</p>
+    <p class="em-frame">A single smooth improvement in skill, scored by an all or nothing metric, can look like an ability that switches on at some scale. Drag the marker to read any point. Then drag the answer length and watch the cliff appear out of a curve that never bends.</p>
+
+    <div class="em-canvas-wrap">
+      <canvas class="em-canvas" id="em-cv" width="1400" height="640" aria-label="Per token accuracy and exact match accuracy versus model scale"></canvas>
+    </div>
+
+    <div class="em-readout">
+      <div class="em-stat"><div class="k">Scale (log10 params)</div><div class="v" id="em-scale">11.00</div></div>
+      <div class="em-stat pt"><div class="k">Per token accuracy</div><div class="v" id="em-ptok">0.900</div></div>
+      <div class="em-stat ex"><div class="k">Exact match accuracy</div><div class="v" id="em-exact">0.122</div></div>
+      <div class="em-stat"><div class="k">Answer length L</div><div class="v" id="em-Lread">20</div></div>
+    </div>
+
+    <div class="em-controls">
+      <div class="em-row">
+        <label>Answer length L (tokens)</label>
+        <input type="range" id="em-L" min="1" max="60" step="1" value="20">
+        <span class="val" id="em-Lval">20 tokens</span>
+      </div>
+    </div>
+
+    <div class="em-note" id="em-note"></div>
+    <p class="em-cap"><b>The lesson.</b> Distrust any emergence claim built on an all or nothing metric. The lesson is not that emergence is fake, real reorganizations like grokking exist. It is that our theory predicts the smooth loss, and not the jagged capability that the loss is supposed to stand for.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("em-root");
+    var cv=document.getElementById("em-cv"), ctx=cv.getContext("2d");
+    var L=20;
+    var markX=11.0;            // current scale marker, log10 of params, in [7,12]
+    var X_LO=7, X_HI=12;       // scale axis range
+
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+    function ptok(x){return 1/(1+Math.exp(-1.1*(x-9)));}   // smooth ground truth
+    function exact(x){return Math.pow(ptok(x),L);}          // all or nothing metric
+
+    function hexA(hex,a){
+      hex=hex.replace('#',''); if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+
+    var pad={l:62,r:26,t:44,b:72};
+    function draw(){
+      var W=cv.width,H=cv.height;
+      ctx.clearRect(0,0,W,H);
+
+      var line=cvar("--line"), muted=cvar("--muted"), ink=cvar("--ink"),
+          accent=cvar("--accent"), accent2=cvar("--accent-2"), surface=cvar("--surface");
+
+      function X(x){return pad.l+(x-X_LO)/(X_HI-X_LO)*(W-pad.l-pad.r);}
+      function Y(a){return pad.t+(1-a)*(H-pad.t-pad.b);}
+      var y0=Y(0), y1=Y(1);
+
+      // horizontal gridlines and y ticks
+      ctx.font="20px ui-monospace,Menlo,monospace"; ctx.textAlign="right"; ctx.textBaseline="middle";
+      var yticks=[0,0.25,0.5,0.75,1];
+      for(var i=0;i<yticks.length;i++){
+        var yy=Y(yticks[i]);
+        ctx.strokeStyle=line; ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(W-pad.r,yy);ctx.stroke();
+        ctx.fillStyle=muted; ctx.fillText(yticks[i].toFixed(2), pad.l-12, yy);
+      }
+      // vertical gridlines and x ticks
+      ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+      for(var g=X_LO; g<=X_HI; g++){
+        var xx=X(g);
+        ctx.strokeStyle=line; ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(xx,pad.t);ctx.lineTo(xx,y0);ctx.stroke();
+        ctx.fillStyle=muted; ctx.fillText(String(g), xx, y0+30);
+      }
+      // axis titles
+      ctx.fillStyle=muted;
+      ctx.textAlign="left"; ctx.fillText("accuracy", 10, pad.t-18);
+      ctx.textAlign="center"; ctx.fillText("scale (log10 params)", (pad.l+(W-pad.r))/2, y0+56);
+
+      var NS=340; // samples
+
+      // fill under the exact match curve, emphasizing the cliff
+      ctx.fillStyle=hexA(accent2,0.13);
+      ctx.beginPath();ctx.moveTo(X(X_LO),y0);
+      for(var s=0;s<=NS;s++){var x=X_LO+(X_HI-X_LO)*s/NS;ctx.lineTo(X(x),Y(exact(x)));}
+      ctx.lineTo(X(X_HI),y0);ctx.closePath();ctx.fill();
+
+      // per token curve (smooth ground truth)
+      ctx.strokeStyle=accent; ctx.lineWidth=3.4; ctx.lineJoin="round"; ctx.beginPath();
+      for(var s2=0;s2<=NS;s2++){var x2=X_LO+(X_HI-X_LO)*s2/NS;var px=X(x2),py=Y(ptok(x2));if(s2===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
+      ctx.stroke();
+
+      // exact match curve (the manufactured cliff)
+      ctx.strokeStyle=accent2; ctx.lineWidth=3.4; ctx.beginPath();
+      for(var s3=0;s3<=NS;s3++){var x3=X_LO+(X_HI-X_LO)*s3/NS;var qx=X(x3),qy=Y(exact(x3));if(s3===0)ctx.moveTo(qx,qy);else ctx.lineTo(qx,qy);}
+      ctx.stroke();
+
+      // legend, parked in the empty top left region
+      var lx=pad.l+22, ly=pad.t+20;
+      ctx.lineWidth=3.4; ctx.textAlign="left"; ctx.textBaseline="middle";
+      ctx.font="22px -apple-system,Segoe UI,sans-serif";
+      ctx.strokeStyle=accent;ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(lx+34,ly);ctx.stroke();
+      ctx.fillStyle=ink;ctx.fillText("per token accuracy, the smooth truth", lx+44, ly);
+      ctx.strokeStyle=accent2;ctx.beginPath();ctx.moveTo(lx,ly+30);ctx.lineTo(lx+34,ly+30);ctx.stroke();
+      ctx.fillStyle=ink;ctx.fillText("exact match over L tokens, the metric", lx+44, ly+30);
+      ctx.textBaseline="alphabetic";
+
+      // marker line
+      var mx=X(markX), mp=ptok(markX), me=exact(markX);
+      var myp=Y(mp), mye=Y(me);
+      ctx.strokeStyle=ink; ctx.lineWidth=1.4; ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(mx,pad.t);ctx.lineTo(mx,y0);ctx.stroke();ctx.setLineDash([]);
+
+      // scale tag at top of marker
+      ctx.font="600 20px ui-monospace,Menlo,monospace"; ctx.textAlign="center"; ctx.fillStyle=muted;
+      var stx=Math.max(pad.l+70,Math.min(W-pad.r-70,mx));
+      ctx.fillText("scale "+markX.toFixed(2), stx, pad.t-8);
+
+      // dot on per token curve, value tag above
+      dot(ctx,mx,myp,accent,surface);
+      valueTag(ctx,mx,myp-24,mp.toFixed(3),accent,surface);
+      // dot on exact match curve, value tag below (opposite side avoids overlap)
+      dot(ctx,mx,mye,accent2,surface);
+      valueTag(ctx,mx,mye+30,me.toFixed(3),accent2,surface);
+
+      // readouts
+      document.getElementById("em-scale").textContent=markX.toFixed(2);
+      document.getElementById("em-ptok").textContent=mp.toFixed(3);
+      document.getElementById("em-exact").textContent=me.toFixed(3);
+      document.getElementById("em-Lread").textContent=String(L);
+    }
+
+    function dot(ctx,x,y,fill,ring){
+      ctx.fillStyle=fill;ctx.beginPath();ctx.arc(x,y,8,0,7);ctx.fill();
+      ctx.fillStyle=ring;ctx.beginPath();ctx.arc(x,y,3.4,0,7);ctx.fill();
+    }
+    function valueTag(ctx,x,y,txt,col,bg){
+      ctx.font="600 22px ui-monospace,Menlo,monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      var w=ctx.measureText(txt).width+16, h=26, y0=cv.height-pad.b;
+      x=Math.max(pad.l+w/2+2,Math.min(cv.width-pad.r-w/2-2,x));
+      y=Math.max(pad.t+h/2+2,Math.min(y0-h/2-2,y));
+      ctx.fillStyle=bg;ctx.globalAlpha=0.85;roundRect(ctx,x-w/2,y-h/2,w,h,6);ctx.fill();ctx.globalAlpha=1;
+      ctx.fillStyle=col;ctx.fillText(txt,x,y+1);
+      ctx.textBaseline="alphabetic";
+    }
+    function roundRect(ctx,x,y,w,h,r){
+      ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+      ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+    }
+
+    // drag the marker along the scale axis
+    function setMarkFromEvent(e){
+      var rect=cv.getBoundingClientRect();
+      var cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+      var px=cx/rect.width*cv.width;
+      var frac=(px-pad.l)/(cv.width-pad.l-pad.r);
+      markX=X_LO+(X_HI-X_LO)*Math.max(0,Math.min(1,frac));
+      draw();
+    }
+    var dragging=false;
+    cv.addEventListener("mousedown",function(e){dragging=true;setMarkFromEvent(e);});
+    window.addEventListener("mousemove",function(e){if(dragging)setMarkFromEvent(e);});
+    window.addEventListener("mouseup",function(){dragging=false;});
+    cv.addEventListener("touchstart",function(e){dragging=true;setMarkFromEvent(e);e.preventDefault();},{passive:false});
+    cv.addEventListener("touchmove",function(e){if(dragging){setMarkFromEvent(e);e.preventDefault();}},{passive:false});
+    cv.addEventListener("touchend",function(){dragging=false;});
+
+    function note(){
+      var el=document.getElementById("em-note");
+      var mp=ptok(markX), me=exact(markX);
+      var tk=(L===1?"token":"tokens");
+      var msg;
+      if(L===1){
+        msg="At L equal to 1 the two curves are the same line, because a one token answer is right exactly when the token is right. There is no cliff yet.";
+      } else if(markX<9.6){
+        msg="Down here the per token skill is already climbing, yet exact match sits near zero. Getting all "+L+" tokens right at once is still overwhelmingly unlikely.";
+      } else {
+        msg="Near this scale a small gain in per token skill ("+mp.toFixed(2)+") is amplified into a large jump in exact match ("+me.toFixed(2)+"), which is what reads as a sudden ability.";
+      }
+      el.innerHTML="<b>One smooth truth, one jagged metric.</b> The blue curve is the real per token skill, a clean logistic that improves gradually with scale. The amber curve is exact match over an answer of "+L+" "+tk+", which needs every token correct at once. Raising a rising probability to the power "+L+" manufactures a threshold that was never in the skill. "+msg+" Drag L and the cliff sharpens and slides right, while the blue curve does not move at all.";
+    }
+
+    document.getElementById("em-L").addEventListener("input",function(e){
+      L=parseInt(e.target.value,10);
+      document.getElementById("em-Lval").textContent=L+(L===1?" token":" tokens");
+      note(); draw();
+    });
+
+    document.getElementById("em-Lval").textContent=L+" tokens";
+    note(); draw();
+    window.addEventListener("resize",draw);
+  })();</script>
+</div>
+
+</body>
+</html>

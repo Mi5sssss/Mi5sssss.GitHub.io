@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Fab economics of a training run</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="fe-root" class="fe-root">
+  <style>
+    .fe-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .fe-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .fe-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .fe-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .fe-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+
+    .fe-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .fe-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .fe-frame{font-size:13.5px;color:var(--muted);margin:0 0 8px;line-height:1.5;}
+    .fe-illus{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+      border:1px solid var(--line);border-radius:6px;padding:2px 6px;margin-bottom:14px;}
+
+    .fe-panel{margin-top:6px;}
+    .fe-divider{border:none;border-top:1px solid var(--line);margin:26px 0 22px;}
+    .fe-sub{font-size:13px;font-weight:650;margin:0 0 3px;letter-spacing:.01em;}
+    .fe-subframe{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.5;}
+
+    /* Panel A, flow */
+    .fe-flow{position:relative;width:100%;height:190px;}
+    .fe-pipe{position:absolute;inset:0;width:100%;height:100%;display:block;}
+    .fe-g0{stop-color:var(--good);} .fe-g1{stop-color:var(--accent-2);}
+    .fe-g2{stop-color:var(--warn);} .fe-g3{stop-color:var(--accent);}
+    .fe-seam{stroke:var(--surface);stroke-width:2;}
+    .fe-stages{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+    .fe-stage{background:transparent;border:none;border-left:1px solid var(--line);
+      display:flex;flex-direction:column;justify-content:space-between;align-items:center;
+      padding:8px 6px 10px;cursor:pointer;font-family:inherit;color:inherit;text-align:center;
+      transition:background .2s;border-radius:0;}
+    .fe-stage:first-child{border-left:none;}
+    .fe-stage:hover,.fe-stage:focus-visible,.fe-stage.hot{background:color-mix(in srgb,var(--line) 45%,transparent);outline:none;}
+    .fe-st-name{font-size:12px;font-weight:600;line-height:1.25;}
+    .fe-st-tag{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:9.5px;color:var(--muted);line-height:1.3;max-width:15ch;}
+    .fe-dot{width:8px;height:8px;border-radius:50%;margin:0 auto;flex:none;}
+    .fe-dot.d0{background:var(--good);} .fe-dot.d1{background:var(--accent-2);}
+    .fe-dot.d2{background:var(--warn);} .fe-dot.d3{background:var(--accent);}
+
+    .fe-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;
+      padding:12px 14px;border:1px solid var(--line);border-radius:10px;min-height:60px;}
+    .fe-note b{color:var(--ink);font-weight:600;}
+
+    /* Panel B, canvas */
+    .fe-canvas-wrap{position:relative;width:100%;overflow-x:auto;}
+    canvas.fe-canvas{width:100%;height:260px;display:block;}
+    .fe-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    .fe-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .fe-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;line-height:1.3;}
+    .fe-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+    .fe-controls{margin-top:14px;}
+    .fe-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
+    .fe-row label{font-size:12.5px;color:var(--muted);min-width:210px;}
+    .fe-row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;min-width:120px;text-align:right;}
+    input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:3px;background:var(--line);outline:none;}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+
+    .fe-cap{font-size:11.5px;color:var(--muted);margin-top:14px;padding-top:14px;border-top:1px solid var(--line);line-height:1.55;font-style:italic;}
+
+    @media (max-width:520px){
+      .fe-readout{grid-template-columns:repeat(2,1fr);}
+      .fe-row{flex-wrap:wrap;}
+      .fe-row label{min-width:100%;}
+      .fe-st-tag{display:none;}
+    }
+    @media (prefers-reduced-motion:reduce){.fe-root *{transition:none !important;}}
+  </style>
+
+  <div class="fe-card">
+    <p class="fe-title">The real bottleneck, and the melting asset</p>
+    <p class="fe-frame">Two ways the frontier is gated by physics and money rather than by ideas. First the supply chain that turns silicon into a usable accelerator. Then the balance sheet that owns it.</p>
+    <span class="fe-illus">Illustrative, normalized</span>
+
+    <!-- Panel A -->
+    <div class="fe-panel">
+      <p class="fe-sub">The supply chain chokepoint</p>
+      <p class="fe-subframe">Follow the path from silicon to a finished accelerator. The pipe is wide where capacity is abundant and necks hard where it is scarce. Hover or tap a stage to see why.</p>
+
+      <div class="fe-flow">
+        <svg class="fe-pipe" viewBox="0 0 720 210" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="fe-grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" class="fe-g0"/>
+              <stop offset="0.24" class="fe-g0"/>
+              <stop offset="0.26" class="fe-g1"/>
+              <stop offset="0.49" class="fe-g1"/>
+              <stop offset="0.51" class="fe-g2"/>
+              <stop offset="0.74" class="fe-g2"/>
+              <stop offset="0.76" class="fe-g3"/>
+              <stop offset="1" class="fe-g3"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,47 L150,47 L185,81 L340,81 L375,93 L525,93 L560,88 L720,88 L720,122 L560,122 L525,117 L375,117 L340,129 L185,129 L150,163 L0,163 Z"
+                fill="url(#fe-grad)" fill-opacity="0.82"/>
+          <line class="fe-seam" x1="180" y1="0" x2="180" y2="210"/>
+          <line class="fe-seam" x1="360" y1="0" x2="360" y2="210"/>
+          <line class="fe-seam" x1="540" y1="0" x2="540" y2="210"/>
+        </svg>
+
+        <div class="fe-stages" id="fe-stages">
+          <button class="fe-stage" data-stage="logic">
+            <span class="fe-st-name">Logic die</span>
+            <span class="fe-dot d0"></span>
+            <span class="fe-st-tag">wafer capacity, abundant</span>
+          </button>
+          <button class="fe-stage" data-stage="pack">
+            <span class="fe-st-name">Advanced packaging</span>
+            <span class="fe-dot d1"></span>
+            <span class="fe-st-tag">CoWoS class, tight</span>
+          </button>
+          <button class="fe-stage" data-stage="hbm">
+            <span class="fe-st-name">High bandwidth memory</span>
+            <span class="fe-dot d2"></span>
+            <span class="fe-st-tag">three makers, scarce</span>
+          </button>
+          <button class="fe-stage" data-stage="acc">
+            <span class="fe-st-name">Finished accelerator</span>
+            <span class="fe-dot d3"></span>
+            <span class="fe-st-tag">output, queue limited</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="fe-note" id="fe-flownote"></div>
+    </div>
+
+    <hr class="fe-divider">
+
+    <!-- Panel B -->
+    <div class="fe-panel">
+      <p class="fe-sub">The melting asset</p>
+      <p class="fe-subframe">A frontier accelerator loses value not because it wears out, but because a successor arrives that does the same work for less. Set how fast performance per dollar improves each year and watch the asset melt.</p>
+
+      <div class="fe-canvas-wrap">
+        <canvas class="fe-canvas" id="fe-cv" width="1400" height="560" aria-label="Depreciation of accelerator value over time"></canvas>
+      </div>
+
+      <div class="fe-readout">
+        <div class="fe-stat"><div class="k">Value after 1 year</div><div class="v" id="fe-v1">65 %</div></div>
+        <div class="fe-stat"><div class="k">Value after 2 years</div><div class="v" id="fe-v2">42 %</div></div>
+        <div class="fe-stat"><div class="k">Value after 3 years</div><div class="v" id="fe-v3">27 %</div></div>
+        <div class="fe-stat"><div class="k">Cost per useful hour, 2 yr</div><div class="v" id="fe-cph">2.40 x</div></div>
+      </div>
+
+      <div class="fe-controls">
+        <div class="fe-row">
+          <label>Performance per dollar gain per year</label>
+          <input type="range" id="fe-g" min="20" max="120" step="5" value="55">
+          <span class="val" id="fe-gval">55 percent per year</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="fe-cap">All figures illustrative, normalized to a start value of 100 percent. Idle time on a melting asset is pure loss, which is why utilization is a financial obsession, and why overtraining a smaller model to cut serving cost is an amortization decision, not a machine learning one.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("fe-root");
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+    function hexA(hex,a){
+      hex=hex.replace('#','');
+      if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+
+    /* ---------- Panel A ---------- */
+    var notes={
+      "default":"<b>The takeaway.</b> The constraint moved off the transistor and onto the act of bonding memory to logic. Capital buys you an allocation in a queue, not frontier capability directly.",
+      "logic":"<b>Logic die.</b> The foundry can etch the compute die, and wafer capacity for logic is not the thing in short supply. This stage is wide, which is why the bottleneck is no longer about the transistor.",
+      "pack":"<b>Advanced packaging.</b> Stacking memory beside the logic on one interposer, the CoWoS class of techniques, has been the gating step on how many accelerators can be built at all. The pipe necks hard here.",
+      "hbm":"<b>High bandwidth memory.</b> Made in volume by three companies on earth. When bandwidth is the constraint, the scarce capability is the one that produces bandwidth, so this is the tightest neck in the whole path.",
+      "acc":"<b>Finished accelerator.</b> Its output rate is set by the narrowest upstream stage, not by the abundant logic. Money entering here buys a place in a queue that is three companies deep."
+    };
+    var flownote=document.getElementById("fe-flownote");
+    flownote.innerHTML=notes["default"];
+    var stages=document.getElementById("fe-stages");
+    function setNote(key){flownote.innerHTML=notes[key]||notes["default"];}
+    Array.prototype.forEach.call(stages.querySelectorAll(".fe-stage"),function(btn){
+      var key=btn.getAttribute("data-stage");
+      function on(){
+        Array.prototype.forEach.call(stages.children,function(c){c.classList.remove("hot");});
+        btn.classList.add("hot"); setNote(key);
+      }
+      function off(){btn.classList.remove("hot"); setNote("default");}
+      btn.addEventListener("mouseenter",on);
+      btn.addEventListener("mouseleave",off);
+      btn.addEventListener("focus",on);
+      btn.addEventListener("blur",off);
+      btn.addEventListener("click",on);
+    });
+
+    /* ---------- Panel B ---------- */
+    var cv=document.getElementById("fe-cv"), ctx=cv.getContext("2d");
+    var g=0.55; // fractional perf-per-dollar gain per year
+    var TMAX=3.5;
+    function V(t){return 100*Math.pow(1/(1+g),t);}        // remaining value, percent
+    function costIndex(t){return Math.pow(1+g,t);}        // effective cost per useful hour
+
+    var pad={l:56,r:22,t:26,b:44};
+    function draw(){
+      var W=cv.width,H=cv.height;
+      ctx.clearRect(0,0,W,H);
+      var line=cvar("--line"),muted=cvar("--muted"),ink=cvar("--ink"),
+          accent=cvar("--accent"),warn=cvar("--warn");
+
+      function X(t){return pad.l+t/TMAX*(W-pad.l-pad.r);}
+      function Y(v){return pad.t+(100-v)/100*(H-pad.t-pad.b);}
+
+      ctx.font="20px ui-monospace,Menlo,monospace";
+      // horizontal grid
+      ctx.strokeStyle=line; ctx.lineWidth=1; ctx.fillStyle=muted; ctx.textAlign="right";
+      [0,25,50,75,100].forEach(function(v){
+        var y=Y(v); ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+        ctx.fillText(v+"%", pad.l-10, y+7);
+      });
+      // vertical grid at whole years
+      ctx.textAlign="center";
+      [0,1,2,3].forEach(function(t){
+        var x=X(t); ctx.strokeStyle=line; ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();
+        ctx.fillText(t+" yr", x, H-pad.b+30);
+      });
+      ctx.fillText("years held", (pad.l+W-pad.r)/2, H-8);
+
+      // reference line, value if it held
+      ctx.strokeStyle=hexA(muted,0.9); ctx.lineWidth=2; ctx.setLineDash([6,6]);
+      ctx.beginPath();ctx.moveTo(X(0),Y(100));ctx.lineTo(X(TMAX),Y(100));ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle=muted; ctx.textAlign="left"; ctx.font="18px -apple-system,sans-serif";
+      ctx.fillText("if value held", X(0)+8, Y(100)-10);
+
+      // area under melt curve
+      ctx.beginPath();
+      ctx.moveTo(X(0),Y(V(0)));
+      for(var t=0;t<=TMAX+0.001;t+=TMAX/240){ctx.lineTo(X(t),Y(V(t)));}
+      ctx.lineTo(X(TMAX),Y(0)); ctx.lineTo(X(0),Y(0)); ctx.closePath();
+      ctx.fillStyle=hexA(accent,0.12); ctx.fill();
+
+      // melt curve
+      ctx.strokeStyle=accent; ctx.lineWidth=3.5; ctx.beginPath();
+      for(var t2=0;t2<=TMAX+0.001;t2+=TMAX/240){
+        var x=X(t2),y=Y(V(t2)); if(t2===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+
+      // year markers
+      ctx.font="19px ui-monospace,Menlo,monospace";
+      [1,2,3].forEach(function(t){
+        var x=X(t),y=Y(V(t));
+        ctx.strokeStyle=hexA(warn,0.5); ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,Y(0));ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle=warn; ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();
+        ctx.fillStyle=ink; ctx.textAlign="center";
+        ctx.fillText(Math.round(V(t))+"%", x, y-16);
+      });
+
+      // readouts
+      document.getElementById("fe-v1").textContent=Math.round(V(1))+" %";
+      document.getElementById("fe-v2").textContent=Math.round(V(2))+" %";
+      document.getElementById("fe-v3").textContent=Math.round(V(3))+" %";
+      document.getElementById("fe-cph").textContent=costIndex(2).toFixed(2)+" x";
+    }
+
+    var slider=document.getElementById("fe-g");
+    slider.addEventListener("input",function(e){
+      g=parseFloat(e.target.value)/100;
+      document.getElementById("fe-gval").textContent=Math.round(g*100)+" percent per year";
+      draw();
+    });
+
+    draw();
+    window.addEventListener("resize",draw);
+  })();</script>
+</div>
+
+</body>
+</html>

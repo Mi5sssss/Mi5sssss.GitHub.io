@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The memory wall</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="mw-root" class="mw-root">
+  <style>
+    .mw-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .mw-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .mw-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .mw-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .mw-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+    .mw-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .mw-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .mw-frame{font-size:13.5px;color:var(--muted);margin:0 0 14px;line-height:1.5;}
+    .mw-legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 10px;}
+    .mw-leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+    .mw-leg i{width:14px;height:3px;border-radius:2px;display:inline-block;}
+    .mw-canvas-wrap{position:relative;width:100%;overflow-x:auto;}
+    canvas.mw-canvas{width:100%;height:330px;display:block;touch-action:none;cursor:grab;}
+    canvas.mw-canvas:active{cursor:grabbing;}
+    .mw-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    .mw-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .mw-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .mw-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+    .mw-stat.starve{border-color:var(--warn);}
+    .mw-stat.starve .k{color:var(--warn);}
+    .mw-stat.starve .v{color:var(--warn);font-size:16px;}
+    .mw-controls{margin-top:14px;}
+    .mw-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
+    .mw-row label{font-size:12.5px;color:var(--muted);min-width:132px;}
+    .mw-row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;min-width:96px;text-align:right;}
+    input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:3px;background:var(--line);outline:none;}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .mw-payload{margin-top:14px;padding:12px 14px;border:1px solid var(--warn);border-radius:10px;background:transparent;}
+    .mw-payload .big{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:26px;font-weight:700;color:var(--warn);line-height:1.1;}
+    .mw-payload .cap{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5;}
+    .mw-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    .mw-note b{color:var(--ink);font-weight:600;}
+    .mw-cap{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;}
+    @media (max-width:520px){.mw-readout{grid-template-columns:repeat(2,1fr);}.mw-row label{min-width:96px;}}
+    @media (prefers-reduced-motion:reduce){.mw-root *{transition:none !important;}}
+  </style>
+
+  <div class="mw-card">
+    <p class="mw-title">The memory wall. Three exponentials pulling apart.</p>
+    <p class="mw-frame">Across a decade of accelerator generations, peak compute has grown far faster than the bandwidth that feeds it. Start every curve at the same point and drag through the generations. Watch compute run away, and watch the accelerator starve.</p>
+
+    <div class="mw-legend">
+      <span class="mw-leg"><i style="background:var(--accent)"></i>Peak compute</span>
+      <span class="mw-leg"><i style="background:var(--accent-2)"></i>Memory bandwidth</span>
+      <span class="mw-leg"><i style="background:var(--good)"></i>Interconnect bandwidth</span>
+      <span class="mw-leg"><i style="background:var(--warn)"></i>Starvation gap</span>
+    </div>
+
+    <div class="mw-canvas-wrap">
+      <canvas class="mw-canvas" id="mw-cv" width="1400" height="660" aria-label="Relative growth of compute, memory bandwidth, and interconnect bandwidth on a log scale across hardware generations"></canvas>
+    </div>
+
+    <div class="mw-readout">
+      <div class="mw-stat"><div class="k">Compute since gen 1</div><div class="v" id="mw-comp">1.0x</div></div>
+      <div class="mw-stat"><div class="k">Memory bandwidth</div><div class="v" id="mw-mem">1.0x</div></div>
+      <div class="mw-stat"><div class="k">Interconnect</div><div class="v" id="mw-inter">1.0x</div></div>
+      <div class="mw-stat starve"><div class="k">Starvation ratio</div><div class="v" id="mw-ratio">1.0x</div></div>
+    </div>
+
+    <div class="mw-controls">
+      <div class="mw-row">
+        <label>Hardware generation</label>
+        <input type="range" id="mw-year" min="0" max="10" step="0.1" value="8">
+        <span class="val" id="mw-yearval">gen 5, year 8</span>
+      </div>
+    </div>
+
+    <div class="mw-payload">
+      <div class="big" id="mw-bignum">16x more compute than the pipe can feed</div>
+      <div class="cap" id="mw-bigcap"></div>
+    </div>
+
+    <div class="mw-note">
+      <b>Two exponentials with different bases diverge without limit.</b> Compute roughly triples every two years. The bandwidth that feeds it grows closer to one and a half times over the same window. Nothing in that arithmetic ever lets bandwidth catch up, so the natural state of a modern chip is starving. That is why the scarce resource in pretraining is bandwidth, not FLOPs, and why so many design choices are really attacks on the bytes you have to move rather than the math you have to do.
+    </div>
+    <p class="mw-cap">Growth rates are illustrative (compute 3x, memory bandwidth 1.5x, interconnect 1.4x per two year generation), chosen to match the shape of the memory wall reported by Gholami and colleagues. They are not measurements of any specific product.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("mw-root");
+    var cv=document.getElementById("mw-cv"), ctx=cv.getContext("2d");
+
+    // illustrative growth rates, per two year generation
+    var RATE={comp:3.0, mem:1.5, inter:1.4};
+    // value of a curve at year t (relative to gen 1 = 1.0)
+    function val(rate,t){return Math.pow(rate, t/2);}
+
+    var year=8; // current scrubber position in years
+
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+    function hexA(hex,a){
+      hex=hex.replace('#','');
+      if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+    function fmtMult(x){
+      if(x>=100) return x.toFixed(0)+"x";
+      if(x>=10) return x.toFixed(0)+"x";
+      return x.toFixed(1)+"x";
+    }
+
+    var pad={l:66,r:22,t:26,b:62};
+    // fixed log y range, 1x up to 300x
+    var yLoLog=0, yHiLog=Math.log10(300);
+    var xLo=0, xHi=10;
+    var yTicks=[1,3,10,30,100,300];
+    var genLabels=["gen 1","gen 2","gen 3","gen 4","gen 5","gen 6"];
+
+    function X(t){return pad.l + (t-xLo)/(xHi-xLo)*(cv.width-pad.l-pad.r);}
+    function Y(v){var lg=Math.log10(v); return cv.height-pad.b - (lg-yLoLog)/(yHiLog-yLoLog)*(cv.height-pad.t-pad.b);}
+
+    function drawCurve(rate,color,width){
+      ctx.strokeStyle=color; ctx.lineWidth=width; ctx.beginPath();
+      for(var i=0;i<=240;i++){
+        var t=xLo+(xHi-xLo)*i/240; var v=val(rate,t);
+        var x=X(t),y=Y(v);
+        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+
+    function draw(){
+      var W=cv.width,H=cv.height;
+      ctx.clearRect(0,0,W,H);
+      var line=cvar("--line"), muted=cvar("--muted"), ink=cvar("--ink"),
+          accent=cvar("--accent"), accent2=cvar("--accent-2"),
+          good=cvar("--good"), warn=cvar("--warn"), surface=cvar("--surface");
+
+      ctx.font="19px ui-monospace,Menlo,monospace";
+
+      // horizontal grid (log y)
+      ctx.strokeStyle=line; ctx.lineWidth=1; ctx.fillStyle=muted; ctx.textAlign="right";
+      for(var yi=0;yi<yTicks.length;yi++){
+        var v=yTicks[yi]; var y=Y(v);
+        ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+        ctx.fillText(v+"x", pad.l-10, y+6);
+      }
+      // vertical grid (generations)
+      for(var g=0;g<=10;g+=2){
+        var x=X(g);
+        ctx.strokeStyle=line;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();
+        ctx.fillStyle=muted;
+        ctx.textAlign = g===0 ? "left" : (g===10 ? "right" : "center");
+        ctx.fillText(genLabels[g/2], x, H-pad.b+28);
+      }
+      ctx.fillStyle=muted;ctx.textAlign="center";
+      ctx.fillText("hardware generation, two years apart", (pad.l + (W-pad.r))/2, H-10);
+
+      // starvation gap fill, between compute curve (top) and memory bandwidth curve (bottom)
+      ctx.fillStyle=hexA(warn,0.14);
+      ctx.beginPath();
+      for(var i=0;i<=240;i++){var t=xLo+(xHi-xLo)*i/240;var x=X(t);var y=Y(val(RATE.comp,t));if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+      for(var j=240;j>=0;j--){var t2=xLo+(xHi-xLo)*j/240;var x2=X(t2);var y2=Y(val(RATE.mem,t2));ctx.lineTo(x2,y2);}
+      ctx.closePath();ctx.fill();
+
+      // curves. slowest drawn first so compute sits on top
+      drawCurve(RATE.inter, good, 3);
+      drawCurve(RATE.mem, accent2, 3);
+      drawCurve(RATE.comp, accent, 3.5);
+
+      // scrubber
+      var t0=year;
+      var xs=X(t0);
+      var vc=val(RATE.comp,t0), vm=val(RATE.mem,t0), vi=val(RATE.inter,t0);
+      var yc=Y(vc), ym=Y(vm), yi2=Y(vi);
+
+      ctx.strokeStyle=ink; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(xs,pad.t);ctx.lineTo(xs,H-pad.b);ctx.stroke();
+      ctx.setLineDash([]);
+
+      // gap bracket between compute and memory dots
+      ctx.strokeStyle=warn; ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(xs,yc);ctx.lineTo(xs,ym);ctx.stroke();
+      // gap ratio label near mid of gap
+      var ratio=vc/vm;
+      var ymid=(yc+ym)/2;
+      var lbl="starving "+fmtMult(ratio);
+      ctx.font="bold 21px ui-monospace,Menlo,monospace";
+      ctx.textAlign = xs>W*0.6 ? "right":"left";
+      var lx = xs>W*0.6 ? xs-12 : xs+12;
+      // label background chip for legibility
+      var tw=ctx.measureText(lbl).width;
+      var bx = ctx.textAlign==="right" ? lx-tw : lx;
+      ctx.fillStyle=hexA(surface,0.82);
+      ctx.fillRect(bx-6, ymid-16, tw+12, 26);
+      ctx.fillStyle=warn;
+      ctx.fillText(lbl, lx, ymid+3);
+
+      // dots
+      function dot(x,y,c){
+        ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();
+        ctx.fillStyle=surface;ctx.beginPath();ctx.arc(x,y,3,0,7);ctx.fill();
+      }
+      dot(xs,yi2,good); dot(xs,ym,accent2); dot(xs,yc,accent);
+
+      // readouts
+      document.getElementById("mw-comp").textContent=fmtMult(vc);
+      document.getElementById("mw-mem").textContent=fmtMult(vm);
+      document.getElementById("mw-inter").textContent=fmtMult(vi);
+      document.getElementById("mw-ratio").textContent=fmtMult(ratio);
+
+      var gen=(t0/2+1);
+      document.getElementById("mw-yearval").textContent="gen "+gen.toFixed(1)+", year "+t0.toFixed(1);
+
+      document.getElementById("mw-bignum").textContent=fmtMult(ratio)+" more compute than the pipe can feed";
+      var cap;
+      if(t0<0.4){
+        cap="At generation one the multipliers and the pipes are balanced. Drag forward to let compute pull away.";
+      } else {
+        cap="Since generation one, compute has grown "+fmtMult(vc)+" while memory bandwidth has grown only "+fmtMult(vm)+". The tensor cores can now demand "+fmtMult(ratio)+" the data the memory system can deliver, so most of the silicon sits idle waiting on bytes.";
+      }
+      document.getElementById("mw-bigcap").textContent=cap;
+
+      cv._Xinv=function(px){return xLo+(px-pad.l)/(W-pad.l-pad.r)*(xHi-xLo);};
+    }
+
+    // interaction, drag on canvas
+    function setFromEvent(e){
+      var rect=cv.getBoundingClientRect();
+      var cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+      var px=cx/rect.width*cv.width;
+      var t=cv._Xinv(px);
+      year=Math.max(xLo,Math.min(xHi,t));
+      document.getElementById("mw-year").value=year;
+      draw();
+    }
+    var dragging=false;
+    cv.addEventListener("mousedown",function(e){dragging=true;setFromEvent(e);});
+    window.addEventListener("mousemove",function(e){if(dragging)setFromEvent(e);});
+    window.addEventListener("mouseup",function(){dragging=false;});
+    cv.addEventListener("touchstart",function(e){dragging=true;setFromEvent(e);e.preventDefault();},{passive:false});
+    cv.addEventListener("touchmove",function(e){if(dragging){setFromEvent(e);e.preventDefault();}},{passive:false});
+    cv.addEventListener("touchend",function(){dragging=false;});
+
+    document.getElementById("mw-year").addEventListener("input",function(e){
+      year=parseFloat(e.target.value); draw();
+    });
+
+    draw();
+    window.addEventListener("resize",draw);
+  })();</script>
+</div>
+
+</body>
+</html>

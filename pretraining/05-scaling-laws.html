@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Scaling laws and the death of Chinchilla</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="sl-root" class="sl-root">
+  <style>
+    .sl-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .sl-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .sl-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .sl-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .sl-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+    .sl-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .sl-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .sl-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+    .sl-canvas-wrap{position:relative;width:100%;overflow-x:auto;}
+    canvas.sl-canvas{width:100%;height:300px;display:block;touch-action:none;cursor:grab;}
+    canvas.sl-canvas:active{cursor:grabbing;}
+    .sl-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    .sl-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .sl-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .sl-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+    .sl-controls{margin-top:14px;}
+    .sl-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
+    .sl-row label{font-size:12.5px;color:var(--muted);min-width:132px;}
+    .sl-row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;min-width:74px;text-align:right;}
+    input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:3px;background:var(--line);outline:none;}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .sl-toggle{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+    .sl-toggle button{background:transparent;color:var(--muted);border:none;padding:8px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:background .2s,color .2s;}
+    .sl-toggle button.on{background:var(--accent-2);color:#1a1204;font-weight:600;}
+    .sl-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    .sl-note b{color:var(--ink);font-weight:600;}
+    .sl-cap{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;}
+    @media (max-width:520px){.sl-readout{grid-template-columns:repeat(2,1fr);}.sl-row label{min-width:96px;}}
+    @media (prefers-reduced-motion:reduce){.sl-root *{transition:none !important;}}
+  </style>
+
+  <div class="sl-card">
+    <p class="sl-title">The death of Chinchilla, in one draggable point</p>
+    <p class="sl-frame">Fix a compute budget. Every model you could train with it lives on the curve below, trading parameters against training tokens. Chinchilla picks the bottom of the curve. Real labs do not. Drag the point and switch the objective to see why.</p>
+
+    <div class="sl-canvas-wrap">
+      <canvas class="sl-canvas" id="sl-cv" width="1400" height="600" aria-label="Loss versus model size at fixed compute"></canvas>
+    </div>
+
+    <div class="sl-readout">
+      <div class="sl-stat"><div class="k">Parameters N</div><div class="v" id="sl-N">8.0 B</div></div>
+      <div class="sl-stat"><div class="k">Train tokens D</div><div class="v" id="sl-D">160 B</div></div>
+      <div class="sl-stat"><div class="k">Tokens per param</div><div class="v" id="sl-R">20</div></div>
+      <div class="sl-stat"><div class="k">Predicted loss</div><div class="v" id="sl-L">2.05</div></div>
+    </div>
+
+    <div class="sl-controls">
+      <div class="sl-row">
+        <label>Compute budget C</label>
+        <input type="range" id="sl-c" min="20" max="26" step="0.05" value="22.5">
+        <span class="val" id="sl-cval">3e22 FLOP</span>
+      </div>
+      <div class="sl-row">
+        <label>Objective</label>
+        <div class="sl-toggle" id="sl-obj">
+          <button data-obj="train" class="on">Training optimal</button>
+          <button data-obj="infer">Whole lifetime optimal</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sl-note" id="sl-explain"></div>
+    <p class="sl-cap">Loss uses the Chinchilla parametric form L(N,D) equal to E plus A over N to the alpha plus B over D to the beta, with C approximately 6 N D. Values from Hoffmann et al. 2022. Absolute numbers are illustrative, the shape is the point.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("sl-root");
+    var cv=document.getElementById("sl-cv"), ctx=cv.getContext("2d");
+    var E=1.69, A=406.4, al=0.34, B=410.7, be=0.28;
+    var C=Math.pow(10,22.5);
+    var obj="train";
+    // marker position as fraction of N-range, user controlled
+    var markFrac=null;
+
+    // css var reader
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+
+    function loss(N,D){return E + A/Math.pow(N,al) + B/Math.pow(D,be);}
+    function Dfor(N){return C/(6*N);}
+    // N range for a given C, in absolute params
+    function Nrange(){
+      // center near optimum, span a few decades
+      var Nopt=optimalN();
+      var lo=Nopt/60, hi=Nopt*25;
+      return [lo,hi];
+    }
+    function optimalN(){
+      // minimize loss along C by scanning log N
+      var best=1e9,bn=1e9;
+      for(var t=0;t<=400;t++){
+        var N=Math.pow(10, 6 + 6*t/400); // 1e6 .. 1e12
+        var D=Dfor(N); if(D<1e6) continue;
+        var l=loss(N,D);
+        if(l<best){best=l;bn=N;}
+      }
+      return bn;
+    }
+    // inference-optimal proxy. penalize serving cost proportional to N.
+    // objective = loss + lambda * N/Nref. small lambda -> pushes to smaller N (overtrain).
+    function inferBestN(){
+      var Nopt=optimalN();
+      var lam=0.9; var Nref=Nopt;
+      var best=1e9,bn=Nopt;
+      var r=Nrange();
+      for(var t=0;t<=400;t++){
+        var N=r[0]*Math.pow(r[1]/r[0], t/400);
+        var D=Dfor(N); if(D<1e6) continue;
+        // quality floor. only consider points within a small loss basin of optimum
+        var l=loss(N,D);
+        var served=lam*(N/Nref);
+        var o=l+served;
+        if(o<best){best=o;bn=N;}
+      }
+      return bn;
+    }
+
+    function fmt(x){
+      if(x>=1e12) return (x/1e12).toFixed(1)+" T";
+      if(x>=1e9) return (x/1e9).toFixed(1)+" B";
+      if(x>=1e6) return (x/1e6).toFixed(0)+" M";
+      return x.toFixed(0);
+    }
+    function fmtFLOP(c){
+      var e=Math.floor(Math.log10(c)); var m=c/Math.pow(10,e);
+      return m.toFixed(0)+"e"+e+" FLOP";
+    }
+
+    var pad={l:52,r:18,t:18,b:38};
+    function draw(){
+      var W=cv.width,H=cv.height, dpr=1;
+      ctx.clearRect(0,0,W,H);
+      var r=Nrange();
+      var logLo=Math.log10(r[0]), logHi=Math.log10(r[1]);
+      // y range from loss values
+      var ys=[];
+      for(var t=0;t<=200;t++){var N=Math.pow(10,logLo+(logHi-logLo)*t/200);ys.push(loss(N,Dfor(N)));}
+      var yMin=Math.min.apply(null,ys), yMax=Math.max.apply(null,ys);
+      yMin-=0.02*(yMax-yMin); yMax+=0.08*(yMax-yMin);
+
+      function X(logN){return pad.l+(logN-logLo)/(logHi-logLo)*(W-pad.l-pad.r);}
+      function Y(l){return pad.t+(l-yMin)/(yMax-yMin)*(H-pad.t-pad.b);}
+
+      var line=cvar("--line"), muted=cvar("--muted"), ink=cvar("--ink"),
+          accent=cvar("--accent"), accent2=cvar("--accent-2"), good=cvar("--good");
+
+      // grid
+      ctx.strokeStyle=line; ctx.lineWidth=1; ctx.font="20px ui-monospace,Menlo,monospace"; ctx.fillStyle=muted;
+      for(var g=Math.ceil(logLo); g<=Math.floor(logHi); g++){
+        var x=X(g); ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();
+        ctx.textAlign="center"; ctx.fillText("1e"+g, x, H-pad.b+26);
+      }
+      ctx.textAlign="left";
+      ctx.fillText("params N", pad.l, H-6);
+      ctx.save();ctx.translate(16,pad.t+40);ctx.rotate(-Math.PI/2);ctx.fillText("loss",0,0);ctx.restore();
+
+      // basin shading. points within 1 percent of min loss
+      var Nopt=optimalN(); var Lopt=loss(Nopt,Dfor(Nopt));
+      ctx.fillStyle=hexA(good,0.10);
+      ctx.beginPath();var started=false;
+      for(var t2=0;t2<=300;t2++){
+        var lN=logLo+(logHi-logLo)*t2/300; var N=Math.pow(10,lN);
+        var l=loss(N,Dfor(N));
+        if(l<=Lopt*1.01){ var x=X(lN); if(!started){ctx.moveTo(x,pad.t);started=true;} ctx.lineTo(x,H-pad.b);}
+      }
+      if(started){ctx.lineTo(X(logHi),H-pad.b);}
+      // simpler basin band
+      ctx.closePath();
+      // draw basin as vertical band between bounds
+      var bnds=basinBounds(Lopt*1.01,logLo,logHi);
+      if(bnds){ctx.fillStyle=hexA(good,0.12);ctx.fillRect(X(bnds[0]),pad.t,X(bnds[1])-X(bnds[0]),H-pad.t-pad.b);}
+
+      // curve
+      ctx.strokeStyle=accent; ctx.lineWidth=3; ctx.beginPath();
+      for(var t3=0;t3<=300;t3++){
+        var lN3=logLo+(logHi-logLo)*t3/300; var N3=Math.pow(10,lN3); var l3=loss(N3,Dfor(N3));
+        var x3=X(lN3),y3=Y(l3); if(t3===0)ctx.moveTo(x3,y3);else ctx.lineTo(x3,y3);
+      }
+      ctx.stroke();
+
+      // chinchilla optimum marker
+      var xo=X(Math.log10(Nopt)), yo=Y(Lopt);
+      ctx.fillStyle=good; ctx.beginPath();ctx.arc(xo,yo,6,0,7);ctx.fill();
+      ctx.fillStyle=good;ctx.textAlign="center";ctx.font="19px -apple-system,sans-serif";
+      ctx.fillText("Chinchilla optimum", xo, yo-14);
+
+      // inference-optimal recommendation marker
+      if(obj==="infer"){
+        var Ni=inferBestN(); var Li=loss(Ni,Dfor(Ni));
+        var xi=X(Math.log10(Ni)),yi=Y(Li);
+        ctx.strokeStyle=accent2;ctx.lineWidth=2;ctx.setLineDash([5,4]);
+        ctx.beginPath();ctx.moveTo(xi,pad.t);ctx.lineTo(xi,H-pad.b);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle=accent2;ctx.beginPath();ctx.arc(xi,yi,6,0,7);ctx.fill();
+        ctx.fillStyle=accent2;ctx.fillText("cheaper to serve forever", xi, yi+30);
+      }
+
+      // user marker
+      if(markFrac===null){markFrac=(Math.log10(Nopt)-logLo)/(logHi-logLo);}
+      var lNm=logLo+(logHi-logLo)*markFrac; var Nm=Math.pow(10,lNm); var Dm=Dfor(Nm); var Lm=loss(Nm,Dm);
+      var xm=X(lNm), ym=Y(Lm);
+      ctx.strokeStyle=ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xm,pad.t);ctx.lineTo(xm,H-pad.b);ctx.stroke();
+      ctx.fillStyle=ink;ctx.beginPath();ctx.arc(xm,ym,8,0,7);ctx.fill();
+      ctx.fillStyle=cvar("--surface");ctx.beginPath();ctx.arc(xm,ym,3.5,0,7);ctx.fill();
+
+      // update readouts
+      document.getElementById("sl-N").textContent=fmt(Nm);
+      document.getElementById("sl-D").textContent=fmt(Dm);
+      document.getElementById("sl-R").textContent=(Dm/Nm).toFixed(0);
+      document.getElementById("sl-L").textContent=Lm.toFixed(3);
+      cv._X=X; cv._logLo=logLo; cv._logHi=logHi;
+    }
+
+    function basinBounds(thr,logLo,logHi){
+      var lo=null,hi=null;
+      for(var t=0;t<=400;t++){
+        var lN=logLo+(logHi-logLo)*t/400; var N=Math.pow(10,lN);
+        if(loss(N,Dfor(N))<=thr){ if(lo===null)lo=lN; hi=lN;}
+      }
+      return lo===null?null:[lo,hi];
+    }
+    function hexA(hex,a){
+      hex=hex.replace('#',''); if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+
+    function explain(){
+      var el=document.getElementById("sl-explain");
+      if(obj==="train"){
+        el.innerHTML="<b>Training optimal.</b> The green band is the flat basin where loss is within one percent of the minimum. Notice how wide it is. Chinchilla tells you to sit at the bottom, near twenty tokens per parameter. But the floor is nearly level for a long way to the left, and the models on the left are smaller.";
+      } else {
+        el.innerHTML="<b>Whole lifetime optimal.</b> Now count inference. A deployed model serves that loss billions of times, and a smaller model is cheaper every single time. The amber line sits left of Chinchilla, on a smaller overtrained model with far more tokens per parameter. You pay more compute in training once, and recover it forever at serving. This is not a machine learning argument. It is amortization.";
+      }
+    }
+
+    // interaction
+    function setMarkFromEvent(e){
+      var rect=cv.getBoundingClientRect();
+      var cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+      var px=cx/rect.width*cv.width;
+      var frac=(px-pad.l)/(cv.width-pad.l-pad.r);
+      markFrac=Math.max(0,Math.min(1,frac));
+      draw();
+    }
+    var dragging=false;
+    cv.addEventListener("mousedown",function(e){dragging=true;setMarkFromEvent(e);});
+    window.addEventListener("mousemove",function(e){if(dragging)setMarkFromEvent(e);});
+    window.addEventListener("mouseup",function(){dragging=false;});
+    cv.addEventListener("touchstart",function(e){dragging=true;setMarkFromEvent(e);e.preventDefault();},{passive:false});
+    cv.addEventListener("touchmove",function(e){if(dragging){setMarkFromEvent(e);e.preventDefault();}},{passive:false});
+    cv.addEventListener("touchend",function(){dragging=false;});
+
+    document.getElementById("sl-c").addEventListener("input",function(e){
+      C=Math.pow(10,parseFloat(e.target.value));
+      document.getElementById("sl-cval").textContent=fmtFLOP(C);
+      markFrac=null; draw();
+    });
+    document.getElementById("sl-obj").addEventListener("click",function(e){
+      var b=e.target.closest("button"); if(!b)return;
+      obj=b.getAttribute("data-obj");
+      Array.prototype.forEach.call(this.children,function(c){c.classList.toggle("on",c===b);});
+      explain(); draw();
+    });
+
+    document.getElementById("sl-cval").textContent=fmtFLOP(C);
+    explain(); draw();
+    window.addEventListener("resize",draw);
+  })();</script>
+</div>
+
+</body>
+</html>

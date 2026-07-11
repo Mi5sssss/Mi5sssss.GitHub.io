@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Tokenizer fertility. The tax on every token</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="tf-root" class="tf-root">
+  <style>
+    .tf-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .tf-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .tf-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .tf-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .tf-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+    .tf-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .tf-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .tf-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+    .tf-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+    .tf-controls .lab{font-size:12.5px;color:var(--muted);}
+    .tf-toggle{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+    .tf-toggle button{background:transparent;color:var(--muted);border:none;padding:8px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:background .25s,color .25s;}
+    .tf-toggle button.on{background:var(--accent);color:#fff;font-weight:600;}
+    .tf-chart{display:flex;flex-direction:column;gap:14px;margin:4px 0 4px;}
+    .tf-bar{cursor:pointer;}
+    .tf-bar .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+    .tf-bar .name{font-size:13px;font-weight:550;}
+    .tf-bar .sub{font-size:11px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+    .tf-track{position:relative;height:26px;background:transparent;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+    .tf-fill{position:absolute;top:0;left:0;height:100%;border-radius:7px 0 0 7px;width:0;transition:width .4s cubic-bezier(.2,.7,.3,1);}
+    .tf-fill.eng{background:var(--accent);}
+    .tf-fill.pen{background:var(--accent-2);}
+    .tf-val{position:absolute;top:0;height:100%;display:flex;align-items:center;padding:0 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;font-weight:600;transition:left .4s cubic-bezier(.2,.7,.3,1);white-space:nowrap;}
+    .tf-bar:hover .tf-track,.tf-bar.active .tf-track{border-color:var(--muted);}
+    .tf-bar:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px;}
+    .tf-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);min-height:38px;}
+    .tf-note b{color:var(--ink);font-weight:600;}
+    .tf-cap{font-size:11.5px;color:var(--muted);margin-top:12px;font-style:italic;line-height:1.5;}
+    @media (max-width:520px){.tf-controls{gap:8px;}}
+    @media (prefers-reduced-motion:reduce){.tf-root *{transition:none !important;}}
+  </style>
+
+  <div class="tf-card">
+    <p class="tf-title">Tokenizer fertility. The tax a tokenizer levies for the life of a model.</p>
+    <p class="tf-frame">A tokenizer trained on English learns the merges that make English cheap. Feed it anything else and the merges stop applying, so the same amount of content costs several times more tokens. Below are four samples of similar length, measured with one byte level BPE trained on English. Switch the metric, and hover a bar to see why it costs what it does.</p>
+
+    <div class="tf-controls">
+      <span class="lab">Metric</span>
+      <div class="tf-toggle" id="tf-toggle">
+        <button data-metric="per100" class="on">Tokens per 100 characters</button>
+        <button data-metric="mult">Multiplier versus english</button>
+      </div>
+    </div>
+
+    <div class="tf-chart" id="tf-chart"></div>
+
+    <div class="tf-note" id="tf-note"></div>
+    <p class="tf-cap">One tokenizer is chosen once, before a single parameter is trained, and then it taxes every token the model ever reads or writes. Vocabulary design is quietly an act of policy, deciding in advance which languages the model will find cheap and which it will find expensive.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("tf-root");
+    var chart=document.getElementById("tf-chart");
+    var note=document.getElementById("tf-note");
+
+    var data=[
+      {key:"english", name:"english prose", chars:59, tokens:33, eng:true,
+       why:"English is the training language, so its merges cover almost every common word and it packs the most content per token."},
+      {key:"code", name:"source code", chars:64, tokens:49, eng:false,
+       why:"Code fragments on punctuation and identifiers, indentation and rare symbol runs that the English merges never learned, so the count climbs."},
+      {key:"russian", name:"russian text", chars:62, tokens:124, eng:false,
+       why:"Cyrillic sits several utf-8 bytes per character, so the english merges do not apply and the tokenizer falls back toward raw bytes."},
+      {key:"chinese", name:"chinese text", chars:28, tokens:84, eng:false,
+       why:"Each Han character is three utf-8 bytes with no learned merges, so the tokenizer splits it toward raw bytes and pays the most per character."}
+    ];
+    data.forEach(function(d){
+      d.per100 = 100*d.tokens/d.chars;
+      d.mult = d.tokens/d.chars / (33/59);
+    });
+
+    var metric="per100";
+    var maxPer100=Math.max.apply(null,data.map(function(d){return d.per100;}));
+    var maxMult=Math.max.apply(null,data.map(function(d){return d.mult;}));
+
+    var defaultNote="<b>Same content, unequal price.</b> English is the reference in blue. Every non English script in amber pays a multiple of the tokens for a comparable amount of text.";
+
+    // build bars
+    var bars=[];
+    data.forEach(function(d,i){
+      var bar=document.createElement("div");
+      bar.className="tf-bar";
+      bar.setAttribute("tabindex","0");
+      bar.setAttribute("role","button");
+      bar.innerHTML=
+        '<div class="head"><span class="name"></span><span class="sub"></span></div>'+
+        '<div class="tf-track"><div class="tf-fill '+(d.eng?"eng":"pen")+'"></div>'+
+        '<div class="tf-val"></div></div>';
+      bar.querySelector(".name").textContent=d.name;
+      bar.querySelector(".sub").textContent=d.chars+" chars, "+d.tokens+" tokens";
+      chart.appendChild(bar);
+      bars.push(bar);
+
+      function reveal(){
+        bars.forEach(function(b){b.classList.remove("active");});
+        bar.classList.add("active");
+        note.innerHTML="<b>"+d.name+".</b> "+d.why;
+      }
+      function clear(){
+        bar.classList.remove("active");
+        note.innerHTML=defaultNote;
+      }
+      bar.addEventListener("mouseenter",reveal);
+      bar.addEventListener("mouseleave",clear);
+      bar.addEventListener("focus",reveal);
+      bar.addEventListener("blur",clear);
+      bar.addEventListener("click",reveal);
+      bar.addEventListener("keydown",function(e){
+        if(e.key==="Enter"||e.key===" "){e.preventDefault();reveal();}
+      });
+    });
+
+    function render(){
+      data.forEach(function(d,i){
+        var v = metric==="per100" ? d.per100 : d.mult;
+        var mx = metric==="per100" ? maxPer100 : maxMult;
+        var frac = v/mx;
+        var label = metric==="per100" ? v.toFixed(1) : v.toFixed(2)+"x";
+        var fill=bars[i].querySelector(".tf-fill");
+        var val=bars[i].querySelector(".tf-val");
+        var pct=(frac*100).toFixed(2)+"%";
+        fill.style.width=pct;
+        val.textContent=label;
+        // place the value just past the end of the bar, or inside if near the edge
+        if(frac>0.82){
+          val.style.left="auto"; val.style.right="8px";
+          val.style.color = d.eng ? "#fff" : "#1a1204";
+        } else {
+          val.style.left=pct; val.style.right="auto";
+          val.style.marginLeft="8px";
+          val.style.color="var(--ink)";
+        }
+      });
+    }
+
+    document.getElementById("tf-toggle").addEventListener("click",function(e){
+      var b=e.target.closest("button"); if(!b)return;
+      metric=b.getAttribute("data-metric");
+      Array.prototype.forEach.call(this.children,function(c){c.classList.toggle("on",c===b);});
+      render();
+    });
+
+    note.innerHTML=defaultNote;
+    render();
+  })();</script>
+</div>
+
+</body>
+</html>

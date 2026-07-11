@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Next token prediction and attention</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="nt-root" class="nt-root">
+  <style>
+    .nt-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .nt-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .nt-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .nt-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .nt-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+
+    .nt-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .nt-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .nt-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+
+    .nt-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+
+    .nt-stage{position:relative;width:100%;padding:74px 4px 14px;overflow-x:auto;}
+    .nt-arcs{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
+    .nt-tokens{position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px;z-index:1;}
+    .nt-chip{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:14px;padding:8px 11px;border-radius:10px;border:1.5px solid var(--line);
+      background:transparent;cursor:pointer;user-select:none;position:relative;
+      transition:border-color .2s,background .2s,transform .2s,box-shadow .2s;
+    }
+    .nt-chip .idx{display:block;font-size:9.5px;color:var(--muted);text-align:center;margin-bottom:2px;letter-spacing:.03em;}
+    .nt-chip:hover{transform:translateY(-2px);}
+    .nt-chip.cursor{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;}
+    .nt-chip.target{border-color:var(--accent-2);border-style:dashed;}
+    .nt-chip.focus{border-color:var(--accent-2);box-shadow:0 0 0 2px var(--accent-2) inset;}
+    .nt-chip.dim{opacity:.4;}
+    .nt-ghost{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:14px;padding:8px 13px;border-radius:10px;border:1.5px dashed var(--accent-2);
+      color:var(--accent-2);background:transparent;user-select:none;
+    }
+    .nt-ghost .idx{display:block;font-size:9.5px;color:var(--muted);text-align:center;margin-bottom:2px;}
+
+    .nt-panels{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-top:16px;}
+    .nt-panel{border:1px solid var(--line);border-radius:12px;padding:13px 14px;}
+    .nt-panel h4{margin:0 0 10px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.02em;}
+
+    .nt-dist .row{display:grid;grid-template-columns:78px 1fr 46px;align-items:center;gap:8px;margin:7px 0;}
+    .nt-dist .tk{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--muted);text-align:right;white-space:nowrap;}
+    .nt-dist .bar{height:14px;border-radius:4px;background:var(--line);position:relative;overflow:hidden;}
+    .nt-dist .bar span{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:4px;transition:width .35s ease;}
+    .nt-dist .row.top .tk{color:var(--ink);font-weight:600;}
+    .nt-dist .row.top .bar span{background:var(--accent-2);}
+    .nt-dist .pv{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--ink);text-align:right;}
+
+    .nt-readout{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
+    .nt-stat{border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .nt-stat .k{font-size:10.5px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .nt-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+
+    .nt-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px;}
+    .nt-btn{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;
+      padding:8px 14px;font-size:12.5px;font-family:inherit;cursor:pointer;transition:border-color .2s,background .2s;}
+    .nt-btn:hover{border-color:var(--accent);}
+    .nt-btn.primary{border-color:var(--accent);color:var(--accent);font-weight:600;}
+    .nt-maskrow{display:flex;align-items:center;gap:10px;margin-left:auto;}
+    .nt-maskrow label{font-size:12.5px;color:var(--muted);}
+    .nt-toggle{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+    .nt-toggle button{background:transparent;color:var(--muted);border:none;padding:8px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:background .2s,color .2s;}
+    .nt-toggle button.on{background:var(--accent);color:#f7fbff;font-weight:600;}
+
+    .nt-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);}
+    .nt-note b{color:var(--ink);font-weight:600;}
+    .nt-cap{font-size:11.5px;color:var(--muted);margin-top:12px;font-style:italic;line-height:1.5;}
+
+    @media (max-width:560px){
+      .nt-panels{grid-template-columns:1fr;}
+      .nt-maskrow{margin-left:0;width:100%;}
+    }
+    @media (prefers-reduced-motion:reduce){.nt-root *{transition:none !important;}}
+  </style>
+
+  <div class="nt-card">
+    <p class="nt-title">Next token prediction, and what attention looks at</p>
+    <p class="nt-frame">The model reads left to right and predicts the next token from everything before it. Attention is how each position pulls information from earlier tokens. Step through the sentence, and click any token to inspect where its attention goes.</p>
+
+    <div class="nt-stage" id="nt-stage">
+      <svg class="nt-arcs" id="nt-arcs" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="nt-tokens" id="nt-tokens"></div>
+    </div>
+
+    <div class="nt-panels">
+      <div class="nt-panel">
+        <h4 id="nt-dist-h">Predicted next token, distribution over candidates</h4>
+        <div class="nt-dist" id="nt-dist"></div>
+      </div>
+      <div class="nt-panel">
+        <h4>Current step</h4>
+        <div class="nt-readout">
+          <div class="nt-stat"><div class="k">Step</div><div class="v" id="nt-step">1 of 7</div></div>
+          <div class="nt-stat"><div class="k">Tokens seen</div><div class="v" id="nt-seen">1</div></div>
+          <div class="nt-stat"><div class="k">Top prediction</div><div class="v" id="nt-top">the</div></div>
+          <div class="nt-stat"><div class="k">Probability</div><div class="v" id="nt-prob">0.00</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nt-controls">
+      <button class="nt-btn primary" id="nt-play">Play</button>
+      <button class="nt-btn" id="nt-step-btn">Step forward</button>
+      <button class="nt-btn" id="nt-reset">Reset</button>
+      <div class="nt-maskrow">
+        <label>Causal mask</label>
+        <div class="nt-toggle" id="nt-mask">
+          <button data-mask="on" class="on">On</button>
+          <button data-mask="off">Off</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="nt-note" id="nt-note"></div>
+    <p class="nt-cap">Distributions and attention weights here are illustrative, chosen to look plausible. They are not read from a real model. The shape of the mechanism is the point.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("nt-root");
+    var stage=document.getElementById("nt-stage");
+    var svg=document.getElementById("nt-arcs");
+    var tokRow=document.getElementById("nt-tokens");
+
+    var tokens=["the","detective","realized","the","killer","was","the"];
+    var N=tokens.length;
+
+    // illustrative next token distributions, one per query position (already sorted high to low)
+    var dists=[
+      [["man",0.12],["detective",0.10],["room",0.08],["door",0.07],["city",0.05]],
+      [["realized",0.22],["looked",0.14],["knew",0.11],["said",0.09],["was",0.06]],
+      [["the",0.31],["that",0.19],["he",0.12],["something",0.08],["it",0.06]],
+      [["killer",0.18],["truth",0.13],["murderer",0.11],["answer",0.09],["man",0.07]],
+      [["was",0.34],["had",0.16],["must",0.10],["could",0.08],["stood",0.05]],
+      [["the",0.29],["still",0.11],["not",0.10],["someone",0.09],["in",0.07]],
+      [["butler",0.21],["one",0.15],["person",0.12],["man",0.10],["host",0.08]]
+    ];
+
+    // illustrative raw attention affinities, att[query][key]
+    var attRaw=[
+      [1.00,0.20,0.10,0.10,0.10,0.10,0.10],
+      [0.80,1.00,0.10,0.10,0.10,0.10,0.10],
+      [0.30,0.90,1.00,0.10,0.10,0.10,0.10],
+      [0.40,0.30,0.80,1.00,0.20,0.10,0.10],
+      [0.30,0.70,0.40,0.60,1.00,0.20,0.10],
+      [0.20,0.30,0.30,0.20,0.90,1.00,0.20],
+      [0.25,0.70,0.55,0.30,0.95,0.80,1.00]
+    ];
+
+    var cursor=0;       // autoregressive query position, 0..N-1
+    var causal=true;
+    var selected=null;  // clicked token to inspect
+    var hover=null;     // hovered token
+    var playing=false, timer=null;
+
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+    function hexA(hex,a){
+      hex=hex.replace('#','');
+      if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+    function focusPos(){ return hover!==null?hover:(selected!==null?selected:cursor); }
+
+    function weightsFor(q){
+      var row=attRaw[q], keys=[], sum=0, hi=causal?q:(N-1);
+      for(var k=0;k<=hi;k++){ keys.push(k); sum+=row[k]; }
+      var out={};
+      keys.forEach(function(k){ out[k]=row[k]/sum; });
+      return out;
+    }
+
+    var chipEls=[];
+    function buildTokens(){
+      tokRow.innerHTML="";
+      chipEls=[];
+      tokens.forEach(function(t,i){
+        var c=document.createElement("div");
+        c.className="nt-chip";
+        c.innerHTML='<span class="idx">'+i+'</span>'+t;
+        c.addEventListener("click",function(){ selected=(selected===i)?null:i; render(); });
+        c.addEventListener("mouseenter",function(){ hover=i; render(); });
+        c.addEventListener("mouseleave",function(){ hover=null; render(); });
+        tokRow.appendChild(c);
+        chipEls.push(c);
+      });
+      var g=document.createElement("div");
+      g.className="nt-ghost";
+      g.innerHTML='<span class="idx">'+N+'</span>?';
+      tokRow.appendChild(g);
+    }
+
+    function chipTop(i){
+      var cr=chipEls[i].getBoundingClientRect(), sr=stage.getBoundingClientRect();
+      return { x:cr.left-sr.left+cr.width/2, y:cr.top-sr.top, cx:cr.left-sr.left+cr.width/2 };
+    }
+
+    function drawArcs(){
+      while(svg.firstChild) svg.removeChild(svg.firstChild);
+      var w=stage.clientWidth, h=stage.clientHeight;
+      svg.setAttribute("viewBox","0 0 "+w+" "+h);
+      var q=focusPos();
+      var wts=weightsFor(q);
+      var accent=cvar("--accent"), accent2=cvar("--accent-2");
+      var qc=chipTop(q);
+      Object.keys(wts).forEach(function(kk){
+        var k=+kk, wv=wts[k];
+        // tint attended chips by weight
+        chipEls[k].style.background = (k===q) ? hexA(accent2,0.14) : hexA(accent,0.06+0.5*wv);
+        if(k===q) return; // self, tint only
+        var kc=chipTop(k);
+        var future=(k>q);
+        var lift=Math.min(qc.y-6, 22+Math.abs(qc.x-kc.x)*0.16);
+        var midX=(qc.x+kc.x)/2, ctrlY=Math.min(qc.y,kc.y)-lift;
+        var p=document.createElementNS("http://www.w3.org/2000/svg","path");
+        p.setAttribute("d","M "+qc.x+" "+qc.y+" Q "+midX+" "+ctrlY+" "+kc.x+" "+kc.y);
+        p.setAttribute("fill","none");
+        p.setAttribute("stroke", future?accent2:accent);
+        p.setAttribute("stroke-width", (1+5*wv).toFixed(2));
+        p.setAttribute("stroke-opacity", (0.18+0.78*wv).toFixed(2));
+        p.setAttribute("stroke-linecap","round");
+        svg.appendChild(p);
+      });
+    }
+
+    function render(){
+      var q=focusPos();
+      // chip state classes
+      chipEls.forEach(function(c,i){
+        c.classList.remove("cursor","target","focus","dim");
+        c.style.background="transparent";
+        if(i===cursor) c.classList.add("cursor");
+        if(i===cursor+1) c.classList.add("target");
+      });
+      if(q!==cursor) chipEls[q].classList.add("focus");
+      // dim tokens the focus query cannot attend to under the mask
+      if(causal){
+        chipEls.forEach(function(c,i){ if(i>q) c.classList.add("dim"); });
+      }
+
+      // distribution bars for the cursor prediction
+      var d=dists[cursor];
+      var dl=document.getElementById("nt-dist");
+      dl.innerHTML="";
+      var maxP=d[0][1];
+      d.forEach(function(row,idx){
+        var r=document.createElement("div");
+        r.className="row"+(idx===0?" top":"");
+        r.innerHTML='<div class="tk">'+row[0]+'</div>'+
+          '<div class="bar"><span style="width:'+(row[1]/maxP*100).toFixed(0)+'%"></span></div>'+
+          '<div class="pv">'+row[1].toFixed(2)+'</div>';
+        dl.appendChild(r);
+      });
+
+      // readout
+      document.getElementById("nt-step").textContent=(cursor+1)+" of "+N;
+      document.getElementById("nt-seen").textContent=(cursor+1);
+      document.getElementById("nt-top").textContent=d[0][0];
+      document.getElementById("nt-prob").textContent=d[0][1].toFixed(2);
+
+      // note
+      var note=document.getElementById("nt-note");
+      if(causal){
+        note.innerHTML="<b>Causal mask on.</b> Each position can attend only to itself and the tokens before it, shown by the arcs reaching left. That is what makes this a valid language model, every prediction uses only the past.";
+      } else {
+        note.innerHTML="<b>Causal mask off.</b> Now a position can also reach tokens to its right, drawn in amber. For predicting the next token that is cheating, the model could read the answer ahead of itself and would learn nothing useful.";
+      }
+
+      drawArcs();
+    }
+
+    // controls
+    document.getElementById("nt-step-btn").addEventListener("click",function(){
+      cursor=(cursor+1)%N; selected=null; render();
+    });
+    document.getElementById("nt-reset").addEventListener("click",function(){
+      stopPlay(); cursor=0; selected=null; render();
+    });
+    function stopPlay(){
+      playing=false;
+      if(timer){clearInterval(timer);timer=null;}
+      document.getElementById("nt-play").textContent="Play";
+    }
+    document.getElementById("nt-play").addEventListener("click",function(){
+      if(playing){ stopPlay(); return; }
+      playing=true; this.textContent="Pause";
+      timer=setInterval(function(){
+        cursor=(cursor+1)%N; selected=null; render();
+      },1400);
+    });
+    document.getElementById("nt-mask").addEventListener("click",function(e){
+      var b=e.target.closest("button"); if(!b)return;
+      causal=(b.getAttribute("data-mask")==="on");
+      Array.prototype.forEach.call(this.children,function(c){c.classList.toggle("on",c===b);});
+      render();
+    });
+
+    buildTokens();
+    render();
+    window.addEventListener("resize",function(){ drawArcs(); });
+    if(window.matchMedia){
+      var mq=window.matchMedia("(prefers-color-scheme:dark)");
+      if(mq.addEventListener) mq.addEventListener("change",render);
+      else if(mq.addListener) mq.addListener(render);
+    }
+  })();</script>
+</div>
+
+</body>
+</html>

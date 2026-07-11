@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Capability timeline. Pretraining sets the ceiling</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="ct-root" class="ct-root">
+  <style>
+    .ct-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .ct-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .ct-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .ct-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .ct-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+    .ct-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .ct-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .ct-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+    .ct-canvas-wrap{position:relative;width:100%;overflow-x:auto;}
+    canvas.ct-canvas{width:100%;height:320px;display:block;touch-action:none;cursor:grab;}
+    canvas.ct-canvas:active{cursor:grabbing;}
+    .ct-legend{display:flex;flex-wrap:wrap;gap:16px;margin:12px 2px 0;font-size:12px;color:var(--muted);}
+    .ct-legend span{display:inline-flex;align-items:center;gap:7px;}
+    .ct-swatch{width:13px;height:13px;border-radius:3px;display:inline-block;}
+    .ct-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    .ct-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .ct-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .ct-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+    .ct-controls{margin-top:14px;}
+    .ct-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
+    .ct-row label{font-size:12.5px;color:var(--muted);min-width:132px;}
+    .ct-row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;min-width:74px;text-align:right;}
+    .ct-root input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:3px;background:var(--line);outline:none;}
+    .ct-root input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .ct-root input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .ct-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    .ct-note b{color:var(--ink);font-weight:600;}
+    .ct-soft{font-size:12px;color:var(--muted);line-height:1.55;margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:10px;}
+    .ct-soft b{color:var(--accent-2);font-weight:600;}
+    .ct-cap{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;}
+    @media (max-width:520px){.ct-readout{grid-template-columns:repeat(2,1fr);}.ct-row label{min-width:96px;}}
+    @media (prefers-reduced-motion:reduce){.ct-root *{transition:none !important;}}
+  </style>
+
+  <div class="ct-card">
+    <p class="ct-title">Capability is built in a continuum. Pretraining sets the ceiling, the rest unlocks it.</p>
+    <p class="ct-frame">Drag the scrubber across a training run. Watch two things move. The raw world model that a base model carries, and the usable aligned behavior it will actually show you. The clean split between pretrain and post train is a convenient story, not a sharp line.</p>
+
+    <div class="ct-canvas-wrap">
+      <canvas class="ct-canvas" id="ct-cv" width="1440" height="640" aria-label="Capability decomposed across the three training phases"></canvas>
+    </div>
+
+    <div class="ct-legend">
+      <span><i class="ct-swatch" id="ct-sw-raw"></i>Raw world model, mostly built in pretraining</span>
+      <span><i class="ct-swatch" id="ct-sw-use"></i>Usable aligned behavior, unlocked later</span>
+    </div>
+
+    <div class="ct-readout">
+      <div class="ct-stat"><div class="k">Phase now</div><div class="v" id="ct-phase">Pretraining</div></div>
+      <div class="ct-stat"><div class="k">Raw world model</div><div class="v" id="ct-raw">0.00</div></div>
+      <div class="ct-stat"><div class="k">Usable behavior</div><div class="v" id="ct-use">0.00</div></div>
+      <div class="ct-stat"><div class="k">Latent gap</div><div class="v" id="ct-gap">0.00</div></div>
+    </div>
+
+    <div class="ct-controls">
+      <div class="ct-row">
+        <label>Training progress</label>
+        <input type="range" id="ct-p" min="0" max="1000" step="1" value="180" aria-label="Training progress along the timeline">
+        <span class="val" id="ct-pval">0.18</span>
+      </div>
+    </div>
+
+    <div class="ct-note" id="ct-explain"></div>
+
+    <div class="ct-soft"><b>The boundaries are soft on purpose.</b> Annealing data leaks into late pretraining, and some alignment signal shows up before post training formally begins. The dividers are drawn as blur bands, not sharp cuts, because that is how the real continuum behaves.</div>
+
+    <p class="ct-cap">Curves are illustrative. The shape carries the argument, that raw capability saturates early and the later phases mostly close the gap between what a model knows and what it will reliably do.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("ct-root");
+    var cv=document.getElementById("ct-cv"), ctx=cv.getContext("2d");
+    var p=0.18; // training progress 0..1
+
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+    function hexA(hex,a){
+      hex=hex.replace('#',''); if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+
+    // phase boundaries (soft), pretraining .. mid .. post
+    var B1=0.60, B2=0.80;
+
+    // raw world model saturates early. reaches near ceiling by end of pretraining.
+    function raw(x){ return 0.96*(1-Math.exp(-6*x)); }
+    // how much of that raw capability is unlocked as usable behavior.
+    function unlock(x){ return 1/(1+Math.exp(-14*(x-0.72))); }
+    function usable(x){ return raw(x)*unlock(x); }
+
+    function phaseName(x){ return x<B1 ? "Pretraining" : (x<B2 ? "Mid training" : "Post training"); }
+
+    var pad={l:48,r:18,t:34,b:48};
+
+    function draw(){
+      var W=cv.width,H=cv.height;
+      ctx.clearRect(0,0,W,H);
+      var plotW=W-pad.l-pad.r, plotH=H-pad.t-pad.b;
+      function X(x){return pad.l+x*plotW;}
+      function Y(v){return pad.t+(1-v)*plotH;} // v in 0..1
+
+      var line=cvar("--line"), muted=cvar("--muted"), ink=cvar("--ink"),
+          accent=cvar("--accent"), accent2=cvar("--accent-2"), surface=cvar("--surface");
+
+      // phase tint bands
+      ctx.fillStyle=hexA(accent,0.05); ctx.fillRect(X(0),pad.t,X(B1)-X(0),plotH);
+      ctx.fillStyle=hexA(muted,0.05); ctx.fillRect(X(B1),pad.t,X(B2)-X(B1),plotH);
+      ctx.fillStyle=hexA(accent2,0.06); ctx.fillRect(X(B2),pad.t,X(1)-X(B2),plotH);
+
+      // soft blur boundary bands (fuzzy dividers, not sharp cuts)
+      function blur(cx){
+        var w=plotW*0.055, x0=X(cx)-w/2;
+        var g=ctx.createLinearGradient(x0,0,x0+w,0);
+        g.addColorStop(0,hexA(muted,0)); g.addColorStop(0.5,hexA(muted,0.30)); g.addColorStop(1,hexA(muted,0));
+        ctx.fillStyle=g; ctx.fillRect(x0,pad.t,w,plotH);
+      }
+      blur(B1); blur(B2);
+
+      // grid, horizontal reference lines
+      ctx.strokeStyle=line; ctx.lineWidth=1;
+      ctx.font="22px ui-monospace,Menlo,monospace"; ctx.fillStyle=muted; ctx.textAlign="right";
+      [0,0.5,1].forEach(function(v){
+        var y=Y(v); ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+        ctx.fillText(v.toFixed(1), pad.l-8, y+7);
+      });
+
+      // ceiling reached in pretraining
+      var ceil=raw(B1);
+      ctx.strokeStyle=hexA(ink,0.55); ctx.lineWidth=1.5; ctx.setLineDash([6,5]);
+      ctx.beginPath();ctx.moveTo(pad.l,Y(ceil));ctx.lineTo(W-pad.r,Y(ceil));ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=ink; ctx.textAlign="left"; ctx.font="21px -apple-system,sans-serif";
+      ctx.fillText("ceiling set in pretraining", X(B2)-6, Y(ceil)-10);
+
+      // raw area
+      ctx.fillStyle=hexA(accent,0.16); ctx.beginPath(); ctx.moveTo(X(0),Y(0));
+      for(var t=0;t<=300;t++){var x=t/300; ctx.lineTo(X(x),Y(raw(x)));}
+      ctx.lineTo(X(1),Y(0)); ctx.closePath(); ctx.fill();
+
+      // usable area
+      ctx.fillStyle=hexA(accent2,0.28); ctx.beginPath(); ctx.moveTo(X(0),Y(0));
+      for(var t2=0;t2<=300;t2++){var x2=t2/300; ctx.lineTo(X(x2),Y(usable(x2)));}
+      ctx.lineTo(X(1),Y(0)); ctx.closePath(); ctx.fill();
+
+      // raw curve
+      ctx.strokeStyle=accent; ctx.lineWidth=3; ctx.beginPath();
+      for(var t3=0;t3<=300;t3++){var x3=t3/300; var yy=Y(raw(x3)); if(t3===0)ctx.moveTo(X(x3),yy);else ctx.lineTo(X(x3),yy);}
+      ctx.stroke();
+      // usable curve
+      ctx.strokeStyle=accent2; ctx.lineWidth=3; ctx.beginPath();
+      for(var t4=0;t4<=300;t4++){var x4=t4/300; var yy4=Y(usable(x4)); if(t4===0)ctx.moveTo(X(x4),yy4);else ctx.lineTo(X(x4),yy4);}
+      ctx.stroke();
+
+      // phase labels near top
+      ctx.fillStyle=muted; ctx.font="600 22px -apple-system,sans-serif"; ctx.textAlign="center";
+      ctx.fillText("Pretraining", X(B1/2), pad.t-10);
+      ctx.fillText("Mid training", X((B1+B2)/2), pad.t-10);
+      ctx.fillText("Post training", X((B2+1)/2), pad.t-10);
+
+      // scrubber
+      var sx=X(p);
+      ctx.strokeStyle=ink; ctx.lineWidth=1.5; ctx.beginPath();ctx.moveTo(sx,pad.t);ctx.lineTo(sx,H-pad.b);ctx.stroke();
+      // dots on each curve at scrubber
+      function dot(v,col){ ctx.fillStyle=col; ctx.beginPath();ctx.arc(sx,Y(v),8,0,7);ctx.fill();
+        ctx.fillStyle=surface; ctx.beginPath();ctx.arc(sx,Y(v),3.5,0,7);ctx.fill(); }
+      dot(raw(p),accent); dot(usable(p),accent2);
+      // handle at top
+      ctx.fillStyle=ink; ctx.beginPath();ctx.arc(sx,pad.t,7,0,7);ctx.fill();
+
+      // x axis label
+      ctx.fillStyle=muted; ctx.textAlign="center"; ctx.font="21px -apple-system,sans-serif";
+      ctx.fillText("training progress, left to right", W/2, H-12);
+
+      // readouts
+      var rv=raw(p), uv=usable(p);
+      document.getElementById("ct-phase").textContent=phaseName(p);
+      document.getElementById("ct-raw").textContent=rv.toFixed(2);
+      document.getElementById("ct-use").textContent=uv.toFixed(2);
+      document.getElementById("ct-gap").textContent=(rv-uv).toFixed(2);
+      document.getElementById("ct-pval").textContent=p.toFixed(2);
+    }
+
+    function explain(){
+      var el=document.getElementById("ct-explain"), ph=phaseName(p);
+      if(ph==="Pretraining"){
+        el.innerHTML="<b>Pretraining.</b> The model reads a large fraction of the web and builds its world model. Almost all raw capability is laid down right here, which is why the blue curve climbs fast and then flattens. A base model at this point already knows a great deal, yet it is hard to steer, so the usable behavior in amber stays low. The ceiling you will see later is being set now.";
+      } else if(ph==="Mid training"){
+        el.innerHTML="<b>Mid training.</b> Long context extension and a high quality annealing mix. Context windows grow and sharper data cleans up what already exists. Notice that the blue curve barely rises. This phase reshapes and stabilizes the world model far more than it expands it.";
+      } else {
+        el.innerHTML="<b>Post training.</b> Supervised fine tuning, then RLHF and reasoning training. This unlocks and aligns behavior the base model already had, so the amber curve climbs toward the blue ceiling and the latent gap shrinks. Very little new raw knowledge is added here.";
+      }
+    }
+
+    // interaction, drag anywhere on canvas
+    function setFromEvent(e){
+      var rect=cv.getBoundingClientRect();
+      var cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+      var px=cx/rect.width*cv.width;
+      var frac=(px-pad.l)/(cv.width-pad.l-pad.r);
+      p=Math.max(0,Math.min(1,frac));
+      document.getElementById("ct-p").value=Math.round(p*1000);
+      explain(); draw();
+    }
+    var dragging=false;
+    cv.addEventListener("mousedown",function(e){dragging=true;setFromEvent(e);});
+    window.addEventListener("mousemove",function(e){if(dragging)setFromEvent(e);});
+    window.addEventListener("mouseup",function(){dragging=false;});
+    cv.addEventListener("touchstart",function(e){dragging=true;setFromEvent(e);e.preventDefault();},{passive:false});
+    cv.addEventListener("touchmove",function(e){if(dragging){setFromEvent(e);e.preventDefault();}},{passive:false});
+    cv.addEventListener("touchend",function(){dragging=false;});
+
+    document.getElementById("ct-p").addEventListener("input",function(e){
+      p=parseFloat(e.target.value)/1000; explain(); draw();
+    });
+
+    // legend swatches
+    document.getElementById("ct-sw-raw").style.background=cvar("--accent");
+    document.getElementById("ct-sw-use").style.background=cvar("--accent-2");
+
+    explain(); draw();
+    window.addEventListener("resize",function(){
+      document.getElementById("ct-sw-raw").style.background=cvar("--accent");
+      document.getElementById("ct-sw-use").style.background=cvar("--accent-2");
+      draw();
+    });
+  })();</script>
+</div>
+
+</body>
+</html>

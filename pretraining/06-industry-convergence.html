@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The converging frontier</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="ic-root" class="ic-root">
+  <style>
+    .ic-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      --tint:rgba(47,111,237,0.10); --tint-strong:rgba(47,111,237,0.18);
+      --amber-tint:rgba(224,138,30,0.16); --good-tint:rgba(31,157,85,0.14);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .ic-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .ic-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;
+        --tint:rgba(107,155,255,0.14);--tint-strong:rgba(107,155,255,0.22);
+        --amber-tint:rgba(240,180,90,0.20);--good-tint:rgba(74,222,128,0.16);}
+    }
+    :root[data-theme="dark"] .ic-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;
+      --tint:rgba(107,155,255,0.14);--tint-strong:rgba(107,155,255,0.22);
+      --amber-tint:rgba(240,180,90,0.20);--good-tint:rgba(74,222,128,0.16);}
+    :root[data-theme="light"] .ic-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;
+      --tint:rgba(47,111,237,0.10);--tint-strong:rgba(47,111,237,0.18);
+      --amber-tint:rgba(224,138,30,0.16);--good-tint:rgba(31,157,85,0.14);}
+
+    .ic-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .ic-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .ic-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+
+    .ic-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px;}
+    .ic-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .ic-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .ic-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+
+    .ic-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px;}
+    .ic-toggle{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+    .ic-toggle button{background:transparent;color:var(--muted);border:none;padding:8px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:background .25s,color .25s;}
+    .ic-toggle button.on{background:var(--accent-2);color:#1a1204;font-weight:600;}
+    .ic-hint{font-size:11.5px;color:var(--muted);flex:1;min-width:140px;text-align:right;}
+
+    .ic-tablewrap{position:relative;width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:12px;}
+    table.ic-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;}
+    .ic-table th,.ic-table td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top;}
+    .ic-table tr:last-child td{border-bottom:none;}
+    .ic-table thead th{position:sticky;top:0;background:var(--surface);z-index:2;font-weight:600;color:var(--muted);border-bottom:1.5px solid var(--line);}
+    .ic-table th button{all:unset;cursor:pointer;font:inherit;color:inherit;display:inline-flex;align-items:center;gap:4px;}
+    .ic-table th button:hover{color:var(--ink);}
+    .ic-table th .arw{font-size:9px;color:var(--accent);}
+    .ic-table td:first-child,.ic-table th:first-child{position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--line);}
+    .ic-table thead th:first-child{z-index:3;}
+    .ic-fam{font-weight:600;color:var(--ink);}
+    .ic-vend{font-size:10.5px;color:var(--muted);margin-top:2px;}
+    .ic-table td .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:600;font-size:12px;color:var(--ink);}
+    .ic-table td .q{display:block;font-size:10px;color:var(--muted);margin-top:2px;font-style:italic;}
+
+    /* consensus mode. light up what everyone shares */
+    .ic-table.mode-shared td[data-s="full"]{background:var(--tint-strong);}
+    .ic-table.mode-shared td[data-s="partial"]{background:var(--tint);}
+    /* moat mode. dim the shared skeleton, light the true differences */
+    .ic-table.mode-moat td[data-s="full"],
+    .ic-table.mode-moat td[data-s="partial"]{opacity:.32;}
+    .ic-table.mode-moat td[data-s="diff"]{background:var(--amber-tint);}
+    .ic-table.mode-moat td[data-s="diff"] .mono{color:var(--accent-2);}
+    .ic-table.mode-moat thead th[data-s="diff"]{color:var(--accent-2);}
+
+    .ic-explain{font-size:12.5px;color:var(--muted);line-height:1.55;margin:14px 0 4px;min-height:34px;}
+    .ic-explain b{color:var(--ink);font-weight:600;}
+
+    .ic-sub{font-size:13px;font-weight:600;margin:22px 0 8px;}
+    .ic-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+    .ic-filter button{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:11.5px;cursor:pointer;font-family:inherit;transition:background .2s,color .2s,border-color .2s;}
+    .ic-filter button.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;}
+
+    .ic-timeline{border:1px solid var(--line);border-radius:12px;padding:14px 16px 8px;}
+    .ic-legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;font-size:11px;color:var(--muted);}
+    .ic-legend span{display:inline-flex;align-items:center;gap:6px;}
+    .ic-dotk{width:10px;height:10px;border-radius:50%;display:inline-block;}
+    .ic-lane{display:grid;grid-template-columns:98px 1fr;align-items:center;gap:8px;margin:4px 0;transition:opacity .25s;}
+    .ic-lane.dim{opacity:.22;}
+    .ic-lane .name{font-size:11.5px;color:var(--ink);font-weight:600;}
+    .ic-track{position:relative;height:26px;border-radius:8px;}
+    .ic-track .base{position:absolute;left:0;right:0;top:12px;height:2px;background:var(--line);border-radius:2px;}
+    .ic-dot{position:absolute;top:6px;width:14px;height:14px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--surface);cursor:default;transition:transform .2s;}
+    .ic-dot:hover{transform:translateX(-50%) scale(1.35);}
+    .ic-axis{display:grid;grid-template-columns:98px 1fr;gap:8px;margin-top:6px;}
+    .ic-axis .ticks{position:relative;height:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;color:var(--muted);}
+    .ic-axis .ticks span{position:absolute;transform:translateX(-50%);}
+
+    .ic-tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font-size:11px;line-height:1.4;padding:7px 9px;border-radius:8px;max-width:230px;opacity:0;transition:opacity .18s;z-index:20;box-shadow:0 4px 14px rgba(0,0,0,.22);}
+    .ic-tip.show{opacity:1;}
+
+    .ic-note{font-size:12px;color:var(--muted);line-height:1.55;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);}
+    .ic-note b{color:var(--ink);font-weight:600;}
+    .ic-cap{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;line-height:1.5;}
+
+    @media (max-width:520px){
+      .ic-readout{grid-template-columns:repeat(2,1fr);}
+      .ic-hint{text-align:left;}
+      .ic-lane,.ic-axis{grid-template-columns:74px 1fr;}
+    }
+    @media (prefers-reduced-motion:reduce){.ic-root *{transition:none !important;}}
+  </style>
+
+  <div class="ic-card">
+    <p class="ic-title">The frontier is converging</p>
+    <p class="ic-frame">Five of the most capable model families, compared on the architectural choices that are publicly known or widely reported. Sort any column, then flip the view. The skeleton is nearly identical. The parts that still differ are not the architecture.</p>
+
+    <div class="ic-readout">
+      <div class="ic-stat"><div class="k">Families compared</div><div class="v">5</div></div>
+      <div class="ic-stat"><div class="k">Universal traits</div><div class="v">3</div></div>
+      <div class="ic-stat"><div class="k">Converging traits</div><div class="v">3</div></div>
+      <div class="ic-stat"><div class="k">Real differentiators</div><div class="v">2</div></div>
+    </div>
+
+    <div class="ic-controls">
+      <div class="ic-toggle" id="ic-mode">
+        <button data-mode="plain" class="on">Plain</button>
+        <button data-mode="shared">Shared skeleton</button>
+        <button data-mode="moat">The real moat</button>
+      </div>
+      <span class="ic-hint">Click a column header to sort.</span>
+    </div>
+
+    <div class="ic-tablewrap">
+      <table class="ic-table mode-plain" id="ic-table">
+        <thead><tr id="ic-head"></tr></thead>
+        <tbody id="ic-body"></tbody>
+      </table>
+    </div>
+
+    <div class="ic-explain" id="ic-explain"></div>
+
+    <p class="ic-sub">The drift over time, filterable by family</p>
+    <div class="ic-filter" id="ic-filter"></div>
+    <div class="ic-timeline" id="ic-timeline">
+      <div class="ic-legend">
+        <span><i class="ic-dotk" style="background:var(--accent)"></i> Move to mixture of experts</span>
+        <span><i class="ic-dotk" style="background:var(--accent-2)"></i> Move to FP8 training</span>
+        <span><i class="ic-dotk" style="background:var(--good)"></i> Longer context and efficient attention</span>
+      </div>
+      <div id="ic-lanes"></div>
+      <div class="ic-axis"><div></div><div class="ticks" id="ic-ticks"></div></div>
+    </div>
+    <div class="ic-tip" id="ic-tip"></div>
+
+    <div class="ic-note">
+      <b>Read this as illustrative and public sourced.</b> Every entry is based on public material and informed inference, not confidential detail. Cells marked reported or inferred are cases where a lab has not fully documented the choice, so the value reflects widely reported architecture rather than a disclosed spec. Nothing here states precise unpublished numbers such as parameter counts or training cost. The point is the family level pattern, not any single figure.
+    </div>
+    <p class="ic-cap">When the skeletons match, the moat is the data recipe and the post training, which is exactly what nobody publishes.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("ic-root");
+    var table=document.getElementById("ic-table");
+    var head=document.getElementById("ic-head");
+    var body=document.getElementById("ic-body");
+
+    var cols=[
+      {key:"name",  label:"Family",        s:"head"},
+      {key:"arch",  label:"Architecture",  s:"partial"},
+      {key:"attn",  label:"Attention",     s:"partial"},
+      {key:"pos",   label:"Position",      s:"full"},
+      {key:"norm",  label:"Normalization", s:"full"},
+      {key:"act",   label:"Activation",    s:"full"},
+      {key:"prec",  label:"Precision",     s:"partial"},
+      {key:"weights",label:"Open weights", s:"diff"},
+      {key:"recipe", label:"Open recipe",  s:"diff"}
+    ];
+
+    var fams=[
+      {name:"GPT family", vendor:"OpenAI",
+        arch:["MoE","reported"], attn:["GQA","inferred"], pos:["RoPE","inferred"],
+        norm:["RMSNorm","inferred"], act:["SwiGLU","inferred"], prec:["BF16 to FP8","reported"],
+        weights:["Mostly no","with open exceptions"], recipe:["No",""]},
+      {name:"Gemini family", vendor:"Google",
+        arch:["MoE","reported"], attn:["GQA","inferred"], pos:["RoPE","inferred"],
+        norm:["RMSNorm","inferred"], act:["GLU family","inferred"], prec:["BF16 on TPU","inferred"],
+        weights:["Mostly no","with open siblings"], recipe:["No",""]},
+      {name:"Llama family", vendor:"Meta",
+        arch:["Dense to MoE","by Llama 4"], attn:["GQA",""], pos:["RoPE",""],
+        norm:["RMSNorm",""], act:["SwiGLU",""], prec:["BF16",""],
+        weights:["Yes",""], recipe:["Partial",""]},
+      {name:"Qwen family", vendor:"Alibaba",
+        arch:["Dense and MoE",""], attn:["GQA",""], pos:["RoPE",""],
+        norm:["RMSNorm",""], act:["SwiGLU",""], prec:["BF16 to FP8",""],
+        weights:["Yes",""], recipe:["Partial",""]},
+      {name:"DeepSeek family", vendor:"DeepSeek",
+        arch:["MoE",""], attn:["MLA",""], pos:["RoPE decoupled",""],
+        norm:["RMSNorm",""], act:["SwiGLU",""], prec:["FP8",""],
+        weights:["Yes",""], recipe:["Fuller","more disclosed"]}
+    ];
+
+    var sortKey=null, sortDir=1;
+
+    function renderHead(){
+      head.innerHTML="";
+      cols.forEach(function(c){
+        var th=document.createElement("th");
+        th.setAttribute("data-s",c.s);
+        var arw=(sortKey===c.key)?(" <span class='arw'>"+(sortDir>0?"▲":"▼")+"</span>"):"";
+        th.innerHTML="<button>"+c.label+arw+"</button>";
+        th.querySelector("button").addEventListener("click",function(){
+          if(sortKey===c.key){sortDir=-sortDir;}else{sortKey=c.key;sortDir=1;}
+          renderHead(); renderBody();
+        });
+        head.appendChild(th);
+      });
+    }
+
+    function valOf(f,key){ return key==="name"?f.name:f[key][0]; }
+
+    function renderBody(){
+      var rows=fams.slice();
+      if(sortKey){
+        rows.sort(function(a,b){
+          var x=valOf(a,sortKey).toLowerCase(), y=valOf(b,sortKey).toLowerCase();
+          return x<y?-1*sortDir:x>y?1*sortDir:0;
+        });
+      }
+      body.innerHTML="";
+      rows.forEach(function(f){
+        var tr=document.createElement("tr");
+        cols.forEach(function(c){
+          var td=document.createElement("td");
+          td.setAttribute("data-s",c.s);
+          if(c.key==="name"){
+            td.innerHTML="<div class='ic-fam'>"+f.name+"</div><div class='ic-vend'>"+f.vendor+"</div>";
+          }else{
+            var cell=f[c.key];
+            var q=cell[1]?"<span class='q'>("+cell[1]+")</span>":"";
+            td.innerHTML="<span class='mono'>"+cell[0]+"</span>"+q;
+          }
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+    }
+
+    // mode toggle
+    var explain=document.getElementById("ic-explain");
+    var texts={
+      plain:"<b>Plain view.</b> The bare comparison. Rotary position encoding, RMSNorm, and a gated SwiGLU style feed forward show up in every column, and grouped query attention is nearly universal. Everyone is moving to mixture of experts and toward FP8 training. Read it once and the sameness is already visible.",
+      shared:"<b>Shared skeleton.</b> The tinted cells are the consensus. The deeper tint marks the traits that are effectively universal, the lighter tint marks the ones that are converging. Almost the whole table lights up, which is the point. The recipe for the base transformer is now common knowledge.",
+      moat:"<b>The real moat.</b> Now the shared skeleton fades and only the columns that actually separate these families stay lit. They are openness of weights and openness of recipe, not architecture. And even open weight families keep the data mixture and the post training private, which is where the remaining advantage lives."
+    };
+    document.getElementById("ic-mode").addEventListener("click",function(e){
+      var b=e.target.closest("button"); if(!b)return;
+      var m=b.getAttribute("data-mode");
+      Array.prototype.forEach.call(this.children,function(c){c.classList.toggle("on",c===b);});
+      table.className="ic-table mode-"+m;
+      explain.innerHTML=texts[m];
+    });
+
+    // timeline
+    var tl=[
+      {fam:"GPT family", ev:[
+        {y:2023,t:"moe",lab:"The GPT 4 generation is widely reported to adopt a mixture of experts design."},
+        {y:2023,t:"ctx",lab:"Context windows grow into the long context regime across the family."},
+        {y:2024,t:"fp8",lab:"Lower precision training is reported for later generations."}]},
+      {fam:"Gemini family", ev:[
+        {y:2023,t:"moe",lab:"The family is reported to use a mixture of experts design."},
+        {y:2024,t:"ctx",lab:"Very long context, up to about a million tokens, is reported."}]},
+      {fam:"Llama family", ev:[
+        {y:2023,t:"ctx",lab:"Grouped query attention and longer context arrive in the later releases."},
+        {y:2024,t:"ctx",lab:"Context is extended toward 128k in the 3.1 line."},
+        {y:2025,t:"moe",lab:"The Llama 4 generation is reported to move to mixture of experts."}]},
+      {fam:"Qwen family", ev:[
+        {y:2024,t:"moe",lab:"Mixture of experts variants ship alongside dense models."},
+        {y:2024,t:"ctx",lab:"Long context releases appear across the family."},
+        {y:2025,t:"fp8",lab:"FP8 checkpoints are released publicly."}]},
+      {fam:"DeepSeek family", ev:[
+        {y:2024,t:"moe",lab:"The V2 and V3 lines are built on mixture of experts."},
+        {y:2024,t:"fp8",lab:"FP8 training is reported for the V3 line."},
+        {y:2024,t:"ctx",lab:"Multi head latent attention improves long context efficiency."}]}
+    ];
+    var Y0=2022, Y1=2026;
+    function leftPct(y){ return (y-Y0)/(Y1-Y0)*100; }
+    var tcol={moe:"var(--accent)",fp8:"var(--accent-2)",ctx:"var(--good)"};
+
+    var lanes=document.getElementById("ic-lanes");
+    var tip=document.getElementById("ic-tip");
+    var timelineEl=document.getElementById("ic-timeline");
+
+    function renderLanes(){
+      lanes.innerHTML="";
+      tl.forEach(function(row){
+        var lane=document.createElement("div");
+        lane.className="ic-lane"; lane.setAttribute("data-fam",row.fam);
+        lane.innerHTML="<div class='name'>"+row.fam.replace(" family","")+"</div>";
+        var track=document.createElement("div"); track.className="ic-track";
+        track.innerHTML="<div class='base'></div>";
+        var used={};
+        row.ev.forEach(function(e){
+          var n=used[e.y]||0; used[e.y]=n+1;
+          var d=document.createElement("div");
+          d.className="ic-dot";
+          d.style.left="calc("+leftPct(e.y)+"% + "+(n*11)+"px)";
+          d.style.background=tcol[e.t];
+          d.addEventListener("mouseenter",function(ev){ showTip(ev, e.lab); });
+          d.addEventListener("mousemove",function(ev){ moveTip(ev); });
+          d.addEventListener("mouseleave",hideTip);
+          track.appendChild(d);
+        });
+        lane.appendChild(track);
+        lanes.appendChild(lane);
+      });
+    }
+    function showTip(ev,txt){ tip.textContent=txt; tip.classList.add("show"); moveTip(ev); }
+    function moveTip(ev){
+      var r=root.getBoundingClientRect();
+      var x=ev.clientX-r.left+12, y=ev.clientY-r.top+12;
+      if(x+240>r.width) x=ev.clientX-r.left-240;
+      tip.style.left=x+"px"; tip.style.top=y+"px";
+    }
+    function hideTip(){ tip.classList.remove("show"); }
+
+    // axis
+    var ticks=document.getElementById("ic-ticks");
+    for(var yr=Y0; yr<=Y1; yr++){
+      var s=document.createElement("span"); s.style.left=leftPct(yr)+"%"; s.textContent=yr;
+      ticks.appendChild(s);
+    }
+
+    // family filter
+    var filter=document.getElementById("ic-filter");
+    var names=["All"].concat(fams.map(function(f){return f.name.replace(" family","");}));
+    names.forEach(function(nm,i){
+      var b=document.createElement("button");
+      b.textContent=nm; if(i===0)b.classList.add("on");
+      b.addEventListener("click",function(){
+        Array.prototype.forEach.call(filter.children,function(c){c.classList.remove("on");});
+        b.classList.add("on");
+        var sel=(nm==="All")?null:nm+" family";
+        Array.prototype.forEach.call(lanes.children,function(lane){
+          lane.classList.toggle("dim", sel!==null && lane.getAttribute("data-fam")!==sel);
+        });
+      });
+      filter.appendChild(b);
+    });
+
+    // init
+    renderHead(); renderBody(); renderLanes();
+    explain.innerHTML=texts.plain;
+  })();</script>
+</div>
+
+</body>
+</html>

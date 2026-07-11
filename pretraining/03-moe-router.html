@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mixture of experts routing</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="moe-root" class="moe-root">
+  <style>
+    .moe-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .moe-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .moe-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .moe-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .moe-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+
+    .moe-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .moe-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .moe-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+
+    .moe-stage-wrap{position:relative;width:100%;overflow-x:auto;}
+    .moe-stage{width:100%;height:auto;display:block;min-width:520px;}
+
+    .moe-lbl{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;fill:var(--muted);}
+    .moe-lbl-ink{fill:var(--ink);font-weight:600;}
+    .moe-line{stroke:var(--line);stroke-width:1;fill:none;}
+    .moe-aline{fill:none;stroke:var(--accent);stroke-width:2.4;}
+    .moe-root.dense .moe-aline{stroke:var(--accent-2);}
+    .moe-exp{fill:var(--accent);stroke:var(--line);stroke-width:1;}
+    .moe-router-box{fill:var(--surface);stroke:var(--accent);stroke-width:1.4;}
+    .moe-tok{fill:var(--accent);}
+    .moe-pulse{fill:var(--accent);}
+    .moe-root.dense .moe-pulse{fill:var(--accent-2);}
+
+    .moe-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    .moe-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .moe-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .moe-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+    .moe-stat .v.big{font-size:16px;}
+    .moe-stat .v.hl{color:var(--accent);}
+    .moe-root.dense .moe-stat .v.hl{color:var(--accent-2);}
+
+    .moe-controls{margin-top:14px;}
+    .moe-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
+    .moe-row label{font-size:12.5px;color:var(--muted);min-width:132px;}
+    .moe-row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;min-width:74px;text-align:right;}
+    .moe-root input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:3px;background:var(--line);outline:none;}
+    .moe-root input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .moe-root input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .moe-krow.off{opacity:.4;pointer-events:none;}
+    .moe-toggle{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+    .moe-toggle button{background:transparent;color:var(--muted);border:none;padding:8px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:background .2s,color .2s;}
+    .moe-toggle button.on{background:var(--accent-2);color:#1a1204;font-weight:600;}
+
+    .moe-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    .moe-note b{color:var(--ink);font-weight:600;}
+    .moe-cap{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;}
+
+    @media (max-width:520px){.moe-readout{grid-template-columns:repeat(2,1fr);}.moe-row label{min-width:96px;}}
+    @media (prefers-reduced-motion:reduce){.moe-root *{transition:none !important;}}
+  </style>
+
+  <div class="moe-card">
+    <p class="moe-title">Mixture of experts. A memory versus compute trade, not a magic trick</p>
+    <p class="moe-frame">A router reads each token and sends it to only a few experts. Total parameters can grow huge while the compute spent on any single token stays small. Raise the top-k, or flip to dense, and watch active parameters move while the total stays put.</p>
+
+    <div class="moe-stage-wrap">
+      <svg class="moe-stage" viewBox="0 0 760 340" role="img" aria-label="Tokens routed by a router to a bank of experts">
+        <text class="moe-lbl" x="24" y="24">Incoming tokens</text>
+        <text class="moe-lbl" x="350" y="24" text-anchor="middle">Router</text>
+        <text class="moe-lbl" x="640" y="24" text-anchor="middle">Experts</text>
+        <g id="moe-lines"></g>
+        <g id="moe-alines"></g>
+        <rect class="moe-router-box" x="305" y="130" width="90" height="80" rx="10"></rect>
+        <text class="moe-lbl moe-lbl-ink" x="350" y="166" text-anchor="middle">route</text>
+        <text class="moe-lbl moe-lbl-ink" x="350" y="182" text-anchor="middle">top-k</text>
+        <g id="moe-experts"></g>
+        <g id="moe-tokens"></g>
+        <g id="moe-pulses"></g>
+      </svg>
+    </div>
+
+    <div class="moe-readout">
+      <div class="moe-stat"><div class="k">Total parameters</div><div class="v big" id="moe-total">46.6 B</div></div>
+      <div class="moe-stat"><div class="k">Active per token</div><div class="v big hl" id="moe-active">13.0 B</div></div>
+      <div class="moe-stat"><div class="k">Active ratio</div><div class="v" id="moe-ratio">28%</div></div>
+      <div class="moe-stat"><div class="k">Load balance</div><div class="v" id="moe-bal">--</div></div>
+    </div>
+
+    <div class="moe-controls">
+      <div class="moe-row">
+        <label>Routing mode</label>
+        <div class="moe-toggle" id="moe-mode">
+          <button data-mode="moe" class="on">MoE (top-k)</button>
+          <button data-mode="dense">Dense (all experts)</button>
+        </div>
+      </div>
+      <div class="moe-row moe-krow" id="moe-krow">
+        <label>Experts per token k</label>
+        <input type="range" id="moe-k" min="1" max="4" step="1" value="2">
+        <span class="val" id="moe-kval">k = 2</span>
+      </div>
+    </div>
+
+    <div class="moe-note" id="moe-explain"></div>
+    <p class="moe-cap">Numbers follow a Mixtral style setup with 8 experts, a shared attention trunk, and top-2 routing. Total and active parameter counts are illustrative, the ratio is the point.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("moe-root");
+    var E=8, sharedP=1.8, expertP=5.6;          // billions
+    var total=sharedP+E*expertP;                 // 46.6 B
+    var mode="moe", k=2;
+
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+    // geometry
+    var routerPt={x:395,y:170};
+    var eTop=36, eH=28, eGap=6, eX=560, eW=150;
+    var experts=[]; // {y,cy,count,flash,rect,bar}
+    var lineGlow=new Array(E).fill(0);
+
+    var SVGNS="http://www.w3.org/2000/svg";
+    function el(tag,attrs){var n=document.createElementNS(SVGNS,tag);for(var a in attrs)n.setAttribute(a,attrs[a]);return n;}
+
+    var gLines=document.getElementById("moe-lines");
+    var gAl=document.getElementById("moe-alines");
+    var gExp=document.getElementById("moe-experts");
+    var gTok=document.getElementById("moe-tokens");
+    var gPul=document.getElementById("moe-pulses");
+
+    function pathStr(i){
+      var cy=experts[i].cy;
+      var cx=(routerPt.x+eX)/2+12;
+      var mcy=(routerPt.y+cy)/2;
+      return "M"+routerPt.x+" "+routerPt.y+" Q"+cx+" "+mcy+" "+eX+" "+cy;
+    }
+    function pointOn(i,t){
+      var p0=routerPt, p1={x:eX,y:experts[i].cy};
+      var cx=(routerPt.x+eX)/2+12, mcy=(routerPt.y+experts[i].cy)/2;
+      var u=1-t;
+      return {
+        x:u*u*p0.x+2*u*t*cx+t*t*p1.x,
+        y:u*u*p0.y+2*u*t*mcy+t*t*p1.y
+      };
+    }
+
+    // build experts + lines
+    for(var i=0;i<E;i++){
+      var y=eTop+i*(eH+eGap), cy=y+eH/2;
+      experts.push({y:y,cy:cy,count:0,flash:0});
+      var rect=el("rect",{class:"moe-exp",x:eX,y:y,width:eW,height:eH,rx:7,"fill-opacity":0.1});
+      gExp.appendChild(rect);
+      var lbl=el("text",{class:"moe-lbl moe-lbl-ink",x:eX+12,y:cy+4});
+      lbl.textContent="E"+(i+1);
+      gExp.appendChild(lbl);
+      var bar=el("rect",{x:eX+eW-8,y:y+4,width:4,height:eH-8,rx:2,fill:"var(--good)","fill-opacity":0.0});
+      gExp.appendChild(bar);
+      experts[i].rect=rect; experts[i].bar=bar;
+      var ln=el("path",{class:"moe-line",d:""});
+      gLines.appendChild(ln); experts[i]._ln=ln;
+      var al=el("path",{class:"moe-aline",d:"","stroke-opacity":0});
+      gAl.appendChild(al); experts[i]._al=al;
+    }
+    for(var j=0;j<E;j++){ experts[j]._ln.setAttribute("d",pathStr(j)); experts[j]._al.setAttribute("d",pathStr(j)); }
+
+    // routing choice
+    function chooseExperts(){
+      if(mode==="dense"){var a=[];for(var m=0;m<E;m++)a.push(m);return a;}
+      var scored=[];
+      for(var m2=0;m2<E;m2++) scored.push({i:m2,s:Math.random()});
+      scored.sort(function(p,q){return q.s-p.s;});
+      var out=[]; for(var n=0;n<k;n++) out.push(scored[n].i);
+      return out;
+    }
+
+    // tokens + pulses
+    var tokens=[], pulses=[];
+    var laneY=[70,108,146,184,222,260], laneIdx=0;
+    var tokStartX=24, tokConsumeX=300, tokSpeed=235, pulseDur=0.72;
+
+    function spawnToken(){
+      if(tokens.length>7) return;
+      var sy=laneY[laneIdx%laneY.length]; laneIdx++;
+      var c=el("circle",{class:"moe-tok",cx:tokStartX,cy:sy,r:7,"fill-opacity":0.9});
+      gTok.appendChild(c);
+      tokens.push({x:tokStartX,sy:sy,node:c});
+    }
+    function routeToken(){
+      var picks=chooseExperts();
+      for(var p=0;p<picks.length;p++){
+        var idx=picks[p];
+        if(reduce){ arrive(idx); }
+        else {
+          var dot=el("circle",{class:"moe-pulse",r:4,cx:routerPt.x,cy:routerPt.y,"fill-opacity":0.95});
+          gPul.appendChild(dot);
+          pulses.push({i:idx,t:0,node:dot});
+        }
+      }
+    }
+    function arrive(idx){
+      experts[idx].count+=1;
+      experts[idx].flash=1;
+      lineGlow[idx]=1;
+    }
+
+    // balance metric over decayed counts
+    function balance(){
+      var sum=0; for(var m=0;m<E;m++) sum+=experts[m].count;
+      if(sum<3) return null;
+      var mean=sum/E, v=0;
+      for(var n=0;n<E;n++){var d=experts[n].count-mean; v+=d*d;}
+      var sd=Math.sqrt(v/E);
+      var cv=mean>0?sd/mean:1;
+      return Math.max(0,Math.min(100, Math.round(100*(1-cv))));
+    }
+
+    function updateReadouts(){
+      var activeE = mode==="dense"? E : k;
+      var active = sharedP + activeE*expertP;
+      document.getElementById("moe-total").textContent=total.toFixed(1)+" B";
+      document.getElementById("moe-active").textContent=active.toFixed(1)+" B";
+      document.getElementById("moe-ratio").textContent=Math.round(active/total*100)+"%";
+      var b=balance();
+      document.getElementById("moe-bal").textContent = b===null? "warming" : b+"%";
+    }
+
+    function explain(){
+      var elx=document.getElementById("moe-explain");
+      if(mode==="dense"){
+        elx.innerHTML="<b>Dense.</b> Every token activates all "+E+" experts, so active parameters equal total parameters and FLOPs per token are as large as they can be. Load is perfectly balanced, but you paid full compute for the full model. This is the baseline that mixture of experts is trying to escape.";
+      } else {
+        elx.innerHTML="<b>MoE with k equal to "+k+".</b> The router lights up only "+k+" of the "+E+" experts for each token. Active parameters, and therefore FLOPs per token, track k while total parameters stay fixed at the full bank. Raising k routes each token more widely, which spreads load more evenly across experts, at the cost of more compute per token.";
+      }
+    }
+
+    // render loop
+    var last=performance.now(), acc=0, spawnEvery=0.62;
+    function frame(now){
+      var dt=Math.min(0.05,(now-last)/1000); last=now;
+      acc+=dt;
+      if(acc>=spawnEvery){ acc-=spawnEvery; spawnToken(); }
+
+      // move tokens
+      for(var t=tokens.length-1;t>=0;t--){
+        var tk=tokens[t];
+        tk.x += tokSpeed*dt;
+        var prog=Math.max(0,Math.min(1,(tk.x-tokStartX)/(tokConsumeX-tokStartX)));
+        var y=tk.sy+(routerPt.y-tk.sy)*prog;
+        tk.node.setAttribute("cx",tk.x.toFixed(1));
+        tk.node.setAttribute("cy",y.toFixed(1));
+        tk.node.setAttribute("fill-opacity",(0.9-0.35*prog).toFixed(2));
+        if(tk.x>=tokConsumeX){ gTok.removeChild(tk.node); tokens.splice(t,1); routeToken(); }
+      }
+
+      // move pulses
+      for(var q=pulses.length-1;q>=0;q--){
+        var pl=pulses[q];
+        pl.t += dt/pulseDur;
+        if(pl.t>=1){ gPul.removeChild(pl.node); pulses.splice(q,1); arrive(pl.i); continue; }
+        var pt=pointOn(pl.i,pl.t);
+        pl.node.setAttribute("cx",pt.x.toFixed(1));
+        pl.node.setAttribute("cy",pt.y.toFixed(1));
+        lineGlow[pl.i]=Math.max(lineGlow[pl.i],0.85);
+      }
+
+      // decay counts (rolling window) and flashes
+      var maxc=0;
+      for(var e=0;e<E;e++){ experts[e].count*=Math.pow(0.985,dt*60/1); if(experts[e].count>maxc)maxc=experts[e].count; }
+      for(var f=0;f<E;f++){
+        experts[f].flash*=Math.pow(0.02,dt);
+        lineGlow[f]*=Math.pow(0.05,dt);
+        var share=maxc>0?experts[f].count/maxc:0;
+        var op=0.08+0.5*share+0.35*experts[f].flash;
+        experts[f].rect.setAttribute("fill-opacity",Math.min(0.95,op).toFixed(3));
+        experts[f].rect.setAttribute("stroke", experts[f].flash>0.15? "var(--accent-2)":"var(--line)");
+        experts[f].rect.setAttribute("stroke-width", experts[f].flash>0.15? "1.8":"1");
+        experts[f].bar.setAttribute("fill-opacity",(0.15+0.7*share).toFixed(3));
+        experts[f].bar.setAttribute("height",Math.max(2,(eH-8)*share).toFixed(1));
+        experts[f].bar.setAttribute("y",(experts[f].y+4+(eH-8)*(1-share)).toFixed(1));
+        var glow = mode==="dense"? 0.5 : lineGlow[f];
+        experts[f]._al.setAttribute("stroke-opacity",Math.min(1,glow).toFixed(3));
+      }
+
+      updateReadouts();
+      requestAnimationFrame(frame);
+    }
+
+    // reduced motion path. discrete routing without travel.
+    function reducedTick(){
+      spawnToken();
+      // consume immediately
+      for(var t=tokens.length-1;t>=0;t--){ gTok.removeChild(tokens[t].node); }
+      tokens.length=0;
+      routeToken();
+      var maxc=0;
+      for(var e=0;e<E;e++){ experts[e].count*=0.9; if(experts[e].count>maxc)maxc=experts[e].count; }
+      for(var f=0;f<E;f++){
+        var share=maxc>0?experts[f].count/maxc:0;
+        experts[f].rect.setAttribute("fill-opacity",(0.1+0.6*share).toFixed(3));
+        experts[f].bar.setAttribute("fill-opacity",(0.15+0.7*share).toFixed(3));
+        experts[f].bar.setAttribute("height",Math.max(2,(eH-8)*share).toFixed(1));
+        experts[f].bar.setAttribute("y",(experts[f].y+4+(eH-8)*(1-share)).toFixed(1));
+        experts[f]._al.setAttribute("stroke-opacity",(mode==="dense"?0.5:(share>0.05?0.6:0)).toFixed(2));
+      }
+      updateReadouts();
+    }
+
+    // controls
+    document.getElementById("moe-mode").addEventListener("click",function(e){
+      var b=e.target.closest("button"); if(!b)return;
+      mode=b.getAttribute("data-mode");
+      Array.prototype.forEach.call(this.children,function(c){c.classList.toggle("on",c===b);});
+      root.classList.toggle("dense",mode==="dense");
+      document.getElementById("moe-krow").classList.toggle("off",mode==="dense");
+      explain(); updateReadouts();
+    });
+    document.getElementById("moe-k").addEventListener("input",function(e){
+      k=parseInt(e.target.value,10);
+      document.getElementById("moe-kval").textContent="k = "+k;
+      explain(); updateReadouts();
+    });
+
+    explain(); updateReadouts();
+    if(reduce){ setInterval(reducedTick,700); }
+    else { requestAnimationFrame(frame); }
+  })();</script>
+</div>
+
+</body>
+</html>

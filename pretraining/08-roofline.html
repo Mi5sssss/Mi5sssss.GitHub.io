@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The roofline. Compute bound versus memory bound</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="rf-root" class="rf-root">
+  <style>
+    #rf-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    #rf-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      #rf-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] #rf-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] #rf-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+    #rf-root .rf-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    #rf-root .rf-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    #rf-root .rf-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+    #rf-root .rf-canvas-wrap{position:relative;width:100%;overflow-x:auto;}
+    #rf-root canvas.rf-canvas{width:100%;height:340px;display:block;touch-action:none;cursor:grab;}
+    #rf-root canvas.rf-canvas:active{cursor:grabbing;}
+    #rf-root .rf-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    #rf-root .rf-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    #rf-root .rf-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    #rf-root .rf-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+    #rf-root .rf-stat .v.mem{color:var(--warn);}
+    #rf-root .rf-stat .v.comp{color:var(--good);}
+    #rf-root .rf-controls{margin-top:14px;}
+    #rf-root .rf-row{display:flex;align-items:center;gap:12px;margin:12px 0 4px;flex-wrap:wrap;}
+    #rf-root .rf-row .lbl{font-size:12.5px;color:var(--muted);min-width:118px;}
+    #rf-root .rf-snap{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap;}
+    #rf-root .rf-snap button{background:transparent;color:var(--muted);border:none;border-right:1px solid var(--line);padding:8px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:background .2s,color .2s;}
+    #rf-root .rf-snap button:last-child{border-right:none;}
+    #rf-root .rf-snap button.on{background:var(--accent-2);color:#1a1204;font-weight:600;}
+    #rf-root .rf-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    #rf-root .rf-note b{color:var(--ink);font-weight:600;}
+    #rf-root .rf-cap{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;line-height:1.5;}
+    @media (max-width:520px){
+      #rf-root .rf-readout{grid-template-columns:repeat(2,1fr);}
+      #rf-root .rf-row .lbl{min-width:0;}
+    }
+    @media (prefers-reduced-motion:reduce){#rf-root *{transition:none !important;}}
+  </style>
+
+  <div class="rf-card">
+    <p class="rf-title">The roofline. Where owning more FLOPs stops helping.</p>
+    <p class="rf-frame">A kernel is limited either by compute or by memory bandwidth, decided by its arithmetic intensity (FLOPs done per byte moved). Below the ridge you are memory bound and the tensor cores sit idle. Drag the marker along the intensity axis, or snap it to a real workload, and watch the same chip run at peak or at a fraction of a percent.</p>
+
+    <div class="rf-canvas-wrap">
+      <canvas class="rf-canvas" id="rf-cv" width="1480" height="700" aria-label="Roofline of attainable performance versus arithmetic intensity"></canvas>
+    </div>
+
+    <div class="rf-readout">
+      <div class="rf-stat"><div class="k">Arithmetic intensity</div><div class="v" id="rf-ai">296 F/B</div></div>
+      <div class="rf-stat"><div class="k">Attainable perf</div><div class="v" id="rf-perf">990 TFLOP/s</div></div>
+      <div class="rf-stat"><div class="k">Percent of peak</div><div class="v" id="rf-pct">100 %</div></div>
+      <div class="rf-stat"><div class="k">Bound by</div><div class="v comp" id="rf-bound">compute</div></div>
+    </div>
+
+    <div class="rf-controls">
+      <div class="rf-row">
+        <span class="lbl">Snap to a workload</span>
+        <div class="rf-snap" id="rf-snap">
+          <button data-k="train">Training matmul</button>
+          <button data-k="prefill">Prefill</button>
+          <button data-k="decode">Decode step</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rf-note" id="rf-note"></div>
+    <p class="rf-cap">Training lives on the right and runs the chip near its peak, while single stream decode lives on the far left at a fraction of a percent, on the very same silicon. That gap is why inference chips and training chips have begun to diverge.</p>
+    <p class="rf-cap">Peaks are illustrative H100 class (bf16 dense). Peak compute 990 TFLOP/s, HBM bandwidth 3.35 TB/s, ridge point near 296 FLOP per byte. Attainable performance is the minimum of the flat compute roof and the slanted memory roof (bandwidth times intensity). Absolute numbers are illustrative, the shape is the point.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("rf-root");
+    var cv=document.getElementById("rf-cv"), ctx=cv.getContext("2d");
+
+    var PEAK=990e12;      // FLOP per second
+    var BW=3.35e12;       // bytes per second
+    var RIDGE=PEAK/BW;    // ~296 FLOP per byte
+
+    // axis ranges in log10
+    var AImin=-1, AImax=5;      // 0.1 .. 1e5 FLOP per byte
+    var Ymin=11, Ymax=15.5;     // 1e11 .. ~3e15 FLOP per second
+
+    // workloads (arithmetic intensity in FLOP per byte)
+    var WORK={
+      train:{ai:5461, name:"training matmul", desc:"a fat FFN up projection over many tokens at once"},
+      prefill:{ai:2521, name:"prefill", desc:"a long prompt, many tokens through the weights at once"},
+      decode:{ai:1.0, name:"decode step", desc:"batch one, one token, every weight read once and used once"}
+    };
+
+    // marker state: log10 of arithmetic intensity. default at ridge.
+    var markLog=Math.log10(RIDGE);
+    var active=null; // which snap button is active
+
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+    function attainable(ai){return Math.min(PEAK, BW*ai);}
+
+    function hexA(hex,a){
+      hex=hex.replace('#','');
+      if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+    function fmtAI(ai){
+      if(ai<10) return ai.toFixed(1)+" F/B";
+      if(ai>=1000) return Math.round(ai).toLocaleString()+" F/B";
+      return Math.round(ai)+" F/B";
+    }
+    function fmtPerf(p){
+      if(p>=1e15) return (p/1e15).toFixed(2)+" PFLOP/s";
+      if(p>=1e12) return (p/1e12).toFixed(p<1e13?2:0)+" TFLOP/s";
+      if(p>=1e9) return (p/1e9).toFixed(0)+" GFLOP/s";
+      return (p/1e6).toFixed(0)+" MFLOP/s";
+    }
+    function fmtPct(pct){
+      if(pct>=10) return pct.toFixed(0)+" %";
+      if(pct>=1) return pct.toFixed(1)+" %";
+      return pct.toFixed(2)+" %";
+    }
+
+    var pad={l:70,r:22,t:26,b:50};
+
+    function draw(){
+      var W=cv.width,H=cv.height;
+      ctx.clearRect(0,0,W,H);
+
+      function X(lg){return pad.l+(lg-AImin)/(AImax-AImin)*(W-pad.l-pad.r);}
+      function Y(perf){var lg=Math.log10(perf);return pad.t+(Ymax-lg)/(Ymax-Ymin)*(H-pad.t-pad.b);}
+      function Ylg(lg){return pad.t+(Ymax-lg)/(Ymax-Ymin)*(H-pad.t-pad.b);}
+
+      var line=cvar("--line"), muted=cvar("--muted"), ink=cvar("--ink"),
+          accent=cvar("--accent"), accent2=cvar("--accent-2"),
+          good=cvar("--good"), warn=cvar("--warn"), surface=cvar("--surface");
+
+      var plotTop=pad.t, plotBot=H-pad.b;
+
+      // memory-bound danger zone (left of ridge)
+      var xRidge=X(Math.log10(RIDGE));
+      ctx.fillStyle=hexA(warn,0.09);
+      ctx.fillRect(pad.l,plotTop,xRidge-pad.l,plotBot-plotTop);
+
+      // grid
+      ctx.strokeStyle=line; ctx.lineWidth=1;
+      ctx.font="21px ui-monospace,Menlo,monospace"; ctx.fillStyle=muted;
+      // vertical (intensity decades)
+      for(var gx=Math.ceil(AImin);gx<=Math.floor(AImax);gx++){
+        var x=X(gx);
+        ctx.beginPath();ctx.moveTo(x,plotTop);ctx.lineTo(x,plotBot);ctx.stroke();
+        ctx.textAlign="center";ctx.fillText("1e"+gx,x,plotBot+30);
+      }
+      // horizontal (performance decades)
+      for(var gy=Math.ceil(Ymin);gy<=Math.floor(Ymax);gy++){
+        var y=Ylg(gy);
+        ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+        ctx.textAlign="right";ctx.fillText("1e"+gy,pad.l-10,y+7);
+      }
+
+      // axis titles
+      ctx.fillStyle=muted;ctx.textAlign="center";ctx.font="22px -apple-system,sans-serif";
+      ctx.fillText("arithmetic intensity (FLOP per byte)",(pad.l+W-pad.r)/2,H-8);
+      ctx.save();ctx.translate(20,(plotTop+plotBot)/2);ctx.rotate(-Math.PI/2);
+      ctx.fillText("attainable performance (FLOP per second)",0,0);ctx.restore();
+
+      // roofline. memory roof (slope 1 in log-log) up to ridge, then flat compute roof.
+      ctx.strokeStyle=accent;ctx.lineWidth=3.5;ctx.beginPath();
+      var aiStart=Math.pow(10,AImin);
+      ctx.moveTo(X(AImin),Y(attainable(aiStart)));
+      ctx.lineTo(xRidge,Y(PEAK));
+      ctx.lineTo(X(AImax),Y(PEAK));
+      ctx.stroke();
+
+      // roof labels
+      ctx.font="20px -apple-system,sans-serif";
+      // memory roof label, placed along the slope
+      var mlAI=Math.pow(10,0.7);
+      ctx.save();
+      ctx.translate(X(0.7),Y(attainable(mlAI))-10);
+      ctx.rotate(-0.62);
+      ctx.fillStyle=warn;ctx.textAlign="left";
+      ctx.fillText("memory roof (bandwidth times intensity)",0,0);
+      ctx.restore();
+      // compute roof label, below the flat roof at the far right to clear the points
+      ctx.fillStyle=good;ctx.textAlign="right";
+      ctx.fillText("compute roof (peak FLOP per second)",X(AImax)-6,Y(PEAK)+30);
+
+      // ridge marker
+      ctx.strokeStyle=muted;ctx.lineWidth=1.5;ctx.setLineDash([6,5]);
+      ctx.beginPath();ctx.moveTo(xRidge,plotTop);ctx.lineTo(xRidge,plotBot);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle=muted;ctx.textAlign="center";ctx.font="20px -apple-system,sans-serif";
+      ctx.fillText("ridge near 296",xRidge,plotBot-12);
+
+      // fixed workload points
+      var pts=[];
+      function plotPoint(key,color,dy){
+        var w=WORK[key];var ai=w.ai;var perf=attainable(ai);
+        var px=X(Math.log10(ai)),py=Y(perf);
+        pts.push({key:key,x:px,y:py});
+        ctx.fillStyle=color;ctx.beginPath();ctx.arc(px,py,9,0,7);ctx.fill();
+        ctx.fillStyle=surface;ctx.beginPath();ctx.arc(px,py,3.6,0,7);ctx.fill();
+        ctx.fillStyle=color;ctx.font="20px -apple-system,sans-serif";
+        ctx.textAlign="center";
+        ctx.fillText(w.name,px,py+dy);
+      }
+      plotPoint("decode",warn,-20);
+      plotPoint("prefill",good,44);
+      plotPoint("train",good,-18);
+      cv._pts=pts;
+
+      // user marker on the roofline
+      var ai=Math.pow(10,markLog);
+      var perf=attainable(ai);
+      var mx=X(markLog),my=Y(perf);
+      ctx.strokeStyle=ink;ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.moveTo(mx,plotTop);ctx.lineTo(mx,plotBot);ctx.stroke();
+      ctx.fillStyle=ink;ctx.beginPath();ctx.arc(mx,my,10,0,7);ctx.fill();
+      ctx.fillStyle=surface;ctx.beginPath();ctx.arc(mx,my,4.2,0,7);ctx.fill();
+
+      // readouts
+      var pct=100*perf/PEAK;
+      var mem=ai<RIDGE*0.9999;
+      document.getElementById("rf-ai").textContent=fmtAI(ai);
+      document.getElementById("rf-perf").textContent=fmtPerf(perf);
+      document.getElementById("rf-pct").textContent=fmtPct(pct);
+      var bEl=document.getElementById("rf-bound");
+      bEl.textContent=mem?"memory":"compute";
+      bEl.className="v "+(mem?"mem":"comp");
+    }
+
+    function note(){
+      var el=document.getElementById("rf-note");
+      var ai=Math.pow(10,markLog);
+      if(ai<RIDGE*0.9999){
+        el.innerHTML="<b>Memory bound.</b> You are left of the ridge, in the shaded zone. Attainable performance is pinned to the memory roof, so owning more FLOPs buys you nothing. The multipliers stall waiting on the wire to HBM. This is where single stream decode lives, reading every weight once to make one token.";
+      } else {
+        el.innerHTML="<b>Compute bound.</b> You are right of the ridge, on the flat compute roof, and the chip runs near its peak. Each byte of weight is reused across many tokens, so the arithmetic dominates the memory traffic. This is where training and prefill live.";
+      }
+    }
+
+    // interaction
+    function logFromEvent(e){
+      var rect=cv.getBoundingClientRect();
+      var cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+      var px=cx/rect.width*cv.width;
+      var frac=(px-pad.l)/(cv.width-pad.l-pad.r);
+      frac=Math.max(0,Math.min(1,frac));
+      return AImin+frac*(AImax-AImin);
+    }
+    function hitPoint(e){
+      if(!cv._pts) return null;
+      var rect=cv.getBoundingClientRect();
+      var cx=((e.touches?e.touches[0].clientX:e.clientX)-rect.left)/rect.width*cv.width;
+      var cy=((e.touches?e.touches[0].clientY:e.clientY)-rect.top)/rect.height*cv.height;
+      var best=null,bd=1e9;
+      cv._pts.forEach(function(p){
+        var d=Math.hypot(cx-p.x,cy-p.y);
+        if(d<bd){bd=d;best=p;}
+      });
+      return (best&&bd<40)?best.key:null;
+    }
+    function setActive(key){
+      active=key;
+      Array.prototype.forEach.call(document.getElementById("rf-snap").children,function(b){
+        b.classList.toggle("on",b.getAttribute("data-k")===key);
+      });
+    }
+    function snap(key){
+      markLog=Math.log10(WORK[key].ai);
+      setActive(key);
+      draw();note();
+    }
+
+    var dragging=false;
+    cv.addEventListener("mousedown",function(e){
+      var k=hitPoint(e);
+      if(k){snap(k);return;}
+      dragging=true;setActive(null);markLog=logFromEvent(e);draw();note();
+    });
+    window.addEventListener("mousemove",function(e){if(dragging){markLog=logFromEvent(e);draw();note();}});
+    window.addEventListener("mouseup",function(){dragging=false;});
+    cv.addEventListener("touchstart",function(e){
+      var k=hitPoint(e);
+      if(k){snap(k);e.preventDefault();return;}
+      dragging=true;setActive(null);markLog=logFromEvent(e);draw();note();e.preventDefault();
+    },{passive:false});
+    cv.addEventListener("touchmove",function(e){if(dragging){markLog=logFromEvent(e);draw();note();e.preventDefault();}},{passive:false});
+    cv.addEventListener("touchend",function(){dragging=false;});
+
+    document.getElementById("rf-snap").addEventListener("click",function(e){
+      var b=e.target.closest("button");if(!b)return;
+      snap(b.getAttribute("data-k"));
+    });
+
+    draw();note();
+    window.addEventListener("resize",draw);
+  })();</script>
+</div>
+
+</body>
+</html>

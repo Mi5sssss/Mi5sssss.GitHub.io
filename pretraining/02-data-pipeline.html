@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The data pipeline and what survives it</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="dp-root" class="dp-root">
+  <style>
+    .dp-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .dp-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .dp-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .dp-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .dp-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+
+    .dp-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:16px;}
+    .dp-card:last-child{margin-bottom:0;}
+    .dp-kicker{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:650;margin:0 0 6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+    .dp-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .dp-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+
+    /* Part A funnel */
+    .dp-funnel{margin:6px 0 4px;}
+    .dp-stage{margin:9px 0;cursor:default;border-radius:8px;padding:6px 8px;transition:background .2s;}
+    .dp-stage:hover,.dp-stage.dp-active{background:color-mix(in srgb, var(--accent) 8%, transparent);}
+    .dp-stage-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:5px;}
+    .dp-stage-name{font-size:12.5px;font-weight:600;color:var(--ink);}
+    .dp-stage-pct{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;}
+    .dp-stage-drop{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:var(--muted);white-space:nowrap;}
+    .dp-track{position:relative;height:16px;background:transparent;border-radius:5px;overflow:hidden;}
+    .dp-track-line{position:absolute;inset:0;border-radius:5px;background:var(--line);opacity:.5;}
+    .dp-bar{position:absolute;top:0;left:0;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 55%, var(--accent-2)));transition:width .5s cubic-bezier(.4,0,.2,1);}
+    .dp-stage:last-child .dp-bar{background:linear-gradient(90deg,var(--good),color-mix(in srgb,var(--good) 60%, var(--accent)));}
+    .dp-desc{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);min-height:38px;}
+    .dp-desc b{color:var(--ink);font-weight:600;}
+    .dp-survive{margin-top:12px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+    .dp-survive .n{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:26px;font-weight:700;color:var(--good);}
+    .dp-survive .t{font-size:12.5px;color:var(--muted);}
+
+    /* Part B mixture */
+    .dp-seg{display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line);margin:4px 0 16px;}
+    .dp-seg span{height:100%;transition:width .25s ease;min-width:0;}
+    .dp-legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-bottom:14px;}
+    .dp-legend .li{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);}
+    .dp-swatch{width:11px;height:11px;border-radius:3px;flex:none;}
+    .dp-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
+    .dp-row label{font-size:12.5px;color:var(--muted);min-width:96px;}
+    .dp-row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;min-width:52px;text-align:right;}
+    .dp-root input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:3px;background:var(--line);outline:none;}
+    .dp-root input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .dp-root input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+
+    .dp-split{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center;margin-top:16px;}
+    .dp-radar-wrap{position:relative;width:100%;overflow-x:auto;}
+    canvas.dp-radar{width:100%;height:auto;display:block;}
+    .dp-caps{display:grid;grid-template-columns:1fr;gap:7px;}
+    .dp-cap{display:flex;align-items:center;gap:8px;}
+    .dp-cap .cn{font-size:11.5px;color:var(--muted);min-width:82px;}
+    .dp-cap .cbar{flex:1;height:6px;border-radius:4px;background:var(--line);position:relative;overflow:hidden;}
+    .dp-cap .cfill{position:absolute;left:0;top:0;height:100%;border-radius:4px;background:var(--accent-2);transition:width .3s ease;}
+    .dp-cap .cv{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;min-width:30px;text-align:right;}
+    .dp-presets{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 14px;}
+    .dp-preset{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:6px 11px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .2s,color .2s,border-color .2s;}
+    .dp-preset:hover{border-color:var(--accent);color:var(--ink);}
+
+    .dp-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    .dp-note b{color:var(--ink);font-weight:600;}
+    .dp-cap-txt{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;}
+
+    @media (max-width:560px){
+      .dp-split{grid-template-columns:1fr;}
+      .dp-row label{min-width:82px;}
+    }
+    @media (prefers-reduced-motion:reduce){.dp-root *{transition:none !important;}}
+  </style>
+
+  <!-- PART A -->
+  <div class="dp-card">
+    <p class="dp-kicker">Part A</p>
+    <p class="dp-title">How little of the web survives the pipeline</p>
+    <p class="dp-frame">A pretraining corpus does not come from the web. It comes from what is left of the web after a long chain of filters. Each stage below removes more than the last. Hover a stage to see what it takes out.</p>
+
+    <div class="dp-funnel" id="dp-funnel"></div>
+
+    <div class="dp-desc" id="dp-desc"></div>
+
+    <div class="dp-survive">
+      <span class="n" id="dp-final">6.8%</span>
+      <span class="t">of the raw crawl reaches training. The rest is thrown away, on purpose.</span>
+    </div>
+
+    <p class="dp-cap-txt">Fractions are cumulative shares of the raw crawl and are illustrative, chosen to match the shape reported for pipelines like RefinedWeb and FineWeb. The lesson is the order of magnitude, not the decimals.</p>
+  </div>
+
+  <!-- PART B -->
+  <div class="dp-card">
+    <p class="dp-kicker">Part B</p>
+    <p class="dp-title">The mixture is a set of bets on capability</p>
+    <p class="dp-frame">What survives still has to be blended. Drag the sliders to change the training mixture. They always renormalize to 100 percent. Watch the capability profile move, and notice that code and math lift reasoning and coding together, because reasoning transfers across domains.</p>
+
+    <div class="dp-presets" id="dp-presets">
+      <button class="dp-preset" data-preset="web">Web heavy</button>
+      <button class="dp-preset" data-preset="balanced">Balanced</button>
+      <button class="dp-preset" data-preset="reason">Reasoning tilt</button>
+    </div>
+
+    <div class="dp-seg" id="dp-seg"></div>
+    <div class="dp-legend" id="dp-legend"></div>
+
+    <div id="dp-sliders"></div>
+
+    <div class="dp-split">
+      <div class="dp-radar-wrap">
+        <canvas class="dp-radar" id="dp-radar" width="900" height="720" aria-label="Illustrative capability profile for the chosen mixture"></canvas>
+      </div>
+      <div class="dp-caps" id="dp-caps"></div>
+    </div>
+
+    <div class="dp-note" id="dp-note"></div>
+    <p class="dp-cap-txt">Capability scores are a toy linear model, each data category contributes a fixed weight to each capability. Numbers are illustrative and exist only to show direction of tradeoff, not to predict any real benchmark.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("dp-root");
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+
+    /* ---------- PART A ---------- */
+    var stages=[
+      {name:"Raw web tokens", keep:100, desc:"The starting point, a full crawl of the public web before any cleaning."},
+      {name:"Text extraction", keep:62, desc:"Pulls readable text out of raw HTML and discards markup, menus, and boilerplate."},
+      {name:"Language filter", keep:44, desc:"Keeps only documents in the target languages, scored by a language classifier."},
+      {name:"Quality filter", keep:20, desc:"Drops low quality pages using handwritten heuristics and a learned quality classifier."},
+      {name:"Exact and near dedup (MinHash)", keep:8.5, desc:"Collapses documents that repeat, exactly or nearly, across the enormous crawl."},
+      {name:"Toxicity and privacy filter", keep:7.2, desc:"Removes toxic material and scrubs personal identifying information from what remains."},
+      {name:"Decontamination", keep:6.8, desc:"Removes text overlapping the evaluation benchmarks so the tests stay honest."}
+    ];
+    var fun=document.getElementById("dp-funnel");
+    var descEl=document.getElementById("dp-desc");
+    function pct(x){ return (x>=10? x.toFixed(0): x.toFixed(1))+"%"; }
+    stages.forEach(function(s,i){
+      var prev=i===0?100:stages[i-1].keep;
+      var dropTxt = i===0 ? "start" : "keeps "+(s.keep/prev*100).toFixed(0)+"% of prior";
+      var el=document.createElement("div");
+      el.className="dp-stage";
+      el.innerHTML=
+        '<div class="dp-stage-head">'+
+          '<span class="dp-stage-name">'+s.name+'</span>'+
+          '<span><span class="dp-stage-drop">'+dropTxt+'</span> &nbsp; <span class="dp-stage-pct">'+pct(s.keep)+'</span></span>'+
+        '</div>'+
+        '<div class="dp-track"><div class="dp-track-line"></div><div class="dp-bar" style="width:0%"></div></div>';
+      fun.appendChild(el);
+      function show(){
+        descEl.innerHTML="<b>"+s.name+".</b> "+s.desc;
+        Array.prototype.forEach.call(fun.children,function(c){c.classList.toggle("dp-active",c===el);});
+      }
+      el.addEventListener("mouseenter",show);
+      el.addEventListener("focus",show);
+      el.tabIndex=0;
+    });
+    // animate bar widths in
+    requestAnimationFrame(function(){
+      Array.prototype.forEach.call(fun.querySelectorAll(".dp-bar"),function(b,i){
+        b.style.width=stages[i].keep+"%";
+      });
+    });
+    descEl.innerHTML="<b>"+stages[0].name+".</b> "+stages[0].desc;
+    document.getElementById("dp-final").textContent=pct(stages[stages.length-1].keep);
+
+    /* ---------- PART B ---------- */
+    var cats=["Web","Code","Math","Books","Multilingual"];
+    var catColors=["--accent","--accent-2","--warn","--good","--muted"];
+    var vals=[60,15,5,8,12];
+
+    var presets={
+      web:[72,8,3,7,10],
+      balanced:[45,20,10,10,15],
+      reason:[30,32,20,8,10]
+    };
+
+    // capability weights: rows = category, cols = [Reasoning, Coding, Knowledge, Multilingual, Writing]
+    var caps=["Reasoning","Coding","Knowledge","Multilingual","Writing"];
+    var W=[
+      /* Web */          [0.30,0.20,0.90,0.40,0.70],
+      /* Code */         [0.80,1.00,0.30,0.10,0.30],
+      /* Math */         [1.00,0.60,0.40,0.05,0.20],
+      /* Books */        [0.50,0.10,0.70,0.20,1.00],
+      /* Multilingual */ [0.30,0.10,0.50,1.00,0.50]
+    ];
+
+    var slidersHost=document.getElementById("dp-sliders");
+    var sliderEls=[];
+    var valEls=[];
+    cats.forEach(function(c,i){
+      var row=document.createElement("div");
+      row.className="dp-row";
+      row.innerHTML='<label>'+c+'</label>'+
+        '<input type="range" min="0" max="100" step="1" value="'+vals[i]+'">'+
+        '<span class="val"></span>';
+      slidersHost.appendChild(row);
+      var inp=row.querySelector("input");
+      var v=row.querySelector(".val");
+      sliderEls.push(inp); valEls.push(v);
+      inp.addEventListener("input",function(){ onSlide(i, parseFloat(inp.value)); });
+    });
+
+    function onSlide(i,newVal){
+      newVal=Math.max(0,Math.min(100,newVal));
+      var others=100-newVal, sumOther=0, j;
+      for(j=0;j<vals.length;j++){ if(j!==i) sumOther+=vals[j]; }
+      if(sumOther<=0.0001){
+        var each=others/(vals.length-1);
+        for(j=0;j<vals.length;j++){ if(j!==i) vals[j]=each; }
+      } else {
+        for(j=0;j<vals.length;j++){ if(j!==i) vals[j]=vals[j]/sumOther*others; }
+      }
+      vals[i]=newVal;
+      render();
+    }
+
+    // largest remainder rounding so displayed integers sum to 100
+    function roundTo100(arr){
+      var floors=arr.map(Math.floor);
+      var rem=100-floors.reduce(function(a,b){return a+b;},0);
+      var order=arr.map(function(x,idx){return {idx:idx,frac:x-Math.floor(x)};})
+                   .sort(function(a,b){return b.frac-a.frac;});
+      for(var k=0;k<rem;k++){ floors[order[k%order.length].idx]+=1; }
+      return floors;
+    }
+
+    var segHost=document.getElementById("dp-seg");
+    var legendHost=document.getElementById("dp-legend");
+    cats.forEach(function(c,i){
+      var seg=document.createElement("span"); segHost.appendChild(seg);
+      var li=document.createElement("div"); li.className="li";
+      li.innerHTML='<span class="dp-swatch" style="background:var('+catColors[i]+')"></span>'+c;
+      legendHost.appendChild(li);
+    });
+
+    var capsHost=document.getElementById("dp-caps");
+    var capFillEls=[], capValEls=[];
+    caps.forEach(function(c,i){
+      var el=document.createElement("div"); el.className="dp-cap";
+      el.innerHTML='<span class="cn">'+c+'</span>'+
+        '<span class="cbar"><span class="cfill" style="width:0%"></span></span>'+
+        '<span class="cv">0</span>';
+      capsHost.appendChild(el);
+      capFillEls.push(el.querySelector(".cfill"));
+      capValEls.push(el.querySelector(".cv"));
+    });
+
+    function capScores(){
+      var out=[0,0,0,0,0];
+      for(var i=0;i<cats.length;i++){
+        var f=vals[i]/100;
+        for(var k=0;k<caps.length;k++){ out[k]+=f*W[i][k]; }
+      }
+      return out.map(function(x){return x*100;}); // 0..100 scale
+    }
+
+    var cv=document.getElementById("dp-radar"), ctx=cv.getContext("2d");
+    function drawRadar(scores){
+      var Wd=cv.width, Hd=cv.height;
+      ctx.clearRect(0,0,Wd,Hd);
+      var cx=Wd/2, cy=Hd/2+8, R=Math.min(Wd,Hd)*0.34;
+      var n=caps.length;
+      var line=cvar("--line"), muted=cvar("--muted"), ink=cvar("--ink"),
+          accent2=cvar("--accent-2");
+      function ang(k){ return -Math.PI/2 + k*2*Math.PI/n; }
+
+      // grid rings
+      ctx.strokeStyle=line; ctx.lineWidth=1.5;
+      for(var ring=1;ring<=4;ring++){
+        var rr=R*ring/4;
+        ctx.beginPath();
+        for(var k=0;k<=n;k++){ var a=ang(k%n); var x=cx+rr*Math.cos(a), y=cy+rr*Math.sin(a); if(k===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+        ctx.stroke();
+      }
+      // spokes
+      for(var k2=0;k2<n;k2++){ var a2=ang(k2); ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a2),cy+R*Math.sin(a2));ctx.stroke(); }
+
+      // polygon
+      ctx.beginPath();
+      for(var k3=0;k3<=n;k3++){
+        var kk=k3%n; var a3=ang(kk); var val=Math.max(0,Math.min(100,scores[kk]));
+        var rr3=R*val/100; var x=cx+rr3*Math.cos(a3), y=cy+rr3*Math.sin(a3);
+        if(k3===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.fillStyle=hexA(accent2,0.22); ctx.fill();
+      ctx.strokeStyle=accent2; ctx.lineWidth=3; ctx.stroke();
+      // vertices
+      for(var k4=0;k4<n;k4++){ var a4=ang(k4); var v4=Math.max(0,Math.min(100,scores[k4])); var rr4=R*v4/100;
+        ctx.beginPath();ctx.arc(cx+rr4*Math.cos(a4),cy+rr4*Math.sin(a4),5,0,7);ctx.fillStyle=accent2;ctx.fill(); }
+
+      // labels
+      ctx.fillStyle=ink; ctx.font="600 26px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif";
+      for(var k5=0;k5<n;k5++){
+        var a5=ang(k5); var lx=cx+(R+34)*Math.cos(a5), ly=cy+(R+34)*Math.sin(a5);
+        ctx.textAlign = Math.abs(Math.cos(a5))<0.3 ? "center" : (Math.cos(a5)>0?"left":"right");
+        ctx.textBaseline = Math.sin(a5)>0.3 ? "top" : (Math.sin(a5)<-0.3?"bottom":"middle");
+        ctx.fillText(caps[k5], lx, ly);
+      }
+    }
+    function hexA(hex,a){
+      hex=hex.replace('#',''); if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+
+    function noteText(scores){
+      var el=document.getElementById("dp-note");
+      var codeMath=vals[1]+vals[2];
+      var reasoning=scores[0], coding=scores[1];
+      if(codeMath>=40){
+        el.innerHTML="<b>Reasoning tilt.</b> Code and math make up "+Math.round(codeMath)+" percent of the mixture. Reasoning and coding are near the top of the profile, and the gain shows up even on tasks that are not code, which is the transfer effect the essay argues for. The cost is knowledge and writing breadth from web and books.";
+      } else if(vals[0]>=65){
+        el.innerHTML="<b>Web heavy.</b> With web near "+Math.round(vals[0])+" percent, knowledge and writing lead the profile while reasoning and coding lag. This is a broad but shallow model, strong at recall and fluent prose, weaker at multi step reasoning.";
+      } else {
+        el.innerHTML="<b>Balanced.</b> No single capability dominates. Adding code and math from here would pull reasoning and coding up faster than their raw share suggests, because structured data teaches procedures that generalize.";
+      }
+    }
+
+    function render(){
+      var disp=roundTo100(vals);
+      cats.forEach(function(c,i){
+        sliderEls[i].value=Math.round(vals[i]);
+        valEls[i].textContent=disp[i]+"%";
+        segHost.children[i].style.width=vals[i]+"%";
+        segHost.children[i].style.background="var("+catColors[i]+")";
+      });
+      var scores=capScores();
+      caps.forEach(function(c,i){
+        capFillEls[i].style.width=Math.max(0,Math.min(100,scores[i]))+"%";
+        capValEls[i].textContent=Math.round(scores[i]);
+      });
+      drawRadar(scores);
+      noteText(scores);
+    }
+
+    document.getElementById("dp-presets").addEventListener("click",function(e){
+      var b=e.target.closest("button"); if(!b)return;
+      var p=presets[b.getAttribute("data-preset")]; if(!p)return;
+      vals=p.slice(); render();
+    });
+
+    render();
+    window.addEventListener("resize",function(){ drawRadar(capScores()); });
+  })();</script>
+</div>
+
+</body>
+</html>

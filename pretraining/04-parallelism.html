@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Four dimensional parallelism</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="pp-root" class="pp-root">
+  <style>
+    .pp-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .pp-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .pp-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .pp-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .pp-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+
+    .pp-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .pp-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .pp-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+
+    .pp-stage-wrap{position:relative;width:100%;overflow-x:auto;}
+    .pp-svg{width:100%;min-width:340px;height:auto;display:block;}
+
+    .pp-legend{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:12px 0 2px;font-size:11.5px;color:var(--muted);}
+    .pp-legend .sw{display:inline-flex;align-items:center;gap:6px;}
+    .pp-legend .chip{width:13px;height:13px;border-radius:4px;border:1px solid var(--line);}
+    .pp-legend .hint{flex:1;min-width:180px;line-height:1.45;}
+
+    .pp-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    .pp-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .pp-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .pp-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;font-weight:600;}
+
+    .pp-controls{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .pp-cue{grid-column:1 / -1;font-size:12px;color:var(--muted);margin:0 0 2px;}
+    .pp-dim{border:1px solid var(--line);border-radius:11px;padding:10px 12px;position:relative;transition:border-color .25s,background .25s;}
+    .pp-dim.focus{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent);}
+    .pp-dim .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+    .pp-name{background:transparent;border:none;padding:0;text-align:left;cursor:pointer;font-family:inherit;color:var(--ink);}
+    .pp-name .nm{font-size:13px;font-weight:600;display:block;}
+    .pp-name .ds{font-size:11px;color:var(--muted);display:block;margin-top:1px;line-height:1.3;}
+    .pp-deg{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;color:var(--muted);}
+    .pp-seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+    .pp-seg button{background:transparent;color:var(--muted);border:none;padding:6px 14px;font-size:12.5px;cursor:pointer;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:600;transition:background .2s,color .2s;}
+    .pp-seg button.on{background:var(--accent-2);color:#1a1204;}
+
+    .pp-meters{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);}
+    .pp-bubble{flex:1;min-width:220px;}
+    .pp-bubble .lab{font-size:11.5px;color:var(--muted);margin-bottom:6px;}
+    .pp-bar{height:12px;border-radius:6px;background:var(--line);overflow:hidden;display:flex;}
+    .pp-bar .fill{height:100%;background:var(--good);transition:width .3s;}
+    .pp-bar .bub{height:100%;background:var(--accent-2);transition:width .3s;}
+    .pp-mapped{font-size:12px;color:var(--muted);}
+    .pp-mapped .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:600;}
+    .pp-mapped.ok .v{color:var(--good);}
+    .pp-mapped.bad .v{color:var(--warn);}
+
+    .pp-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    .pp-note b{color:var(--ink);font-weight:600;}
+    .pp-cap{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;line-height:1.5;}
+
+    @media (max-width:520px){
+      .pp-readout{grid-template-columns:repeat(2,1fr);}
+      .pp-controls{grid-template-columns:1fr;}
+    }
+    @media (prefers-reduced-motion:reduce){.pp-root *{transition:none !important;}}
+  </style>
+
+  <div class="pp-card">
+    <p class="pp-title">Four ways to cut a model across a cluster</p>
+    <p class="pp-frame">A large model does not fit on one chip, so it is cut along up to four dimensions at once. Set the degree of each split, then click a split to inspect what each chip holds and what has to talk to what. Every row of four chips is one node on a fast local fabric.</p>
+
+    <div class="pp-stage-wrap">
+      <svg class="pp-svg" id="pp-svg" viewBox="0 0 480 410" role="img" aria-label="A four by four grid of sixteen chips partitioned along the selected parallelism dimensions"></svg>
+    </div>
+
+    <div class="pp-legend" id="pp-legend"></div>
+
+    <div class="pp-readout">
+      <div class="pp-stat"><div class="k">Inspecting</div><div class="v" id="pp-s-name">Tensor parallel</div></div>
+      <div class="pp-stat"><div class="k">Degree</div><div class="v" id="pp-s-deg">2 shards</div></div>
+      <div class="pp-stat"><div class="k">Collective</div><div class="v" id="pp-s-coll">all reduce</div></div>
+      <div class="pp-stat"><div class="k">Cadence</div><div class="v" id="pp-s-cad">every layer</div></div>
+    </div>
+
+    <div class="pp-controls" id="pp-controls">
+      <p class="pp-cue">Set each degree, then click a split to inspect its communication.</p>
+    </div>
+
+    <div class="pp-meters">
+      <div class="pp-bubble">
+        <div class="lab">Pipeline utilisation, <span id="pp-bub-txt">89 percent compute, 11 percent bubble</span></div>
+        <div class="pp-bar"><div class="fill" id="pp-bar-fill" style="width:89%"></div><div class="bub" id="pp-bar-bub" style="width:11%"></div></div>
+      </div>
+      <div class="pp-mapped ok" id="pp-mapped">Chips mapped <span class="v" id="pp-mapped-v">2 x 2 x 2 x 2 equals 16 of 16</span></div>
+    </div>
+
+    <div class="pp-note" id="pp-note"></div>
+    <p class="pp-cap">The right combination is dictated by cluster topology and interconnect bandwidth, not by elegance. Tensor parallel wants a single node, data parallel spans the whole cluster, and pipeline depth is a trade against the bubble. Layout follows the wires.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("pp-root");
+    var svg=document.getElementById("pp-svg");
+    var N=4, TOTAL=16, MICRO=8;
+    // nesting inner to outer, TP innermost so tensor groups stay contiguous inside a node
+    var deg={TP:2, EP:2, PP:2, DP:2};
+    var focus="TP";
+
+    var meta={
+      TP:{name:"Tensor parallel", ds:"splits every layer", unit:"shards", coll:"all reduce", cad:"every layer", style:"ring"},
+      DP:{name:"Data parallel",   ds:"replicates the model", unit:"replicas", coll:"all reduce", cad:"once per step", style:"ring"},
+      PP:{name:"Pipeline parallel",ds:"stages of layers", unit:"stages", coll:"send and receive", cad:"per microbatch", style:"chain"},
+      EP:{name:"Expert parallel",  ds:"shards the experts", unit:"shards", coll:"all to all", cad:"per MoE layer", style:"mesh"}
+    };
+    var order=["TP","DP","PP","EP"];
+
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+    function hexA(hex,a){
+      hex=hex.replace('#',''); if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+    function shardColors(){return [cvar("--accent"),cvar("--accent-2"),cvar("--good"),cvar("--warn")];}
+
+    // decompose a global chip index into its four coordinates
+    function coordsOf(i){
+      var tp=i % deg.TP;
+      var ep=Math.floor(i/deg.TP) % deg.EP;
+      var pp=Math.floor(i/(deg.TP*deg.EP)) % deg.PP;
+      var dp=Math.floor(i/(deg.TP*deg.EP*deg.PP)) % deg.DP;
+      return {TP:tp, EP:ep, PP:pp, DP:dp};
+    }
+
+    // grid geometry in viewBox units
+    var x0=40, yt=16, mr=16, mb=16;
+    var cw=(480-x0-mr)/N, ch=(410-yt-mb)/N;
+    function cx(col){return x0+col*cw+cw/2;}
+    function cy(row){return yt+row*ch+ch/2;}
+
+    function esc(s){return String(s);}
+
+    function build(){
+      var cols=shardColors();
+      var wire=hexA(cvar("--ink"),0.55);
+      var lineC=cvar("--line");
+      var d=deg[focus];
+      var parts=[];
+
+      // node bands, each row is a physical node
+      for(var r=0;r<N;r++){
+        var bx=x0+3, by=yt+r*ch+4, bw=N*cw-6, bh=ch-8;
+        parts.push('<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="12" fill="none" stroke="'+hexA(cvar("--muted"),0.28)+'" stroke-width="1" stroke-dasharray="3 4"/>');
+        var lcy=yt+r*ch+ch/2;
+        parts.push('<text x="16" y="'+lcy.toFixed(1)+'" transform="rotate(-90 16 '+lcy.toFixed(1)+')" text-anchor="middle" font-size="9.5" font-family="ui-monospace,Menlo,monospace" fill="'+cvar("--muted")+'">node '+r+'</text>');
+      }
+
+      // chips
+      var chipW=cw-24, chipH=ch-24;
+      for(var i=0;i<TOTAL;i++){
+        var row=Math.floor(i/N), col=i%N;
+        var c=coordsOf(i);
+        var sc=cols[c[focus] % cols.length];
+        var fx=x0+col*cw+(cw-chipW)/2, fy=yt+row*ch+(ch-chipH)/2;
+        parts.push('<rect x="'+fx.toFixed(1)+'" y="'+fy.toFixed(1)+'" width="'+chipW.toFixed(1)+'" height="'+chipH.toFixed(1)+'" rx="9" fill="'+hexA(sc,0.16)+'" stroke="'+hexA(sc,0.9)+'" stroke-width="1.3"/>');
+        var mcx=cx(col), mcy=cy(row);
+        parts.push('<text x="'+mcx.toFixed(1)+'" y="'+(fy+13).toFixed(1)+'" text-anchor="middle" font-size="9" font-family="ui-monospace,Menlo,monospace" fill="'+cvar("--muted")+'">g'+i+'</text>');
+        var big = d>1 ? (focus+" "+c[focus]) : focus;
+        parts.push('<text x="'+mcx.toFixed(1)+'" y="'+(mcy+4).toFixed(1)+'" text-anchor="middle" font-size="14" font-weight="700" font-family="ui-monospace,Menlo,monospace" fill="'+sc+'">'+big+'</text>');
+      }
+
+      // communication links along the focus dimension
+      if(d>1){
+        var groups={};
+        for(var j=0;j<TOTAL;j++){
+          var cj=coordsOf(j);
+          var key=order.filter(function(k){return k!==focus;}).map(function(k){return cj[k];}).join("_");
+          (groups[key]=groups[key]||[]).push(j);
+        }
+        var style=meta[focus].style;
+        Object.keys(groups).forEach(function(key){
+          var mem=groups[key];
+          mem.sort(function(a,b){return coordsOf(a)[focus]-coordsOf(b)[focus];});
+          var pts=mem.map(function(g){return [cx(g%N), cy(Math.floor(g/N))];});
+          if(pts.length<2) return;
+          if(style==="mesh"){
+            for(var a=0;a<pts.length;a++)for(var b=a+1;b<pts.length;b++){
+              parts.push(seg(pts[a],pts[b],hexA(cvar("--ink"),0.30),1.4,false));
+            }
+          } else if(style==="chain"){
+            for(var s=0;s<pts.length-1;s++){
+              parts.push(seg(pts[s],pts[s+1],wire,2,true));
+            }
+          } else { // ring, all reduce
+            for(var s2=0;s2<pts.length-1;s2++){
+              parts.push(seg(pts[s2],pts[s2+1],wire,2.1,false));
+            }
+            if(pts.length>2){parts.push(seg(pts[pts.length-1],pts[0],wire,2.1,false));}
+          }
+          pts.forEach(function(p){
+            parts.push('<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="'+cvar("--surface")+'" stroke="'+wire+'" stroke-width="1.6"/>');
+          });
+        });
+      }
+
+      svg.innerHTML=parts.join("");
+    }
+
+    function seg(a,b,color,w,arrow){
+      var out='<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="'+color+'" stroke-width="'+w+'"/>';
+      if(arrow){
+        var ang=Math.atan2(b[1]-a[1], b[0]-a[0]);
+        var back=14; // offset so head sits before the node marker
+        var hx=b[0]-Math.cos(ang)*back, hy=b[1]-Math.sin(ang)*back;
+        var sz=6;
+        var p1=[hx-Math.cos(ang-0.5)*sz, hy-Math.sin(ang-0.5)*sz];
+        var p2=[hx-Math.cos(ang+0.5)*sz, hy-Math.sin(ang+0.5)*sz];
+        out+='<polygon points="'+hx.toFixed(1)+','+hy.toFixed(1)+' '+p1[0].toFixed(1)+','+p1[1].toFixed(1)+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1)+'" fill="'+color+'"/>';
+      }
+      return out;
+    }
+
+    function updateReadout(){
+      var m=meta[focus], d=deg[focus];
+      document.getElementById("pp-s-name").textContent=m.name;
+      document.getElementById("pp-s-deg").textContent = d>1 ? (d+" "+m.unit) : "1 (not split)";
+      document.getElementById("pp-s-coll").textContent = d>1 ? m.coll : "none";
+      document.getElementById("pp-s-cad").textContent = d>1 ? m.cad : "none";
+
+      // pipeline bubble from PP degree, fixed microbatch count
+      var p=deg.PP;
+      var bubble = p>1 ? (p-1)/(MICRO+p-1) : 0;
+      var comp=Math.round((1-bubble)*100), bub=100-comp;
+      document.getElementById("pp-bar-fill").style.width=comp+"%";
+      document.getElementById("pp-bar-bub").style.width=bub+"%";
+      document.getElementById("pp-bub-txt").textContent=comp+" percent compute, "+bub+" percent bubble";
+
+      // chips mapped
+      var prod=deg.TP*deg.DP*deg.PP*deg.EP;
+      var mapped=document.getElementById("pp-mapped");
+      document.getElementById("pp-mapped-v").textContent=deg.TP+" x "+deg.DP+" x "+deg.PP+" x "+deg.EP+" equals "+prod+" of "+TOTAL;
+      mapped.className="pp-mapped "+(prod===TOTAL?"ok":"bad");
+
+      // legend swatches for the focus shards
+      var leg=document.getElementById("pp-legend");
+      var cols=shardColors();
+      var sw="";
+      if(d>1){
+        for(var s=0;s<d;s++){
+          sw+='<span class="sw"><span class="chip" style="background:'+hexA(cols[s%cols.length],0.16)+';border-color:'+cols[s%cols.length]+'"></span>'+focus+' '+s+'</span>';
+        }
+      } else {
+        sw='<span class="sw"><span class="chip" style="background:'+hexA(cols[0],0.16)+';border-color:'+cols[0]+'"></span>one shard, whole model</span>';
+      }
+      sw+='<span class="hint">A dashed box is a node of four chips. Vertical wires cross nodes, horizontal wires stay inside one.</span>';
+      leg.innerHTML=sw;
+
+      // note
+      var note=document.getElementById("pp-note");
+      var text;
+      if(d<=1){
+        text="<b>"+m.name+", degree one.</b> The model is not split along this dimension, so nothing has to communicate here. Raise the degree to see the traffic it would create and where the wires would run.";
+      } else if(focus==="TP"){
+        text="<b>Tensor parallel.</b> Each layer is cut across the chips of one node, so every chip holds only a slice of the weight matrices. They run an all reduce on every layer in both the forward and the backward pass. This is the most bandwidth hungry split, which is why it stays inside a node on the fast local fabric. The cost is high and it is paid many times per step.";
+      } else if(focus==="DP"){
+        text="<b>Data parallel.</b> Each replica holds a full copy of the model and sees a different slice of the batch. The replicas reconcile their gradients with a single all reduce once per optimiser step. The message is large but it fires rarely, so this split tolerates the slower links that run across the cluster.";
+      } else if(focus==="PP"){
+        text="<b>Pipeline parallel.</b> Consecutive blocks of layers live on different stages. A stage sends its activations forward to the next and receives gradients on the way back, a light point to point exchange. The real cost is not bandwidth, it is the bubble, the idle time while the pipeline fills and drains. More stages mean a bigger bubble unless you feed more microbatches.";
+      } else {
+        text="<b>Expert parallel.</b> The experts of a mixture of experts layer are sharded across chips. Every token is routed to its chosen experts through an all to all exchange and then routed back. The cost grows with how far tokens travel and with how unbalanced the routing becomes, so a hot expert can stall the whole layer.";
+      }
+      note.innerHTML=text;
+    }
+
+    function refresh(){ build(); updateReadout(); }
+
+    // build controls
+    var ctrl=document.getElementById("pp-controls");
+    order.forEach(function(dim){
+      var m=meta[dim];
+      var box=document.createElement("div");
+      box.className="pp-dim"+(dim===focus?" focus":"");
+      box.setAttribute("data-dim",dim);
+      box.innerHTML=
+        '<div class="top">'+
+          '<button class="pp-name" data-focus="'+dim+'"><span class="nm">'+m.name+' ('+dim+')</span><span class="ds">'+m.ds+'</span></button>'+
+          '<span class="pp-deg" data-deg-label="'+dim+'">x'+deg[dim]+'</span>'+
+        '</div>'+
+        '<div class="pp-seg" data-seg="'+dim+'">'+
+          '<button data-deg="1"'+(deg[dim]===1?' class="on"':'')+'>1</button>'+
+          '<button data-deg="2"'+(deg[dim]===2?' class="on"':'')+'>2</button>'+
+          '<button data-deg="4"'+(deg[dim]===4?' class="on"':'')+'>4</button>'+
+        '</div>';
+      ctrl.appendChild(box);
+    });
+
+    function setFocus(dim){
+      focus=dim;
+      Array.prototype.forEach.call(ctrl.querySelectorAll(".pp-dim"),function(b){
+        b.classList.toggle("focus", b.getAttribute("data-dim")===dim);
+      });
+      refresh();
+    }
+
+    ctrl.addEventListener("click",function(e){
+      var nameBtn=e.target.closest(".pp-name");
+      if(nameBtn){ setFocus(nameBtn.getAttribute("data-focus")); return; }
+      var seg=e.target.closest(".pp-seg button");
+      if(seg){
+        var dim=seg.parentNode.getAttribute("data-seg");
+        deg[dim]=parseInt(seg.getAttribute("data-deg"),10);
+        Array.prototype.forEach.call(seg.parentNode.children,function(c){c.classList.toggle("on",c===seg);});
+        ctrl.querySelector('[data-deg-label="'+dim+'"]').textContent="x"+deg[dim];
+        setFocus(dim);
+      }
+    });
+
+    refresh();
+    // repaint on theme flips so svg colors track the palette
+    if(window.matchMedia){
+      try{window.matchMedia("(prefers-color-scheme:dark)").addEventListener("change",refresh);}catch(err){}
+    }
+    window.addEventListener("resize",function(){});
+  })();</script>
+</div>
+
+</body>
+</html>

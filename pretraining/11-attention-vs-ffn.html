@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Where the compute goes. Feedforward until long context</title>
+<style>
+  html, body { margin:0; background:#ffffff; }
+  body { padding:14px 10px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div id="af-root" class="af-root">
+  <style>
+    .af-root{
+      --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e4e7ec;
+      --accent:#2f6fed; --accent-2:#e08a1e; --good:#1f9d55; --warn:#d1495b;
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      max-width:760px; margin:0 auto; box-sizing:border-box;
+    }
+    .af-root *{box-sizing:border-box;}
+    @media (prefers-color-scheme:dark){
+      .af-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+        --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    }
+    :root[data-theme="dark"] .af-root{--surface:#16181d;--ink:#eceef2;--muted:#9aa1ad;--line:#2a2e37;
+      --accent:#6b9bff;--accent-2:#f0b45a;--good:#4ade80;--warn:#f2748a;}
+    :root[data-theme="light"] .af-root{--surface:#ffffff;--ink:#16181d;--muted:#5b616e;--line:#e4e7ec;
+      --accent:#2f6fed;--accent-2:#e08a1e;--good:#1f9d55;--warn:#d1495b;}
+    .af-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+    .af-title{font-size:17px;font-weight:650;margin:0 0 4px;}
+    .af-frame{font-size:13.5px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+    .af-canvas-wrap{position:relative;width:100%;overflow-x:auto;}
+    canvas.af-canvas{width:100%;height:330px;display:block;}
+    .af-legend{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0 2px;font-size:12px;color:var(--muted);}
+    .af-legend span{display:inline-flex;align-items:center;gap:6px;}
+    .af-swatch{width:11px;height:11px;border-radius:3px;display:inline-block;}
+    .af-readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 6px;}
+    .af-stat{background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+    .af-stat .k{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+    .af-stat .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:600;}
+    .af-controls{margin-top:14px;}
+    .af-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
+    .af-row label{font-size:12.5px;color:var(--muted);min-width:118px;}
+    .af-row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;min-width:118px;text-align:right;}
+    .af-root input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:3px;background:var(--line);outline:none;}
+    .af-root input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .af-root input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface);}
+    .af-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+    .af-note b{color:var(--ink);font-weight:600;}
+    .af-cap{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;line-height:1.5;}
+    @media (max-width:520px){.af-readout{grid-template-columns:repeat(2,1fr);}.af-row label{min-width:96px;}.af-row .val{min-width:96px;}}
+    @media (prefers-reduced-motion:reduce){.af-root *{transition:none !important;}}
+  </style>
+
+  <div class="af-card">
+    <p class="af-title">Where the compute actually goes. Feedforward, until long context.</p>
+    <p class="af-frame">Per token, per layer FLOPs inside one transformer block. The feedforward network is a fixed cost. Attention has a fixed projection cost plus a sequence term that grows with context length. Slide the context length and watch where the compute lives.</p>
+
+    <div class="af-legend">
+      <span><i class="af-swatch" id="af-sw-ff"></i> feedforward (fixed)</span>
+      <span><i class="af-swatch" id="af-sw-proj"></i> attention projections (fixed)</span>
+      <span><i class="af-swatch" id="af-sw-seq"></i> attention sequence term (grows)</span>
+    </div>
+
+    <div class="af-canvas-wrap">
+      <canvas class="af-canvas" id="af-cv" width="1400" height="660" aria-label="Stacked per token FLOPs versus context length"></canvas>
+    </div>
+
+    <div class="af-readout">
+      <div class="af-stat"><div class="k">Feedforward</div><div class="v" id="af-ff">1.074 G</div></div>
+      <div class="af-stat"><div class="k">Attn projections</div><div class="v" id="af-proj">0.537 G</div></div>
+      <div class="af-stat"><div class="k">Attn sequence</div><div class="v" id="af-seq">0.017 G</div></div>
+      <div class="af-stat"><div class="k">Attention share</div><div class="v" id="af-share">34.0 %</div></div>
+    </div>
+
+    <div class="af-controls">
+      <div class="af-row">
+        <label>Context length</label>
+        <input type="range" id="af-ctx" min="9" max="19" step="0.01" value="13">
+        <span class="val" id="af-ctxval">8,192 tokens</span>
+      </div>
+    </div>
+
+    <div class="af-note" id="af-note">
+      <b>Ordinary use is feedforward bound.</b> At everyday context lengths most per token compute sits in the feedforward network, not attention. That is why mixture of experts, which enlarges the feedforward part, is where the parameter action is. Long context is a separate and more expensive regime, where the sequence term grows without bound and eventually dominates everything else.
+    </div>
+    <p class="af-cap">FLOPs per token per layer with d_model 8192 and d_ff 32768, counting a multiply add as two FLOPs. Attention projections equal 2 times (4 d_model squared). Sequence term equals 4 seq d_model. Feedforward equals 2 times (2 d_model d_ff). The sequence term meets the feedforward term near 32768 tokens, where attention share crosses roughly sixty percent.</p>
+  </div>
+
+  <script>(function(){
+    var root=document.getElementById("af-root");
+    var cv=document.getElementById("af-cv"), ctx=cv.getContext("2d");
+
+    var dm=8192, dff=4*dm;                 // d_model, d_ff
+    var PROJ=2*(4*dm*dm);                  // attention projections, constant
+    var FF=2*(2*dm*dff);                   // feedforward, constant
+    function SEQ(seq){return 4*seq*dm;}    // attention sequence term
+    function total(seq){return FF+PROJ+SEQ(seq);}
+    function share(seq){return (PROJ+SEQ(seq))/total(seq);}
+
+    var logLo=9, logHi=19;                 // log2 of 512 and 524288
+    var xover=15;                          // log2 of 32768
+    var seqLog=13;                         // current, log2
+
+    function cvar(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+    function hexA(hex,a){
+      hex=hex.replace('#','');
+      if(hex.length===3)hex=hex.split('').map(function(c){return c+c;}).join('');
+      var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+      return "rgba("+r+","+g+","+b+","+a+")";
+    }
+    function fmtG(f){return (f/1e9).toFixed(3)+" G";}
+    function fmtTok(n){ if(n>=1024) return (n/1024)+"K"; return ""+n; }
+    function commas(n){return n.toLocaleString("en-US");}
+
+    var pad={l:64,r:18,t:22,b:44};
+    var yMax=20e9;
+
+    function draw(){
+      var W=cv.width,H=cv.height;
+      ctx.clearRect(0,0,W,H);
+
+      var line=cvar("--line"), muted=cvar("--muted"), ink=cvar("--ink"),
+          accent=cvar("--accent"), accent2=cvar("--accent-2"), good=cvar("--good"),
+          surface=cvar("--surface");
+
+      function X(lg){return pad.l+(lg-logLo)/(logHi-logLo)*(W-pad.l-pad.r);}
+      function Y(f){return H-pad.b-(f/yMax)*(H-pad.t-pad.b);}
+
+      // horizontal grid and y labels
+      ctx.strokeStyle=line; ctx.lineWidth=1;
+      ctx.font="19px ui-monospace,Menlo,monospace"; ctx.fillStyle=muted; ctx.textAlign="right";
+      for(var gy=0;gy<=20;gy+=5){
+        var y=Y(gy*1e9);
+        ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+        ctx.fillText(gy+"", pad.l-10, y+6);
+      }
+
+      // sampled top boundaries as we stack ff, proj, seq
+      var N=320, xs=[], topFF=[], topPROJ=[], topTOT=[];
+      for(var i=0;i<=N;i++){
+        var lg=logLo+(logHi-logLo)*i/N;
+        var seq=Math.pow(2,lg);
+        xs.push(X(lg));
+        topFF.push(Y(FF));
+        topPROJ.push(Y(FF+PROJ));
+        topTOT.push(Y(total(seq)));
+      }
+      var xL=X(logLo), xR=X(logHi), yBase=Y(0);
+
+      // feedforward band (bottom)
+      ctx.fillStyle=hexA(accent,0.30);
+      ctx.beginPath();ctx.moveTo(xL,yBase);ctx.lineTo(xR,yBase);ctx.lineTo(xR,Y(FF));ctx.lineTo(xL,Y(FF));ctx.closePath();ctx.fill();
+      // attention projections band
+      ctx.fillStyle=hexA(good,0.30);
+      ctx.beginPath();ctx.moveTo(xL,Y(FF));ctx.lineTo(xR,Y(FF));ctx.lineTo(xR,Y(FF+PROJ));ctx.lineTo(xL,Y(FF+PROJ));ctx.closePath();ctx.fill();
+      // attention sequence term band (grows)
+      ctx.fillStyle=hexA(accent2,0.34);
+      ctx.beginPath();ctx.moveTo(xs[0],topPROJ[0]);
+      for(var a=0;a<=N;a++)ctx.lineTo(xs[a],topPROJ[a]);
+      for(var b=N;b>=0;b--)ctx.lineTo(xs[b],topTOT[b]);
+      ctx.closePath();ctx.fill();
+
+      // boundary strokes
+      ctx.lineWidth=2;
+      ctx.strokeStyle=accent;ctx.beginPath();ctx.moveTo(xL,Y(FF));ctx.lineTo(xR,Y(FF));ctx.stroke();
+      ctx.strokeStyle=good;ctx.beginPath();ctx.moveTo(xL,Y(FF+PROJ));ctx.lineTo(xR,Y(FF+PROJ));ctx.stroke();
+      ctx.strokeStyle=accent2;ctx.beginPath();
+      for(var c=0;c<=N;c++){if(c===0)ctx.moveTo(xs[c],topTOT[c]);else ctx.lineTo(xs[c],topTOT[c]);}
+      ctx.stroke();
+
+      // vertical ticks and x labels
+      ctx.fillStyle=muted;ctx.textAlign="center";ctx.font="19px ui-monospace,Menlo,monospace";
+      for(var t=logLo;t<=logHi;t+=2){
+        var xt=X(t), tok=Math.round(Math.pow(2,t));
+        ctx.strokeStyle=line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xt,pad.t);ctx.lineTo(xt,H-pad.b);ctx.stroke();
+        ctx.fillStyle=muted;ctx.fillText(fmtTok(tok), xt, H-pad.b+26);
+      }
+
+      // axis titles
+      ctx.fillStyle=muted;ctx.textAlign="center";ctx.font="20px -apple-system,sans-serif";
+      ctx.fillText("context length in tokens", (pad.l+W-pad.r)/2, H-6);
+      ctx.save();ctx.translate(20,(pad.t+H-pad.b)/2);ctx.rotate(-Math.PI/2);
+      ctx.fillText("GFLOPs per token per layer",0,0);ctx.restore();
+
+      // crossover reference line at 32768
+      var xc=X(xover);
+      ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.setLineDash([6,5]);
+      ctx.beginPath();ctx.moveTo(xc,pad.t);ctx.lineTo(xc,H-pad.b);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=ink;ctx.textAlign="left";ctx.font="600 18px -apple-system,sans-serif";
+      var cLabel="crossover near 32768, sequence term meets feedforward";
+      var lx=xc+8; ctx.textAlign="left";
+      if(lx>W-360){ctx.textAlign="right";lx=xc-8;}
+      ctx.fillText(cLabel, lx, pad.t+16);
+
+      // current context marker
+      var seqNow=Math.round(Math.pow(2,seqLog));
+      var xm=X(seqLog);
+      ctx.strokeStyle=accent;ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.moveTo(xm,pad.t);ctx.lineTo(xm,H-pad.b);ctx.stroke();
+      var ymt=Y(total(seqNow));
+      ctx.fillStyle=accent;ctx.beginPath();ctx.arc(xm,ymt,8,0,7);ctx.fill();
+      ctx.fillStyle=surface;ctx.beginPath();ctx.arc(xm,ymt,3.5,0,7);ctx.fill();
+    }
+
+    function update(){
+      var seqNow=Math.round(Math.pow(2,seqLog));
+      document.getElementById("af-ctxval").textContent=commas(seqNow)+" tokens";
+      document.getElementById("af-ff").textContent=fmtG(FF);
+      document.getElementById("af-proj").textContent=fmtG(PROJ);
+      document.getElementById("af-seq").textContent=fmtG(SEQ(seqNow));
+      document.getElementById("af-share").textContent=(share(seqNow)*100).toFixed(1)+" %";
+      draw();
+    }
+
+    // legend swatch colors
+    function paintSwatches(){
+      document.getElementById("af-sw-ff").style.background=hexA(cvar("--accent"),0.55);
+      document.getElementById("af-sw-proj").style.background=hexA(cvar("--good"),0.55);
+      document.getElementById("af-sw-seq").style.background=hexA(cvar("--accent-2"),0.6);
+    }
+
+    document.getElementById("af-ctx").addEventListener("input",function(e){
+      seqLog=parseFloat(e.target.value); update();
+    });
+
+    paintSwatches(); update();
+    window.addEventListener("resize",draw);
+    if(window.matchMedia){
+      var mq=window.matchMedia("(prefers-color-scheme:dark)");
+      if(mq.addEventListener)mq.addEventListener("change",function(){paintSwatches();draw();});
+    }
+  })();</script>
+</div>
+
+</body>
+</html>
